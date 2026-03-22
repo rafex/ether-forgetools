@@ -63,3 +63,47 @@ if result.ok:
 | `docs` | changelog |
 
 See [AGENTS.md](AGENTS.md) for full agent usage guide.
+
+---
+
+## MCP — opencode integration
+
+Exposes all forgetools as MCP tools for use with [opencode](https://opencode.ai) or any MCP-compatible agent.
+
+### Install with MCP support
+
+```bash
+pip install -e ".[mcp]"
+```
+
+### Configure opencode
+
+Add to `~/.config/opencode/config.json`:
+
+```json
+{
+  "mcp": {
+    "forgetools": {
+      "type": "local",
+      "command": ["forge-mcp"]
+    }
+  }
+}
+```
+
+### Available MCP tools (35)
+
+| Category | Tools |
+|---|---|
+| `git` | `git_status`, `git_log`, `git_diff`, `git_branch`, `git_blame`, `git_stash`, `git_conflicts` |
+| `gh` | `gh_pr_list`, `gh_pr_create`, `gh_pr_review`, `gh_issue_list`, `gh_actions` |
+| `k8s` | `k8s_pods`, `k8s_logs`, `k8s_rollout`, `k8s_contexts` |
+| `search` | `search_grep`, `search_find_files`, `search_replace`, `search_todo` |
+| `edit` | `edit_insert`, `edit_replace_lines`, `edit_bulk_rename` |
+| `java` | `java_maven`, `java_gradle`, `java_stacktrace`, `java_test_report` |
+| `fs` | `fs_tree`, `fs_read` |
+| `diag` | `diag_health`, `diag_env`, `diag_port` |
+| `net` | `net_http`, `net_health` |
+| `docs` | `docs_changelog` |
+
+Every tool returns `{ "ok": bool, "tool": str, "data": ..., "errors": [], "duration_ms": int }`.
