@@ -12,9 +12,11 @@ license = { text = "MIT" }
 dependencies = []
 
 [project.scripts]
-forge = "forgetools._forge_cli:main"
+forge     = "forgetools._forge_cli:main"
+forge-mcp = "forgetools.mcp_server:main"
 
 [project.optional-dependencies]
+mcp = ["fastmcp>=2.0"]
 dev = ["pytest", "pytest-cov"]
 
 [tool.hatch.build.targets.wheel]
