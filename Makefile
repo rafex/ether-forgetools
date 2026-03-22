@@ -1,6 +1,6 @@
 .PHONY: install install-mcp serve dev docker-build docker-run docker-serve help
 
-PYTHON     ?= python3
+PYTHON     ?= python3.13
 VENV       := .venv
 BIN        := $(VENV)/bin
 IMAGE      ?= forgetools-mcp
