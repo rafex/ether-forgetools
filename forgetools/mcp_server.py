@@ -17,14 +17,7 @@ from fastmcp import FastMCP
 
 from forgetools._forge_cli import REGISTRY
 
-server = FastMCP(
-    "forgetools",
-    description=(
-        "Structured Python toolkit for code agents — "
-        "git, gh, k8s, java, search, edit, fs, diag, net, docs. "
-        "Every tool returns a JSON object with ok, tool, data, errors, duration_ms."
-    ),
-)
+server = FastMCP("forgetools")
 
 
 def _wrap(fn):
