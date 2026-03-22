@@ -48,7 +48,7 @@ for _key, _module_path in REGISTRY.items():
 
 
 def main() -> None:
-    server.run(transport="stdio")
+    server.run(transport="stdio", show_banner=False)
 
 
 if __name__ == "__main__":
