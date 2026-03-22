@@ -53,6 +53,50 @@ REGISTRY: dict[str, str] = {
     "net health":          "forgetools.net.health_check",
     # docs
     "docs changelog":      "forgetools.docs.changelog",
+    # shell
+    "shell run":           "forgetools.shell.run",
+    # test
+    "test junit-report":   "forgetools.test.junit_report",
+    "test coverage":       "forgetools.test.coverage",
+    # lint
+    "lint checkstyle":     "forgetools.lint.checkstyle",
+    "lint eslint":         "forgetools.lint.eslint",
+    "lint pylint":         "forgetools.lint.pylint",
+    "lint golangci":       "forgetools.lint.golangci",
+    # docker
+    "docker ps":           "forgetools.docker.ps",
+    "docker build":        "forgetools.docker.build",
+    "docker logs":         "forgetools.docker.logs",
+    "docker inspect":      "forgetools.docker.inspect",
+    "docker exec":         "forgetools.docker.exec",
+    # npm
+    "npm run":             "forgetools.npm.run",
+    "npm install":         "forgetools.npm.install",
+    "npm audit":           "forgetools.npm.audit",
+    # go
+    "go build":            "forgetools.go.build",
+    "go test":             "forgetools.go.test",
+    "go mod":              "forgetools.go.mod",
+    # cargo
+    "cargo build":         "forgetools.cargo.build",
+    "cargo test":          "forgetools.cargo.test",
+    "cargo check":         "forgetools.cargo.check",
+    # git additions
+    "git pr-workflow":     "forgetools.git.pr_workflow",
+    # fs additions
+    "fs diff":             "forgetools.fs.diff",
+    # secrets
+    "secrets scan":        "forgetools.secrets.scan",
+    # process
+    "process ps":          "forgetools.process.ps",
+    "process kill":        "forgetools.process.kill",
+    "process port":        "forgetools.process.port",
+    # template
+    "template scaffold":   "forgetools.template.scaffold",
+    # openapi parsing
+    "openapi parse":       "forgetools.openapi.parse",
+    # context
+    "context summarize":   "forgetools.context.summarize",
 }
 
 
