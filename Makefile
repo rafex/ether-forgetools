@@ -1,4 +1,4 @@
-.PHONY: install install-mcp serve dev docker-build docker-run docker-serve help
+.PHONY: install install-mcp serve dev docker-build docker-run docker-serve openapi help
 
 PYTHON     ?= python3.13
 VENV       := .venv
@@ -19,6 +19,9 @@ help:
 	@echo "  make docker-build  build Docker image ($(IMAGE))"
 	@echo "  make docker-run    run MCP server inside container (stdio)"
 	@echo "  make docker-serve  build + run in one step"
+	@echo ""
+	@echo "  Docs"
+	@echo "  make openapi       regenerate openapi/forgetools.json from live server"
 
 # ── Local ──────────────────────────────────────────────────────────────────────
 
@@ -37,6 +40,11 @@ dev: install-mcp serve
 
 $(VENV):
 	$(MAKE) install-mcp
+
+# ── Docs ───────────────────────────────────────────────────────────────────────
+
+openapi: $(VENV)
+	$(BIN)/python3.13 scripts/gen_openapi.py
 
 # ── Container ──────────────────────────────────────────────────────────────────
 
