@@ -97,6 +97,32 @@ REGISTRY: dict[str, str] = {
     "openapi parse":       "forgetools.openapi.parse",
     # context
     "context summarize":   "forgetools.context.summarize",
+    # git additions
+    "git submodule-status":  "forgetools.git.submodule_status",
+    "git submodule-sync":    "forgetools.git.submodule_sync",
+    "git tag":               "forgetools.git.tag",
+    "git cherry-pick":       "forgetools.git.cherry_pick",
+    # db
+    "db query":              "forgetools.db.query",
+    "db schema":             "forgetools.db.schema",
+    "db migrations":         "forgetools.db.migrations",
+    # docker additions
+    "docker compose":        "forgetools.docker.compose",
+    # gh additions
+    "gh release":            "forgetools.gh.release",
+    # helm
+    "helm status":           "forgetools.helm.status",
+    "helm install":          "forgetools.helm.install",
+    "helm upgrade":          "forgetools.helm.upgrade",
+    "helm diff":             "forgetools.helm.diff",
+    # make
+    "make run":              "forgetools.make.run",
+    # json
+    "json query":            "forgetools.json.query",
+    # fs additions
+    "fs checksum":           "forgetools.fs.checksum",
+    # context additions
+    "context diff-summary":  "forgetools.context.diff_summary",
 }
 
 
