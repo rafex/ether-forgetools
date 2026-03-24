@@ -131,6 +131,8 @@ REGISTRY: dict[str, str] = {
     "git commit": "forgetools.git.commit",
     # text
     "text audit-chars":      "forgetools.text.audit_chars",
+    # ether ecosystem
+    "ether catalog":         "forgetools.ether.catalog",
 }
 
 
