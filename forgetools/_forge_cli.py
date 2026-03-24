@@ -125,6 +125,8 @@ REGISTRY: dict[str, str] = {
     "context diff-summary":  "forgetools.context.diff_summary",
     # config
     "config validate":       "forgetools.config.validate",
+    # git worktree
+    "git worktree":          "forgetools.git.worktree",
 }
 
 
