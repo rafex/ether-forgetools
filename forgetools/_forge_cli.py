@@ -128,6 +128,7 @@ REGISTRY: dict[str, str] = {
     "config validate":       "forgetools.config.validate",
     # git worktree
     "git worktree":          "forgetools.git.worktree",
+    "git commit": "forgetools.git.commit",
     # text
     "text audit-chars":      "forgetools.text.audit_chars",
 }
