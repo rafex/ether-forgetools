@@ -22,6 +22,7 @@ REGISTRY: dict[str, str] = {
     "gh pr-review":        "forgetools.gh.pr_review",
     "gh issue-list":       "forgetools.gh.issue_list",
     "gh actions":          "forgetools.gh.actions",
+    "gh actions-validate": "forgetools.gh.actions_validate",
     # k8s
     "k8s pods":            "forgetools.k8s.pods",
     "k8s logs":            "forgetools.k8s.logs",
