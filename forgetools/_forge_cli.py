@@ -123,6 +123,8 @@ REGISTRY: dict[str, str] = {
     "fs checksum":           "forgetools.fs.checksum",
     # context additions
     "context diff-summary":  "forgetools.context.diff_summary",
+    # config
+    "config validate":       "forgetools.config.validate",
 }
 
 
