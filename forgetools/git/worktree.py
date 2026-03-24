@@ -1,9 +1,13 @@
 """
 Manage git worktrees: list, add, remove, move, prune, lock/unlock, status.
+
+Space check before add:
+    FREE < REPO * 2  →  failure with structured space data and user options.
 """
 from __future__ import annotations
 
 import argparse
+import shutil
 import subprocess
 from pathlib import Path
 
@@ -61,6 +65,39 @@ def _worktree_is_dirty(path: str) -> bool:
         return False
 
 
+# ── disk space check ─────────────────────────────────────────────────────────
+
+def _disk_space_check(cwd: str | None) -> dict | None:
+    """Returns space info dict, or None if check cannot run (never blocks add)."""
+    try:
+        check_dir = Path(cwd).resolve() if cwd else Path.cwd()
+        free_kb = shutil.disk_usage(check_dir).free // 1024
+
+        rc, out, _ = run_command(["git", "rev-parse", "--git-dir"], cwd=cwd)
+        if rc != 0:
+            return None
+        git_dir = out.strip()
+        git_path = Path(git_dir) if Path(git_dir).is_absolute() else check_dir / git_dir
+
+        result = subprocess.run(
+            ["du", "-sk", str(git_path)],
+            capture_output=True, text=True, timeout=15,
+        )
+        if result.returncode != 0:
+            return None
+        repo_kb = int(result.stdout.split()[0])
+
+        return {
+            "free_kb":   free_kb,
+            "repo_kb":   repo_kb,
+            "free_mb":   round(free_kb  / 1024, 1),
+            "repo_mb":   round(repo_kb  / 1024, 1),
+            "sufficient": free_kb >= repo_kb * 2,
+        }
+    except Exception:
+        return None
+
+
 # ── actions ───────────────────────────────────────────────────────────────────
 
 def _list(cwd: str | None) -> ForgeResult:
@@ -100,6 +137,25 @@ def _add(path: str, branch: str | None, commit: str | None,
     with Timer() as t:
         if not path:
             return ForgeResult.failure(TOOL, ["--path is required for add"], t.elapsed_ms)
+
+        # ── disk space guard ─────────────────────────────────────────────────
+        space = _disk_space_check(cwd)
+        if space and not space["sufficient"]:
+            return ForgeResult(
+                ok=False,
+                tool=TOOL,
+                data={"space": space, "options": ["inline", "cancel"]},
+                errors=["Insufficient disk space for safe worktree creation"],
+                duration_ms=t.elapsed_ms,
+                suggestion=(
+                    f"Free: {space['free_mb']} MB — Repo: {space['repo_mb']} MB "
+                    f"(need ≥ {round(space['repo_mb'] * 2, 1)} MB free). "
+                    "Options: 'inline' = work on current branch without isolation; "
+                    "'cancel' = free space first."
+                ),
+            )
+        # ─────────────────────────────────────────────────────────────────────
+
         cmd = ["git", "worktree", "add"]
         if branch and new_branch:
             cmd += ["-b", branch]
@@ -117,9 +173,10 @@ def _add(path: str, branch: str | None, commit: str | None,
                                        suggestion="Use --new-branch to create a new branch")
         return ForgeResult.success(TOOL, {
             "action": "add",
-            "path": str(Path(path).resolve()),
+            "path":   str(Path(path).resolve()),
             "branch": branch,
             "commit": commit,
+            "space":  space,
         }, t.elapsed_ms)
 
 
