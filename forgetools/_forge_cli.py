@@ -42,6 +42,8 @@ REGISTRY: dict[str, str] = {
     "java gradle":         "forgetools.java.gradle",
     "java stacktrace":     "forgetools.java.parse_stacktrace",
     "java test-report":    "forgetools.java.test_report",
+    "java format":         "forgetools.java.format",
+    "java jdt":            "forgetools.java.jdt",
     # fs
     "fs tree":             "forgetools.fs.tree",
     "fs read":             "forgetools.fs.read",
