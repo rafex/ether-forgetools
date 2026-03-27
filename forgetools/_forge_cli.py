@@ -63,7 +63,10 @@ REGISTRY: dict[str, str] = {
     "shell run":           "forgetools.shell.run",
     # test
     "test junit-report":   "forgetools.test.junit_report",
-    "test coverage":       "forgetools.test.coverage",
+    "test coverage":         "forgetools.test.coverage",
+    "test coverage-report":  "forgetools.test.coverage_report",
+    # security
+    "security owasp":        "forgetools.security.owasp",
     # lint
     "lint checkstyle":     "forgetools.lint.checkstyle",
     "lint eslint":         "forgetools.lint.eslint",
