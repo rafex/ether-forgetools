@@ -3,8 +3,18 @@ from __future__ import annotations
 """
 java/format.py — Wrapper for google-java-format.
 
-Finds the binary automatically in PATH, Mason (Neovim), opencode, or Homebrew.
-Does NOT require any configuration — just works wherever google-java-format is installed.
+Resolution order (first match wins):
+  1. GOOGLE_JAVA_FORMAT env var
+  2. Bundled binary in <repo>/bin/  (ships with forgetools — no install needed)
+  3. System PATH
+  4. Mason / opencode / Homebrew / common paths
+  5. all-deps JAR in <repo>/bin/ via java -jar  (cross-platform fallback)
+  6. all-deps JAR in ~/.m2
+
+Bundled binaries (v1.34.1):
+  bin/google-java-format_darwin-arm64   — macOS Apple Silicon
+  bin/google-java-format_linux-x86-64   — Linux x86-64
+  bin/google-java-format-1.34.1-all-deps.jar — fallback (requires java)
 
 Actions:
     format  (default) — format files in-place
@@ -17,6 +27,7 @@ Ref: https://github.com/google/google-java-format
 import argparse
 import glob as _glob
 import os
+import platform
 from pathlib import Path
 
 from forgetools._cli import make_cli
@@ -25,28 +36,53 @@ from forgetools._runner import run_command
 
 TOOL = "java.format"
 
-# ── Binary search order ───────────────────────────────────────────────────────
+# ── Bundled binary resolution ─────────────────────────────────────────────────
+
+# <repo-root>/bin/ — always relative to this file's location (forgetools/java/format.py)
+_BIN_DIR = Path(__file__).parent.parent.parent / "bin"
+
+_BUNDLED_BINARY_MAP: dict[tuple[str, str], str] = {
+    ("darwin",  "arm64"):  "google-java-format_darwin-arm64",
+    ("darwin",  "aarch64"):"google-java-format_darwin-arm64",
+    ("linux",   "x86_64"): "google-java-format_linux-x86-64",
+    ("linux",   "amd64"):  "google-java-format_linux-x86-64",
+}
+
+_BUNDLED_JAR = "google-java-format-1.34.1-all-deps.jar"
+
+
+def _bundled_binary() -> str | None:
+    """Return path to the bundled platform binary, or None if not available."""
+    system  = platform.system().lower()
+    machine = platform.machine().lower()
+    name = _BUNDLED_BINARY_MAP.get((system, machine))
+    if not name:
+        return None
+    p = _BIN_DIR / name
+    return str(p) if p.is_file() and os.access(p, os.X_OK) else None
+
+
+def _bundled_jar() -> str | None:
+    """Return jar: path to bundled all-deps JAR, or None."""
+    p = _BIN_DIR / _BUNDLED_JAR
+    return f"jar:{p}" if p.is_file() else None
+
+
+# ── System search paths ───────────────────────────────────────────────────────
 
 _SEARCH_PATHS: list[str] = [
-    # System PATH (handled separately by shutil.which)
-    # Mason (Neovim package manager)
     "~/.local/share/nvim/mason/bin/google-java-format",
-    # opencode
     "~/.local/share/opencode/bin/google-java-format",
-    # Homebrew Apple Silicon
     "/opt/homebrew/bin/google-java-format",
-    # Homebrew Intel
     "/usr/local/bin/google-java-format",
-    # Linux common
     "/usr/bin/google-java-format",
-    # User tools directory
     "~/tools/google-java-format",
     "~/bin/google-java-format",
 ]
 
 
 def _find_binary() -> str | None:
-    """Find google-java-format binary. Returns absolute path or None."""
+    """Find google-java-format. Resolution order documented in module docstring."""
     import shutil
 
     # 1. Environment variable override
@@ -54,23 +90,33 @@ def _find_binary() -> str | None:
     if env_val and Path(env_val).is_file():
         return env_val
 
-    # 2. System PATH
+    # 2. Bundled binary (ships with forgetools)
+    bundled = _bundled_binary()
+    if bundled:
+        return bundled
+
+    # 3. System PATH
     found = shutil.which("google-java-format")
     if found:
         return found
 
-    # 3. Known locations
+    # 4. Known system locations
     for raw in _SEARCH_PATHS:
         p = Path(raw).expanduser()
         if p.is_file() and os.access(p, os.X_OK):
             return str(p)
 
-    # 4. Maven local repo (all-deps jar runnable via java -jar)
+    # 5. Bundled all-deps JAR (cross-platform, requires java)
+    jar = _bundled_jar()
+    if jar:
+        return jar
+
+    # 6. Maven local repo JAR
     m2 = Path("~/.m2/repository/com/google/googlejavaformat/google-java-format").expanduser()
     if m2.is_dir():
         jars = sorted(m2.rglob("google-java-format-*-all-deps.jar"), reverse=True)
         if jars:
-            return f"jar:{jars[0]}"  # special prefix to indicate jar mode
+            return f"jar:{jars[0]}"
 
     return None
 
