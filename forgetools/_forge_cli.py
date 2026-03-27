@@ -45,6 +45,9 @@ REGISTRY: dict[str, str] = {
     # fs
     "fs tree":             "forgetools.fs.tree",
     "fs read":             "forgetools.fs.read",
+    "fs find-by-type":     "forgetools.fs.find_by_type",
+    "fs head":             "forgetools.fs.head",
+    "fs tail":             "forgetools.fs.tail",
     # diag
     "diag health":         "forgetools.diag.health",
     "diag env":            "forgetools.diag.env_validate",
