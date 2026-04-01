@@ -39,6 +39,7 @@ REGISTRY: dict[str, str] = {
     "edit bulk-rename":    "forgetools.edit.bulk_rename",
     # java
     "java maven":          "forgetools.java.maven",
+    "java maven-modules":  "forgetools.java.maven_modules",
     "java gradle":         "forgetools.java.gradle",
     "java stacktrace":     "forgetools.java.parse_stacktrace",
     "java test-report":    "forgetools.java.test_report",
