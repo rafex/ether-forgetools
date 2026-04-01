@@ -110,6 +110,7 @@ REGISTRY: dict[str, str] = {
     # context
     "context summarize":   "forgetools.context.summarize",
     # git additions
+    "git multi-repo":        "forgetools.git.multi_repo",
     "git submodule-status":  "forgetools.git.submodule_status",
     "git submodule-sync":    "forgetools.git.submodule_sync",
     "git tag":               "forgetools.git.tag",
