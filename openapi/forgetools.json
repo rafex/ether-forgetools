@@ -1154,6 +1154,102 @@
         }
       }
     },
+    "/tools/gh_actions_validate": {
+      "post": {
+        "operationId": "gh_actions_validate",
+        "summary": "Run gh actions validate",
+        "tags": [
+          "gh"
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "path": {
+                    "default": ".github/workflows",
+                    "type": "string"
+                  },
+                  "file": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null
+                  },
+                  "cwd": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null
+                  }
+                },
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "ForgeResult",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "ok": {
+                      "type": "boolean"
+                    },
+                    "tool": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "default": null,
+                      "title": "Data"
+                    },
+                    "errors": {
+                      "items": {
+                        "type": "string"
+                      },
+                      "type": "array"
+                    },
+                    "duration_ms": {
+                      "default": 0,
+                      "type": "integer"
+                    },
+                    "suggestion": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null
+                    }
+                  },
+                  "required": [
+                    "ok",
+                    "tool"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/tools/k8s_pods": {
       "post": {
         "operationId": "k8s_pods",
@@ -2438,6 +2534,117 @@
         }
       }
     },
+    "/tools/java_maven_modules": {
+      "post": {
+        "operationId": "java_maven_modules",
+        "summary": "Run java maven modules",
+        "tags": [
+          "java"
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "action": {
+                    "default": "list",
+                    "type": "string"
+                  },
+                  "dir": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null
+                  },
+                  "path": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null
+                  },
+                  "pattern": {
+                    "default": "*",
+                    "type": "string"
+                  },
+                  "cwd": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null
+                  }
+                },
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "ForgeResult",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "ok": {
+                      "type": "boolean"
+                    },
+                    "tool": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "default": null,
+                      "title": "Data"
+                    },
+                    "errors": {
+                      "items": {
+                        "type": "string"
+                      },
+                      "type": "array"
+                    },
+                    "duration_ms": {
+                      "default": 0,
+                      "type": "integer"
+                    },
+                    "suggestion": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null
+                    }
+                  },
+                  "required": [
+                    "ok",
+                    "tool"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/tools/java_gradle": {
       "post": {
         "operationId": "java_gradle",
@@ -2715,6 +2922,246 @@
         }
       }
     },
+    "/tools/java_format": {
+      "post": {
+        "operationId": "java_format",
+        "summary": "Run java format",
+        "tags": [
+          "java"
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "action": {
+                    "default": "format",
+                    "type": "string"
+                  },
+                  "files": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null
+                  },
+                  "pattern": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null
+                  },
+                  "style": {
+                    "default": "google",
+                    "type": "string"
+                  },
+                  "lines": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null
+                  },
+                  "binary": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null
+                  },
+                  "cwd": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null
+                  }
+                },
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "ForgeResult",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "ok": {
+                      "type": "boolean"
+                    },
+                    "tool": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "default": null,
+                      "title": "Data"
+                    },
+                    "errors": {
+                      "items": {
+                        "type": "string"
+                      },
+                      "type": "array"
+                    },
+                    "duration_ms": {
+                      "default": 0,
+                      "type": "integer"
+                    },
+                    "suggestion": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null
+                    }
+                  },
+                  "required": [
+                    "ok",
+                    "tool"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tools/java_jdt": {
+      "post": {
+        "operationId": "java_jdt",
+        "summary": "Run java jdt",
+        "tags": [
+          "java"
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "action": {
+                    "default": "locate",
+                    "type": "string"
+                  },
+                  "binary": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null
+                  },
+                  "data_dir": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null
+                  },
+                  "cwd": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null
+                  }
+                },
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "ForgeResult",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "ok": {
+                      "type": "boolean"
+                    },
+                    "tool": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "default": null,
+                      "title": "Data"
+                    },
+                    "errors": {
+                      "items": {
+                        "type": "string"
+                      },
+                      "type": "array"
+                    },
+                    "duration_ms": {
+                      "default": 0,
+                      "type": "integer"
+                    },
+                    "suggestion": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null
+                    }
+                  },
+                  "required": [
+                    "ok",
+                    "tool"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/tools/fs_tree": {
       "post": {
         "operationId": "fs_tree",
@@ -2857,6 +3304,327 @@
                 "required": [
                   "file"
                 ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "ForgeResult",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "ok": {
+                      "type": "boolean"
+                    },
+                    "tool": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "default": null,
+                      "title": "Data"
+                    },
+                    "errors": {
+                      "items": {
+                        "type": "string"
+                      },
+                      "type": "array"
+                    },
+                    "duration_ms": {
+                      "default": 0,
+                      "type": "integer"
+                    },
+                    "suggestion": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null
+                    }
+                  },
+                  "required": [
+                    "ok",
+                    "tool"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tools/fs_find_by_type": {
+      "post": {
+        "operationId": "fs_find_by_type",
+        "summary": "Run fs find by type",
+        "tags": [
+          "fs"
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "type": {
+                    "type": "string"
+                  },
+                  "path": {
+                    "default": ".",
+                    "type": "string"
+                  },
+                  "recursive": {
+                    "default": true,
+                    "type": "boolean"
+                  },
+                  "max": {
+                    "default": 200,
+                    "type": "integer"
+                  },
+                  "cwd": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null
+                  }
+                },
+                "required": [
+                  "type"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "ForgeResult",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "ok": {
+                      "type": "boolean"
+                    },
+                    "tool": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "default": null,
+                      "title": "Data"
+                    },
+                    "errors": {
+                      "items": {
+                        "type": "string"
+                      },
+                      "type": "array"
+                    },
+                    "duration_ms": {
+                      "default": 0,
+                      "type": "integer"
+                    },
+                    "suggestion": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null
+                    }
+                  },
+                  "required": [
+                    "ok",
+                    "tool"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tools/fs_head": {
+      "post": {
+        "operationId": "fs_head",
+        "summary": "Run fs head",
+        "tags": [
+          "fs"
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "file": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null
+                  },
+                  "pattern": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null
+                  },
+                  "lines": {
+                    "default": 10,
+                    "type": "integer"
+                  },
+                  "path": {
+                    "default": ".",
+                    "type": "string"
+                  },
+                  "cwd": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null
+                  }
+                },
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "ForgeResult",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "ok": {
+                      "type": "boolean"
+                    },
+                    "tool": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "default": null,
+                      "title": "Data"
+                    },
+                    "errors": {
+                      "items": {
+                        "type": "string"
+                      },
+                      "type": "array"
+                    },
+                    "duration_ms": {
+                      "default": 0,
+                      "type": "integer"
+                    },
+                    "suggestion": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null
+                    }
+                  },
+                  "required": [
+                    "ok",
+                    "tool"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tools/fs_tail": {
+      "post": {
+        "operationId": "fs_tail",
+        "summary": "Run fs tail",
+        "tags": [
+          "fs"
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "file": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null
+                  },
+                  "pattern": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null
+                  },
+                  "lines": {
+                    "default": 10,
+                    "type": "integer"
+                  },
+                  "path": {
+                    "default": ".",
+                    "type": "string"
+                  },
+                  "cwd": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null
+                  }
+                },
                 "type": "object"
               }
             }
@@ -3185,34 +3953,12 @@
             "application/json": {
               "schema": {
                 "properties": {
-                  "cwd": {
-                    "anyOf": [
-                      {
-                        "type": "string"
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ],
-                    "default": null
-                  },
                   "url": {
                     "type": "string"
                   },
                   "method": {
                     "default": "GET",
                     "type": "string"
-                  },
-                  "body": {
-                    "anyOf": [
-                      {
-                        "type": "string"
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ],
-                    "default": null
                   },
                   "header": {
                     "anyOf": [
@@ -3228,9 +3974,87 @@
                     ],
                     "default": null
                   },
+                  "body": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null
+                  },
+                  "form": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null
+                  },
+                  "auth": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null
+                  },
+                  "bearer": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null
+                  },
                   "timeout": {
                     "default": 30,
                     "type": "integer"
+                  },
+                  "follow": {
+                    "default": true,
+                    "type": "boolean"
+                  },
+                  "insecure": {
+                    "default": false,
+                    "type": "boolean"
+                  },
+                  "output": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null
+                  },
+                  "backend": {
+                    "default": "auto",
+                    "type": "string"
+                  },
+                  "cwd": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null
                   }
                 },
                 "required": [
@@ -3680,6 +4504,459 @@
                 "properties": {
                   "path": {
                     "default": "coverage.xml",
+                    "type": "string"
+                  },
+                  "cwd": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null
+                  }
+                },
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "ForgeResult",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "ok": {
+                      "type": "boolean"
+                    },
+                    "tool": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "default": null,
+                      "title": "Data"
+                    },
+                    "errors": {
+                      "items": {
+                        "type": "string"
+                      },
+                      "type": "array"
+                    },
+                    "duration_ms": {
+                      "default": 0,
+                      "type": "integer"
+                    },
+                    "suggestion": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null
+                    }
+                  },
+                  "required": [
+                    "ok",
+                    "tool"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tools/test_coverage_report": {
+      "post": {
+        "operationId": "test_coverage_report",
+        "summary": "Run test coverage report",
+        "tags": [
+          "test"
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "action": {
+                    "default": "report",
+                    "type": "string"
+                  },
+                  "path": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null
+                  },
+                  "min_pct": {
+                    "default": 80.0,
+                    "type": "number"
+                  },
+                  "worst": {
+                    "default": 10,
+                    "type": "integer"
+                  },
+                  "cwd": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null
+                  }
+                },
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "ForgeResult",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "ok": {
+                      "type": "boolean"
+                    },
+                    "tool": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "default": null,
+                      "title": "Data"
+                    },
+                    "errors": {
+                      "items": {
+                        "type": "string"
+                      },
+                      "type": "array"
+                    },
+                    "duration_ms": {
+                      "default": 0,
+                      "type": "integer"
+                    },
+                    "suggestion": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null
+                    }
+                  },
+                  "required": [
+                    "ok",
+                    "tool"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tools/security_owasp": {
+      "post": {
+        "operationId": "security_owasp",
+        "summary": "Run security owasp",
+        "tags": [
+          "security"
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "action": {
+                    "default": "scan",
+                    "type": "string"
+                  },
+                  "scan_path": {
+                    "default": ".",
+                    "type": "string"
+                  },
+                  "report": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null
+                  },
+                  "format": {
+                    "default": "JSON",
+                    "type": "string"
+                  },
+                  "out_dir": {
+                    "default": ".",
+                    "type": "string"
+                  },
+                  "severity": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null
+                  },
+                  "binary": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null
+                  },
+                  "cwd": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null
+                  }
+                },
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "ForgeResult",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "ok": {
+                      "type": "boolean"
+                    },
+                    "tool": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "default": null,
+                      "title": "Data"
+                    },
+                    "errors": {
+                      "items": {
+                        "type": "string"
+                      },
+                      "type": "array"
+                    },
+                    "duration_ms": {
+                      "default": 0,
+                      "type": "integer"
+                    },
+                    "suggestion": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null
+                    }
+                  },
+                  "required": [
+                    "ok",
+                    "tool"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tools/security_spotbugs": {
+      "post": {
+        "operationId": "security_spotbugs",
+        "summary": "Run security spotbugs",
+        "tags": [
+          "security"
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "action": {
+                    "default": "scan",
+                    "type": "string"
+                  },
+                  "report": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null
+                  },
+                  "security_only": {
+                    "default": true,
+                    "type": "boolean"
+                  },
+                  "binary": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null
+                  },
+                  "cwd": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null
+                  }
+                },
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "ForgeResult",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "ok": {
+                      "type": "boolean"
+                    },
+                    "tool": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "default": null,
+                      "title": "Data"
+                    },
+                    "errors": {
+                      "items": {
+                        "type": "string"
+                      },
+                      "type": "array"
+                    },
+                    "duration_ms": {
+                      "default": 0,
+                      "type": "integer"
+                    },
+                    "suggestion": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null
+                    }
+                  },
+                  "required": [
+                    "ok",
+                    "tool"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tools/security_eslint": {
+      "post": {
+        "operationId": "security_eslint",
+        "summary": "Run security eslint",
+        "tags": [
+          "security"
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "action": {
+                    "default": "scan",
+                    "type": "string"
+                  },
+                  "path": {
+                    "default": ".",
+                    "type": "string"
+                  },
+                  "security_only": {
+                    "default": true,
+                    "type": "boolean"
+                  },
+                  "binary": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null
+                  },
+                  "ext": {
+                    "default": ".js,.jsx,.ts,.tsx,.mjs,.cjs",
                     "type": "string"
                   },
                   "cwd": {
@@ -6239,6 +7516,141 @@
         }
       }
     },
+    "/tools/git_multi_repo": {
+      "post": {
+        "operationId": "git_multi_repo",
+        "summary": "Run git multi repo",
+        "tags": [
+          "git"
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "action": {
+                    "default": "check",
+                    "type": "string"
+                  },
+                  "dir": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null
+                  },
+                  "pattern": {
+                    "default": "*",
+                    "type": "string"
+                  },
+                  "modules": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null
+                  },
+                  "branch": {
+                    "default": "main",
+                    "type": "string"
+                  },
+                  "remote": {
+                    "default": "origin",
+                    "type": "string"
+                  },
+                  "license_header": {
+                    "default": "Copyright (C)",
+                    "type": "string"
+                  },
+                  "source_ext": {
+                    "default": ".java",
+                    "type": "string"
+                  },
+                  "no_fetch": {
+                    "default": false,
+                    "type": "boolean"
+                  },
+                  "no_license": {
+                    "default": false,
+                    "type": "boolean"
+                  },
+                  "cwd": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null
+                  }
+                },
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "ForgeResult",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "ok": {
+                      "type": "boolean"
+                    },
+                    "tool": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "default": null,
+                      "title": "Data"
+                    },
+                    "errors": {
+                      "items": {
+                        "type": "string"
+                      },
+                      "type": "array"
+                    },
+                    "duration_ms": {
+                      "default": 0,
+                      "type": "integer"
+                    },
+                    "suggestion": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null
+                    }
+                  },
+                  "required": [
+                    "ok",
+                    "tool"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/tools/git_submodule_status": {
       "post": {
         "operationId": "git_submodule_status",
@@ -8287,6 +9699,132 @@
         }
       }
     },
+    "/tools/git_commit": {
+      "post": {
+        "operationId": "git_commit",
+        "summary": "Run git commit",
+        "tags": [
+          "git"
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "action": {
+                    "default": "analyze",
+                    "type": "string"
+                  },
+                  "message": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null
+                  },
+                  "body": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null
+                  },
+                  "stage_all": {
+                    "default": false,
+                    "type": "boolean"
+                  },
+                  "emoji": {
+                    "default": true,
+                    "type": "boolean"
+                  },
+                  "lang": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null
+                  },
+                  "cwd": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null
+                  }
+                },
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "ForgeResult",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "ok": {
+                      "type": "boolean"
+                    },
+                    "tool": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "default": null,
+                      "title": "Data"
+                    },
+                    "errors": {
+                      "items": {
+                        "type": "string"
+                      },
+                      "type": "array"
+                    },
+                    "duration_ms": {
+                      "default": 0,
+                      "type": "integer"
+                    },
+                    "suggestion": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null
+                    }
+                  },
+                  "required": [
+                    "ok",
+                    "tool"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/tools/text_audit_chars": {
       "post": {
         "operationId": "text_audit_chars",
@@ -8321,6 +9859,121 @@
                     "type": "string"
                   },
                   "report_tabs": {
+                    "default": false,
+                    "type": "boolean"
+                  },
+                  "cwd": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null
+                  }
+                },
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "ForgeResult",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "ok": {
+                      "type": "boolean"
+                    },
+                    "tool": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "default": null,
+                      "title": "Data"
+                    },
+                    "errors": {
+                      "items": {
+                        "type": "string"
+                      },
+                      "type": "array"
+                    },
+                    "duration_ms": {
+                      "default": 0,
+                      "type": "integer"
+                    },
+                    "suggestion": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null
+                    }
+                  },
+                  "required": [
+                    "ok",
+                    "tool"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tools/ether_catalog": {
+      "post": {
+        "operationId": "ether_catalog",
+        "summary": "Run ether catalog",
+        "tags": [
+          "ether"
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "action": {
+                    "default": "list",
+                    "type": "string"
+                  },
+                  "query": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null
+                  },
+                  "module": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null
+                  },
+                  "deployed_only": {
+                    "default": false,
+                    "type": "boolean"
+                  },
+                  "refresh": {
                     "default": false,
                     "type": "boolean"
                   },
