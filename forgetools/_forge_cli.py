@@ -16,13 +16,24 @@ REGISTRY: dict[str, str] = {
     "git blame":           "forgetools.git.blame",
     "git stash":           "forgetools.git.stash",
     "git conflicts":       "forgetools.git.conflicts",
-    # gh
+    # gh — no token required (public repos via GitHub REST API)
+    "gh api-repo":         "forgetools.gh.api_repo",
+    "gh api-releases":     "forgetools.gh.api_releases",
+    "gh api-search":       "forgetools.gh.api_search",
+    # gh — requires gh CLI + auth
     "gh pr-list":          "forgetools.gh.pr_list",
     "gh pr-create":        "forgetools.gh.pr_create",
     "gh pr-review":        "forgetools.gh.pr_review",
+    "gh pr-merge":         "forgetools.gh.pr_merge",
+    "gh pr-diff":          "forgetools.gh.pr_diff",
     "gh issue-list":       "forgetools.gh.issue_list",
+    "gh issue-create":     "forgetools.gh.issue_create",
+    "gh issue-view":       "forgetools.gh.issue_view",
     "gh actions":          "forgetools.gh.actions",
     "gh actions-validate": "forgetools.gh.actions_validate",
+    "gh actions-trigger":  "forgetools.gh.actions_trigger",
+    "gh actions-logs":     "forgetools.gh.actions_logs",
+    "gh branch":           "forgetools.gh.branch",
     # k8s
     "k8s pods":            "forgetools.k8s.pods",
     "k8s logs":            "forgetools.k8s.logs",
