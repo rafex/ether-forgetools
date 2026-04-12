@@ -114,6 +114,9 @@ REGISTRY: dict[str, str] = {
     "process ps":          "forgetools.process.ps",
     "process kill":        "forgetools.process.kill",
     "process port":        "forgetools.process.port",
+    "process inspect":     "forgetools.process.inspect",
+    "process ports":       "forgetools.process.ports",
+    "process top":         "forgetools.process.top",
     # template
     "template scaffold":   "forgetools.template.scaffold",
     # openapi parsing
