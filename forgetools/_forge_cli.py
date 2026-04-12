@@ -157,6 +157,10 @@ REGISTRY: dict[str, str] = {
     "text audit-chars":      "forgetools.text.audit_chars",
     # ether ecosystem
     "ether catalog":         "forgetools.ether.catalog",
+    # specnative — spec-first development workflow
+    "specnative status":     "forgetools.specnative.status",
+    "specnative context":    "forgetools.specnative.context",
+    "specnative initiative": "forgetools.specnative.initiative",
 }
 
 
