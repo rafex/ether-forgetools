@@ -4,21 +4,29 @@ from __future__ import annotations
 specnative/_core.py — Shared helpers for SpecNative tools.
 
 SpecNative repos have a fixed structure:
-  AGENTS.md                 — operating contract
-  agents/PRODUCT.md         — user problems / vision
-  agents/ARCHITECTURE.md    — system design
-  agents/STACK.md           — technology choices
-  agents/CONVENTIONS.md     — coding conventions
-  agents/COMMANDS.md        — build/run/test commands
-  agents/DECISIONS.md       — persistent trade-offs (DEC-XXXX)
-  agents/ROADMAP.md         — temporal priorities
-  agents/TRACEABILITY.md    — cross-artifact links
-  agents/SPEC.md            — default spec (agents domain)
-  agents/specs/<initiative>/SPEC.md   — per-initiative specs
-  tasks/<initiative>/TASKS.md         — per-initiative tasks
-  pipelines/CI.md
-  pipelines/CD.md
-  .specnative/SCHEMA.md     — TOML schema definition
+  AGENTS.md                          — operating contract (read first)
+  agents/PRODUCT.md                  — user problems / vision
+  agents/ARCHITECTURE.md             — system structure, boundaries
+  agents/STACK.md                    — technology choices, versions, constraints
+  agents/CONVENTIONS.md              — naming, style, testing rules
+  agents/COMMANDS.md                 — project-specific build/run/test commands
+  agents/DECISIONS.md                — persistent trade-offs (DEC-XXXX)
+  agents/ROADMAP.md                  — temporal priorities and rationale
+  agents/TRACEABILITY.md             — cross-artifact links
+  agents/SPEC.md                     — default spec (agents domain)
+  agents/specs/<initiative>/SPEC.md  — per-initiative specs
+  tasks/<initiative>/TASKS.md        — per-initiative tasks
+  workflows/PLANNING.md              — planning workflow guide
+  workflows/IMPLEMENTATION.md        — implementation workflow guide
+  workflows/REVIEW.md                — review workflow guide
+  pipelines/CI.md                    — automated validation gates
+  pipelines/CD.md                    — delivery process
+  .specnative/SCHEMA.md              — TOML schema definition
+  .specnative/CLI.md                 — CLI command reference
+
+Principle: "Una verdad por documento" — each document owns one semantic
+domain exclusively. README.md files are navigation indices, not sources
+of truth. UPPERCASE files are agent context.
 """
 
 from pathlib import Path
@@ -37,28 +45,128 @@ REQUIRED_FILES = [
     "agents/ROADMAP.md",
     "agents/TRACEABILITY.md",
     "agents/SPEC.md",
+    "workflows/PLANNING.md",
+    "workflows/IMPLEMENTATION.md",
+    "workflows/REVIEW.md",
     "pipelines/CI.md",
     "pipelines/CD.md",
     ".specnative/SCHEMA.md",
+    ".specnative/CLI.md",
 ]
 
 # ── Context document map ──────────────────────────────────────────────────────
 
 CONTEXT_MAP: dict[str, str] = {
-    "product":       "agents/PRODUCT.md",
-    "architecture":  "agents/ARCHITECTURE.md",
-    "stack":         "agents/STACK.md",
-    "conventions":   "agents/CONVENTIONS.md",
-    "commands":      "agents/COMMANDS.md",
-    "decisions":     "agents/DECISIONS.md",
-    "roadmap":       "agents/ROADMAP.md",
-    "traceability":  "agents/TRACEABILITY.md",
-    "agents":        "AGENTS.md",
-    "schema":        ".specnative/SCHEMA.md",
-    "ci":            "pipelines/CI.md",
-    "cd":            "pipelines/CD.md",
-    "spec":          "agents/SPEC.md",
+    # core agent context
+    "agents":           "AGENTS.md",
+    "product":          "agents/PRODUCT.md",
+    "architecture":     "agents/ARCHITECTURE.md",
+    "stack":            "agents/STACK.md",
+    "conventions":      "agents/CONVENTIONS.md",
+    "commands":         "agents/COMMANDS.md",
+    "decisions":        "agents/DECISIONS.md",
+    "roadmap":          "agents/ROADMAP.md",
+    "traceability":     "agents/TRACEABILITY.md",
+    "spec":             "agents/SPEC.md",
+    # workflows
+    "planning":         "workflows/PLANNING.md",
+    "implementation":   "workflows/IMPLEMENTATION.md",
+    "review":           "workflows/REVIEW.md",
+    # pipelines
+    "ci":               "pipelines/CI.md",
+    "cd":               "pipelines/CD.md",
+    # framework meta
+    "schema":           ".specnative/SCHEMA.md",
+    "cli":              ".specnative/CLI.md",
 }
+
+# ── Valid states (official SpecNative schema) ─────────────────────────────────
+
+SPEC_STATES      = ("draft", "active", "blocked", "done", "superseded")
+TASK_STATES      = ("todo", "in_progress", "blocked", "done")
+DECISION_STATES  = ("proposed", "accepted", "deprecated", "replaced")
+
+# ── Document ownership (decision placement test) ──────────────────────────────
+
+DOCUMENT_OWNERSHIP: dict[str, dict] = {
+    "PRODUCT.md": {
+        "contains": ["Problem", "users", "objectives", "value proposition"],
+        "excludes":  ["Implementation", "technical decisions"],
+        "placement_test": "¿Explica el producto o el problema del usuario?",
+    },
+    "SPEC.md": {
+        "contains": ["Requirements", "scope", "acceptance criteria", "risks"],
+        "excludes":  ["Persistent tradeoffs", "product vision", "direction"],
+        "placement_test": "¿Desaparece cuando termina la iniciativa?",
+    },
+    "DECISIONS.md": {
+        "contains": ["Persistent tradeoffs for future initiatives"],
+        "excludes":  ["What to build", "temporal priorities"],
+        "placement_test": "¿Debe respetarse en la próxima iniciativa?",
+    },
+    "ROADMAP.md": {
+        "contains": ["Temporal sequencing", "rationale"],
+        "excludes":  ["Implementation approach", "specific tradeoffs"],
+        "placement_test": "¿Guía la prioridad temporal?",
+    },
+    "ARCHITECTURE.md": {
+        "contains": ["Modules", "boundaries", "data flows", "constraints"],
+        "excludes":  ["What to build", "decision rationale"],
+        "placement_test": "¿Describe la estructura del sistema?",
+    },
+    "STACK.md": {
+        "contains": ["Languages", "runtimes", "frameworks", "versions"],
+        "excludes":  ["Code structure", "conventions"],
+        "placement_test": "¿Describe tecnologías y versiones?",
+    },
+    "CONVENTIONS.md": {
+        "contains": ["Naming", "style", "testing approach", "commit rules"],
+        "excludes":  ["Project commands", "technology choices"],
+        "placement_test": "¿Guía cómo se escribe el código?",
+    },
+    "COMMANDS.md": {
+        "contains": ["Build", "test", "lint", "run", "migrations"],
+        "excludes":  ["Framework CLI commands"],
+        "placement_test": "¿Son comandos específicos de este proyecto?",
+    },
+    "CI.md": {
+        "contains": ["Automated gates", "triggers", "checks"],
+        "excludes":  ["Local development", "implementation logic"],
+        "placement_test": "¿Define validaciones automáticas de CI?",
+    },
+    "CD.md": {
+        "contains": ["Release process", "environments", "promotion gates"],
+        "excludes":  ["Deploy scripts", "credentials"],
+        "placement_test": "¿Describe entrega a producción?",
+    },
+}
+
+PLACEMENT_DECISION_TREE = [
+    ("¿Desaparece cuando termina la iniciativa?",        "SPEC.md"),
+    ("¿Debe respetarse en la próxima iniciativa?",       "DECISIONS.md"),
+    ("¿Explica el producto o problema del usuario?",     "PRODUCT.md"),
+    ("¿Guía la prioridad temporal?",                     "ROADMAP.md"),
+    ("¿Describe la estructura del sistema?",             "ARCHITECTURE.md"),
+    ("¿Describe tecnologías, versiones o constraints?",  "STACK.md"),
+    ("¿Guía cómo se escribe el código?",                 "CONVENTIONS.md"),
+    ("¿Son comandos de build/test/run de este proyecto?","COMMANDS.md"),
+    ("¿Define validaciones automáticas de CI?",          "CI.md"),
+    ("¿Describe la entrega a producción?",               "CD.md"),
+]
+
+# ── Agent workflow sequence (official 9-step) ─────────────────────────────────
+
+AGENT_WORKFLOW_SEQUENCE = [
+    "1. Leer README.md del folder actual (punto de entrada de navegación)",
+    "2. Revisar ROADMAP.md para confirmar coherencia de la iniciativa",
+    "3. Cargar contexto mínimo: PRODUCT.md + arquitectura relevante",
+    "4. Estudiar DECISIONS.md para respetar tradeoffs persistentes",
+    "5. Revisar o crear SPEC.md para la iniciativa",
+    "6. Derivar o leer tasks/ (TASKS.md de la iniciativa)",
+    "7. Implementar siguiendo workflows/IMPLEMENTATION.md",
+    "8. Registrar en DECISIONS.md SOLO tradeoffs que sobreviven a esta iniciativa",
+    "9. Actualizar TRACEABILITY.md al cerrar la iniciativa",
+]
 
 
 # ── File I/O ──────────────────────────────────────────────────────────────────
@@ -99,6 +207,7 @@ def _toml_loads(text: str) -> dict[str, Any]:
 
 def _toml_fallback(text: str) -> dict[str, Any]:
     """Minimal hand-rolled TOML parser (key = value lines only)."""
+    import re
     result: dict[str, Any] = {}
     for line in text.splitlines():
         line = line.strip()
@@ -107,8 +216,14 @@ def _toml_fallback(text: str) -> dict[str, Any]:
         if "=" in line:
             k, _, v = line.partition("=")
             k = k.strip()
-            v = v.strip().strip('"').strip("'")
-            result[k] = v
+            raw = v.strip()
+            # array: ["a", "b"]
+            arr_m = re.match(r'^\[(.*)\]$', raw)
+            if arr_m:
+                items = re.findall(r'"([^"]*)"', arr_m.group(1))
+                result[k] = items
+                continue
+            result[k] = raw.strip('"').strip("'")
     return result
 
 

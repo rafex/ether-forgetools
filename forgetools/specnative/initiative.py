@@ -31,12 +31,18 @@ from forgetools.specnative._core import (
     find_specs,
     task_state_summary,
     CONTEXT_MAP,
+    SPEC_STATES,
+    TASK_STATES,
+    DECISION_STATES,
+    AGENT_WORKFLOW_SEQUENCE,
+    PLACEMENT_DECISION_TREE,
 )
 
 TOOL = "specnative.initiative"
 
-_VALID_SPEC_STATES  = ("draft", "review", "approved", "in-progress", "done", "cancelled")
-_VALID_TASK_STATES  = ("pending", "in-progress", "done", "blocked", "cancelled")
+_VALID_SPEC_STATES     = SPEC_STATES      # draft | active | blocked | done | superseded
+_VALID_TASK_STATES     = TASK_STATES      # todo | in_progress | blocked | done
+_VALID_DECISION_STATES = DECISION_STATES  # proposed | accepted | deprecated | replaced
 
 
 def _now() -> str:
@@ -62,17 +68,22 @@ def _write_or_preview(path: Path, content: str, write: bool) -> dict:
 
 def _spec_template(initiative: str, problem: str, owner: str) -> str:
     today = _now()
+    spec_id = f"SPEC-{initiative.upper()[:20]}"
     return f"""\
 # Spec: {initiative.replace("-", " ").title()}
 
 ```toml
 artifact_type = "spec"
-id = "SPEC-{initiative.upper()[:20]}"
+id = "{spec_id}"
 state = "draft"
 owner = "{owner}"
 initiative = "{initiative}"
 created_at = "{today}"
 updated_at = "{today}"
+related_tasks = []
+related_decisions = []
+artifacts = []
+validation = []
 ```
 
 ## Problem
@@ -96,6 +107,10 @@ updated_at = "{today}"
 
 <!-- DEC-XXXX: Short title -->
 
+## Risks
+
+<!-- Identified risks and mitigations -->
+
 ## Notes
 
 <!-- Any context, constraints, or open questions -->
@@ -104,6 +119,7 @@ updated_at = "{today}"
 
 def _tasks_template(initiative: str, spec_content: str) -> str:
     today = _now()
+    spec_id = f"SPEC-{initiative.upper()[:20]}"
     # Extract acceptance criteria lines from spec
     criteria = re.findall(r"- \[ \] (.+)", spec_content)
     tasks_blocks = ""
@@ -115,9 +131,14 @@ def _tasks_template(initiative: str, spec_content: str) -> str:
 ```toml
 artifact_type = "task"
 id = "{task_id}"
-state = "pending"
-spec_id = "SPEC-{initiative.upper()[:20]}"
+state = "todo"
+owner = "team"
+spec_id = "{spec_id}"
 initiative = "{initiative}"
+dependencies = []
+expected_files = []
+close_criteria = "{criterion.strip()}"
+validation = []
 created_at = "{today}"
 updated_at = "{today}"
 ```
@@ -129,7 +150,7 @@ updated_at = "{today}"
 
 **Validation:**
 - [ ] Tests pass
-- [ ] Spec criterion met
+- [ ] Spec criterion met: `{criterion.strip()}`
 
 ---
 """
@@ -142,9 +163,14 @@ updated_at = "{today}"
 ```toml
 artifact_type = "task"
 id = "{task_id}"
-state = "pending"
-spec_id = "SPEC-{initiative.upper()[:20]}"
+state = "todo"
+owner = "team"
+spec_id = "{spec_id}"
 initiative = "{initiative}"
+dependencies = []
+expected_files = []
+close_criteria = "Implement the initiative as specified and all tests pass"
+validation = []
 created_at = "{today}"
 updated_at = "{today}"
 ```
@@ -164,7 +190,8 @@ updated_at = "{today}"
     return f"# Tasks: {initiative.replace('-', ' ').title()}\n\n" + tasks_blocks.strip() + "\n"
 
 
-def _decision_block(dec_id: str, title: str, context: str, decision: str, consequences: str, owner: str) -> str:
+def _decision_block(dec_id: str, title: str, context: str, decision: str,
+                    consequences: str, owner: str, state: str = "proposed") -> str:
     today = _now()
     return f"""
 ## {dec_id}: {title}
@@ -173,9 +200,10 @@ def _decision_block(dec_id: str, title: str, context: str, decision: str, conseq
 artifact_type = "decision"
 id = "{dec_id}"
 title = "{title}"
-state = "accepted"
+state = "{state}"
 owner = "{owner}"
 created_at = "{today}"
+updated_at = "{today}"
 ```
 
 ### Context
@@ -198,17 +226,18 @@ created_at = "{today}"
 
 def run(
     *,
-    action:       str = "start",
-    initiative:   str | None = None,
-    problem:      str | None = None,
-    task_id:      str | None = None,
-    state:        str | None = None,
+    action:          str = "start",
+    initiative:      str | None = None,
+    problem:         str | None = None,
+    task_id:         str | None = None,
+    state:           str | None = None,
     # decision fields
-    title:        str | None = None,
-    context:      str | None = None,
-    decision:     str | None = None,
-    consequences: str | None = None,
-    owner:        str = "team",
+    title:           str | None = None,
+    context:         str | None = None,
+    decision:        str | None = None,
+    consequences:    str | None = None,
+    decision_state:  str = "proposed",   # proposed → accepted | deprecated | replaced
+    owner:           str = "team",
     write:        bool = False,
     repo:         str | None = None,
     cwd:          str | None = None,
@@ -259,36 +288,54 @@ def run(
             if not initiative:
                 return ForgeResult.failure(TOOL, ["--initiative is required"], t.elapsed_ms)
 
-            spec_content     = read_file(root, f"agents/specs/{initiative}/SPEC.md") or read_file(root, "agents/SPEC.md") or ""
-            conventions      = read_file(root, "agents/CONVENTIONS.md") or ""
-            commands         = read_file(root, "agents/COMMANDS.md") or ""
-            architecture     = read_file(root, "agents/ARCHITECTURE.md") or ""
-            stack            = read_file(root, "agents/STACK.md") or ""
+            # Official 9-step agent workflow — load minimum necessary context
+            # Step 1-4: context loading
+            roadmap       = read_file(root, "agents/ROADMAP.md") or ""
+            product       = read_file(root, "agents/PRODUCT.md") or ""
+            decisions     = read_file(root, "agents/DECISIONS.md") or ""
+            architecture  = read_file(root, "agents/ARCHITECTURE.md") or ""
+            # Step 5: spec
+            spec_content  = (read_file(root, f"agents/specs/{initiative}/SPEC.md")
+                             or read_file(root, "agents/SPEC.md") or "")
+            # Step 7: workflow guide
+            impl_workflow = read_file(root, "workflows/IMPLEMENTATION.md") or ""
+            # Supporting context
+            conventions   = read_file(root, "agents/CONVENTIONS.md") or ""
+            commands      = read_file(root, "agents/COMMANDS.md") or ""
+            stack         = read_file(root, "agents/STACK.md") or ""
 
-            tasks_rel = f"tasks/{initiative}/TASKS.md"
+            # Step 6: tasks
+            tasks_rel     = f"tasks/{initiative}/TASKS.md"
             tasks_content = read_file(root, tasks_rel) or ""
-            all_tasks = parse_all_toml_blocks(tasks_content)
+            all_tasks     = parse_all_toml_blocks(tasks_content)
 
-            # Filter to specific task if provided
+            # Filter to specific task if provided; default to todo/in_progress
             if task_id:
                 target_tasks = [t for t in all_tasks if t.get("id") == task_id]
             else:
-                target_tasks = [t for t in all_tasks if t.get("state") in ("pending", "in-progress")]
+                target_tasks = [t for t in all_tasks if t.get("state") in ("todo", "in_progress")]
 
             return ForgeResult.success(TOOL, {
-                "action":       "implement",
-                "initiative":   initiative,
-                "task_id":      task_id,
-                "target_tasks": target_tasks,
-                "spec_summary": spec_content[:2000],
-                "conventions":  conventions[:1500],
-                "commands":     commands[:500],
-                "architecture": architecture[:1000],
-                "stack":        stack[:500],
-                "hint":         (
-                    "Read spec + conventions before coding. "
-                    "Each task has expected_files. "
-                    "Update task state to 'in-progress' before starting, 'done' when complete."
+                "action":           "implement",
+                "initiative":       initiative,
+                "task_id":          task_id,
+                "target_tasks":     target_tasks,
+                "spec_summary":     spec_content[:2000],
+                "conventions":      conventions[:1500],
+                "commands":         commands[:500],
+                "architecture":     architecture[:1000],
+                "stack":            stack[:500],
+                "roadmap_summary":  roadmap[:500],
+                "decisions_hint":   decisions[:800],
+                "impl_workflow":    impl_workflow[:1000],
+                "agent_sequence":   AGENT_WORKFLOW_SEQUENCE,
+                "placement_test":   [f"{q} → {doc}" for q, doc in PLACEMENT_DECISION_TREE],
+                "hint": (
+                    "Sigue los 9 pasos del agent_sequence. "
+                    "Carga solo el contexto mínimo necesario. "
+                    "Registra en DECISIONS.md SOLO tradeoffs que sobreviven a esta iniciativa. "
+                    "Actualiza cada tarea a in_progress antes de codear, a done al terminar. "
+                    "Usa placement_test para decidir dónde documentar cada decisión."
                 ),
             }, t.elapsed_ms)
 
@@ -374,10 +421,17 @@ def run(
                     ["--title, --context, --decision, --consequences are all required for action=decision"],
                     t.elapsed_ms,
                 )
+            if decision_state not in _VALID_DECISION_STATES:
+                return ForgeResult.failure(
+                    TOOL,
+                    [f"Invalid decision_state '{decision_state}'. Valid: {', '.join(_VALID_DECISION_STATES)}"],
+                    t.elapsed_ms,
+                )
             dec_path    = root / "agents" / "DECISIONS.md"
             existing    = read_file(root, "agents/DECISIONS.md") or "# Decisions\n\n"
             dec_id      = _next_decision_id(existing)
-            new_block   = _decision_block(dec_id, title, context, decision, consequences, owner)
+            new_block   = _decision_block(dec_id, title, context, decision, consequences,
+                                          owner, state=decision_state)
             updated     = existing.rstrip() + "\n" + new_block
             result      = _write_or_preview(dec_path, updated, write)
 
@@ -385,6 +439,8 @@ def run(
                 "action":     "decision",
                 "id":         dec_id,
                 "title":      title,
+                "state":      decision_state,
+                "placement_test": [f"{q} → {doc}" for q, doc in PLACEMENT_DECISION_TREE],
                 **result,
             }, t.elapsed_ms)
 
@@ -474,15 +530,18 @@ def _add_args(p: argparse.ArgumentParser) -> None:
     p.add_argument("--initiative",   default=None, help="Initiative folder name")
     p.add_argument("--problem",      default=None, help="Problem description for action=start")
     p.add_argument("--task-id",      default=None, dest="task_id", help="Task ID for action=implement/state")
-    p.add_argument("--state",        default=None, help=f"New state. Spec: {_VALID_SPEC_STATES} | Task: {_VALID_TASK_STATES}")
-    p.add_argument("--title",        default=None, help="Decision title for action=decision")
-    p.add_argument("--context",      default=None, help="Decision context")
-    p.add_argument("--decision",     default=None, help="The decision made")
-    p.add_argument("--consequences", default=None, help="Consequences of the decision")
-    p.add_argument("--owner",        default="team")
-    p.add_argument("--write",        action="store_true", help="Actually write files (default: preview only)")
-    p.add_argument("--repo",         default=None)
-    p.add_argument("--cwd",          default=None)
+    p.add_argument("--state",           default=None,
+                   help=f"New state. Spec: {_VALID_SPEC_STATES} | Task: {_VALID_TASK_STATES}")
+    p.add_argument("--title",           default=None, help="Decision title (action=decision)")
+    p.add_argument("--context",         default=None, help="Decision context (action=decision)")
+    p.add_argument("--decision",        default=None, help="The decision made (action=decision)")
+    p.add_argument("--consequences",    default=None, help="Consequences of the decision (action=decision)")
+    p.add_argument("--decision-state",  default="proposed", dest="decision_state",
+                   help=f"Initial state for a new decision: {_VALID_DECISION_STATES} (default: proposed)")
+    p.add_argument("--owner",           default="team")
+    p.add_argument("--write",           action="store_true",
+                   help="Actually write files (default: preview only)")
+    p.add_argument("--repo",            default=None)
 
 
 if __name__ == "__main__":

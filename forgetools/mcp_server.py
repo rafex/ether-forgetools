@@ -243,6 +243,8 @@ def resource_specnative_status() -> str:
 def start_feature(initiative: str, problem: str) -> str:
     """Start a new feature using git worktree isolation + SpecNative spec scaffold.
 
+    Follows the official SpecNative 9-step agent workflow sequence.
+
     Args:
         initiative: Short hyphenated name for the feature (e.g. 'user-auth')
         problem:    One-sentence description of the problem being solved
@@ -252,53 +254,101 @@ def start_feature(initiative: str, problem: str) -> str:
 
 **Problem:** {problem}
 
-You are starting a new feature in a spec-first, isolated workspace.
-Follow these steps **in order**:
+Sigue el flujo oficial SpecNative de 9 pasos. **No omitas pasos.**
 
-## 1. Create isolated workspace
-```
-git_worktree(action="add", path="../worktrees/{initiative}", branch="{initiative}", new_branch=True)
-```
+---
 
-## 2. Scaffold the spec (preview first, then write)
+## Paso 1 — Navegación (entry point)
 ```
-specnative_initiative(action="start", initiative="{initiative}", problem="{problem}", owner="<your-name>")
-# Review the preview, then:
-specnative_initiative(action="start", initiative="{initiative}", problem="{problem}", owner="<your-name>", write=True)
+# Lee el README.md del folder actual primero
+fs_read(path="README.md")
 ```
 
-## 3. Read project context before planning
+## Paso 2 — Coherencia de iniciativa
 ```
+specnative_context(action="read", document="roadmap")
+```
+Verifica que `{initiative}` sea coherente con las prioridades actuales.
+
+## Paso 3 — Contexto mínimo
+```
+specnative_context(action="read", document="product")
 specnative_context(action="read", document="architecture")
+```
+Carga SOLO lo necesario. No leas todo el repositorio.
+
+## Paso 4 — Respetar decisiones previas
+```
+specnative_context(action="decisions")
+```
+Lee los DEC-XXXX antes de escribir una sola línea de spec.
+
+## Paso 5 — Crear workspace aislado + spec
+```
+git_worktree(action="add", path="../.claude/worktrees/{initiative}",
+             branch="ai/{initiative}", new_branch=True)
+
+# Preview primero:
+specnative_initiative(action="start", initiative="{initiative}",
+                      problem="{problem}", owner="<owner>")
+# Si el preview es correcto, escribir:
+specnative_initiative(action="start", initiative="{initiative}",
+                      problem="{problem}", owner="<owner>", write=True)
+```
+
+**Estados de spec válidos:** `draft` → `active` → `blocked` | `done` | `superseded`
+
+## Paso 6 — Derivar tareas
+```
 specnative_context(action="read", document="conventions")
 specnative_context(action="read", document="stack")
-context_repo_size()
-```
 
-## 4. Derive tasks from spec acceptance criteria
-```
+# Preview:
 specnative_initiative(action="plan", initiative="{initiative}")
-# Review the preview, then:
+# Escribir:
 specnative_initiative(action="plan", initiative="{initiative}", write=True)
 ```
 
-## 5. Begin implementation
+**Estados de tarea válidos:** `todo` → `in_progress` → `blocked` | `done`
+
+## Paso 7 — Implementar (workflows/IMPLEMENTATION.md)
 ```
 specnative_initiative(action="implement", initiative="{initiative}")
-# Read the returned target_tasks, spec_summary, and conventions before coding
+# Devuelve: target_tasks, spec_summary, conventions, agent_sequence,
+#           placement_test para decidir dónde documentar cada cosa
 ```
 
-## 6. Track progress
-After completing each task, update its state:
+Actualiza cada tarea antes de comenzar y al terminar:
 ```
-specnative_initiative(action="state", initiative="{initiative}", task_id="TASK-...", state="done", write=True)
+specnative_initiative(action="state", initiative="{initiative}",
+                      task_id="TASK-...", state="in_progress", write=True)
+# ... código ...
+specnative_initiative(action="state", initiative="{initiative}",
+                      task_id="TASK-...", state="done", write=True)
 ```
 
-## 7. Review and close
+## Paso 8 — Registrar decisiones persistentes
+Solo si el tradeoff SOBREVIVE a esta iniciativa:
+```
+specnative_initiative(
+    action="decision",
+    title="<título de la decisión>",
+    context="<por qué fue necesaria esta decisión>",
+    decision="<qué se decidió>",
+    consequences="<trade-offs e impactos>",
+    decision_state="proposed",   # luego: accepted | deprecated | replaced
+    write=True
+)
+```
+**Usa el placement_test** (devuelto por implement) para decidir si va en
+DECISIONS.md o en otro documento.
+
+## Paso 9 — Cerrar y actualizar trazabilidad
 ```
 specnative_initiative(action="review", initiative="{initiative}")
-# When ready_to_close = true:
+# Cuando ready_to_close = true:
 specnative_initiative(action="close", initiative="{initiative}", write=True)
+# TRACEABILITY.md se actualiza automáticamente en close
 ```
 """
 
@@ -684,30 +734,46 @@ def specnative_workflow(initiative: str, action: str = "status") -> str:
         initiative: Initiative name (e.g. 'user-auth', 'payment-api')
         action:     'status' | 'start' | 'implement' | 'review' | 'close'
     """
+    _SPEC_STATES     = "draft → active → blocked | done | superseded"
+    _TASK_STATES     = "todo → in_progress → blocked | done"
+    _DEC_STATES      = "proposed → accepted | deprecated | replaced"
+    _PLACEMENT_BRIEF = (
+        "¿Desaparece al terminar la iniciativa? → SPEC.md\n"
+        "¿Debe respetarse en la próxima iniciativa? → DECISIONS.md\n"
+        "¿Explica el producto? → PRODUCT.md  |  ¿Guía prioridad temporal? → ROADMAP.md\n"
+        "¿Describe estructura del sistema? → ARCHITECTURE.md"
+    )
+
     if action == "status":
         return f"""\
 # SpecNative Status: `{initiative}`
 
-## Check repository health
+## Estados válidos
+- Spec:     `{_SPEC_STATES}`
+- Tarea:    `{_TASK_STATES}`
+- Decisión: `{_DEC_STATES}`
+
+## 1. Salud del repositorio (valida los 17 archivos requeridos)
 ```
 specnative_status(action="validate")
 specnative_status(action="status")
 specnative_status(action="list-specs")
 ```
 
-## Read spec
+## 2. Leer spec e estado de tareas
 ```
 specnative_context(action="read-spec", initiative="{initiative}")
-```
-
-## See tasks
-```
 specnative_context(action="list-tasks", initiative="{initiative}")
 ```
 
-## Read relevant decisions
+## 3. Decisiones relevantes (tradeoffs persistentes)
 ```
 specnative_context(action="decisions")
+```
+
+## Placement test (¿dónde va este contenido?)
+```
+{_PLACEMENT_BRIEF}
 ```
 """
 
@@ -715,24 +781,44 @@ specnative_context(action="decisions")
         return f"""\
 # SpecNative Start: `{initiative}`
 
-## 1. Read existing context first
+Sigue la secuencia oficial de 9 pasos.
+
+## 1. Navegación y coherencia
+```
+fs_read(path="README.md")
+specnative_context(action="read", document="roadmap")
+```
+
+## 2. Contexto mínimo + decisiones previas
 ```
 specnative_context(action="read", document="product")
-specnative_context(action="read", document="roadmap")
-specnative_context(action="read", document="decisions")
+specnative_context(action="read", document="architecture")
+specnative_context(action="decisions")
 ```
 
-## 2. Scaffold spec
+## 3. Crear spec (estado inicial: `draft`)
 ```
-specnative_initiative(action="start", initiative="{initiative}", problem="<describe the problem>")
-# Review output, then:
-specnative_initiative(action="start", initiative="{initiative}", problem="<describe the problem>", write=True)
+# Preview:
+specnative_initiative(action="start", initiative="{initiative}",
+                      problem="<describe the problem>", owner="<owner>")
+# Escribir:
+specnative_initiative(action="start", initiative="{initiative}",
+                      problem="<describe the problem>", owner="<owner>", write=True)
 ```
 
-## 3. Scaffold tasks
+## 4. Derivar tareas (estado inicial de cada tarea: `todo`)
 ```
+specnative_context(action="read", document="conventions")
+# Preview:
 specnative_initiative(action="plan", initiative="{initiative}")
+# Escribir:
 specnative_initiative(action="plan", initiative="{initiative}", write=True)
+```
+
+## 5. Activar spec al comenzar implementación
+```
+specnative_initiative(action="state", initiative="{initiative}",
+                      state="active", write=True)
 ```
 """
 
@@ -740,26 +826,56 @@ specnative_initiative(action="plan", initiative="{initiative}", write=True)
         return f"""\
 # SpecNative Implement: `{initiative}`
 
-## 1. Load implementation context
+## 1. Cargar contexto de implementación (9-step sequence incluida)
 ```
 specnative_initiative(action="implement", initiative="{initiative}")
 ```
-The result contains: target_tasks, spec_summary, conventions, architecture, stack.
+El resultado incluye:
+- `target_tasks` — tareas en estado `todo` o `in_progress`
+- `spec_summary`, `conventions`, `architecture`, `stack`
+- `agent_sequence` — los 9 pasos oficiales
+- `placement_test` — árbol de decisiones sobre dónde documentar
 
-## 2. For each task, update state to in-progress
+## 2. Por cada tarea, ciclo: todo → in_progress → done
 ```
-specnative_initiative(action="state", initiative="{initiative}", task_id="TASK-...", state="in-progress", write=True)
-```
+# Al comenzar:
+specnative_initiative(action="state", initiative="{initiative}",
+                      task_id="TASK-...", state="in_progress", write=True)
 
-## 3. Check relevant code
-```
-search_grep(pattern="<related class or function>")
+# Buscar código relacionado:
+search_grep(pattern="<clase o función relevante>")
 fs_find_by_type(extensions=".java,.py,.ts")
+
+# Al terminar:
+specnative_initiative(action="state", initiative="{initiative}",
+                      task_id="TASK-...", state="done", write=True)
 ```
 
-## 4. After completing a task
+## 3. Si una tarea se bloquea
 ```
-specnative_initiative(action="state", initiative="{initiative}", task_id="TASK-...", state="done", write=True)
+specnative_initiative(action="state", initiative="{initiative}",
+                      task_id="TASK-...", state="blocked", write=True)
+# Documentar el bloqueo en el SPEC.md con --state blocked
+specnative_initiative(action="state", initiative="{initiative}",
+                      state="blocked", write=True)
+```
+
+## 4. Registrar decisiones persistentes (usar placement_test)
+```
+# Solo si el tradeoff SOBREVIVE a esta iniciativa:
+specnative_initiative(
+    action="decision",
+    title="<título>",
+    context="<por qué>",
+    decision="<qué se decidió>",
+    consequences="<impactos>",
+    decision_state="proposed",
+    write=True
+)
+```
+**Placement test rápido:**
+```
+{_PLACEMENT_BRIEF}
 ```
 """
 
@@ -767,54 +883,59 @@ specnative_initiative(action="state", initiative="{initiative}", task_id="TASK-.
         return f"""\
 # SpecNative Review: `{initiative}`
 
-## 1. Check all tasks done
+## 1. Verificar que todas las tareas estén en `done`
 ```
 specnative_initiative(action="review", initiative="{initiative}")
+# ready_to_close debe ser true para continuar
 ```
 
-## 2. Verify tests pass
+## 2. Verificar tests
 ```
 java_maven(goal="verify")
 go_test()
 npm_run(script="test")
 ```
 
-## 3. Security check
+## 3. Seguridad y calidad
 ```
 secrets_scan()
 security_spotbugs(action="scan", security_only=True)
-```
-
-## 4. Lint
-```
 lint_checkstyle()
 lint_eslint()
 lint_pylint()
 ```
+
+## 4. Confirmar estado del spec
+El spec debe estar en `active`. Si todo está bien, pasar a `close`.
 """
 
     if action == "close":
         return f"""\
 # SpecNative Close: `{initiative}`
 
-## 1. Final review
+## 1. Revisión final
 ```
 specnative_initiative(action="review", initiative="{initiative}")
+# ready_to_close debe ser true
 ```
 
-## 2. Record any new decisions
+## 2. Registrar decisiones finales que sobrevivan (si aplica)
 ```
+# Usa el placement_test para confirmar que va en DECISIONS.md:
+# "¿Debe respetarse en la próxima iniciativa?" → sí → DECISIONS.md
 specnative_initiative(
     action="decision",
-    initiative="{initiative}",
-    title="<decision title>",
-    context="<why this decision was needed>",
-    decision="<what was decided>",
-    consequences="<trade-offs and impacts>"
+    title="<título>",
+    context="<por qué>",
+    decision="<qué se decidió>",
+    consequences="<impactos>",
+    decision_state="proposed",
+    write=True
 )
 ```
 
-## 3. Close the spec
+## 3. Cerrar el spec (estado → `done`, actualiza TRACEABILITY.md)
+
 ```
 specnative_initiative(action="close", initiative="{initiative}")
 # Preview looks good? Write it:
