@@ -1447,6 +1447,896 @@ The main repo is returned to the state before `init`.
 
 
 # ─────────────────────────────────────────────────────────────────────────────
+# RESOURCES — additional coverage (docker, process, gh, db, context, k8s, test)
+# ─────────────────────────────────────────────────────────────────────────────
+
+# ── forge://docker/containers ─────────────────────────────────────────────────
+
+@server.resource("forge://docker/containers")
+def resource_docker_containers() -> str:
+    """Running Docker containers snapshot (equivalent to docker ps)."""
+    try:
+        data = _run_tool("docker ps")
+        return json.dumps(data, indent=2)
+    except Exception as exc:
+        return json.dumps({"ok": False, "error": str(exc)})
+
+
+# ── forge://process/listening ─────────────────────────────────────────────────
+
+@server.resource("forge://process/listening")
+def resource_process_listening() -> str:
+    """Snapshot of all listening ports on the local machine."""
+    try:
+        data = _run_tool("process ports", action="listen")
+        return json.dumps(data, indent=2)
+    except Exception as exc:
+        return json.dumps({"ok": False, "error": str(exc)})
+
+
+# ── forge://gh/open-prs ───────────────────────────────────────────────────────
+
+@server.resource("forge://gh/open-prs")
+def resource_gh_open_prs() -> str:
+    """Open pull requests for the current repository."""
+    try:
+        data = _run_tool("gh pr-list", state="open")
+        return json.dumps(data, indent=2)
+    except Exception as exc:
+        return json.dumps({"ok": False, "error": str(exc)})
+
+
+# ── forge://gh/ci-status ─────────────────────────────────────────────────────
+
+@server.resource("forge://gh/ci-status")
+def resource_gh_ci_status() -> str:
+    """Latest GitHub Actions workflow runs (last 3) for the current repository."""
+    try:
+        data = _run_tool("gh actions", limit=3)
+        return json.dumps(data, indent=2)
+    except Exception as exc:
+        return json.dumps({"ok": False, "error": str(exc)})
+
+
+# ── forge://db/schema/{database} ─────────────────────────────────────────────
+
+@server.resource("forge://db/schema/{database}")
+def resource_db_schema(database: str) -> str:
+    """Database schema snapshot (tables list) for the given database name.
+
+    Examples:
+      forge://db/schema/myapp_development
+      forge://db/schema/postgres
+    """
+    try:
+        data = _run_tool("db schema", action="tables", database=database)
+        return json.dumps(data, indent=2)
+    except Exception as exc:
+        return json.dumps({"ok": False, "error": str(exc)})
+
+
+# ── forge://context/summary ───────────────────────────────────────────────────
+
+@server.resource("forge://context/summary")
+def resource_context_summary() -> str:
+    """AI-readable codebase summary: structure, languages, and key patterns."""
+    try:
+        data = _run_tool("context summarize")
+        return json.dumps(data, indent=2)
+    except Exception as exc:
+        return json.dumps({"ok": False, "error": str(exc)})
+
+
+# ── forge://git/branches ──────────────────────────────────────────────────────
+
+@server.resource("forge://git/branches")
+def resource_git_branches() -> str:
+    """All branches with ahead/behind tracking information for the cwd repository."""
+    try:
+        data = _run_tool("git branch", action="list")
+        return json.dumps(data, indent=2)
+    except Exception as exc:
+        return json.dumps({"ok": False, "error": str(exc)})
+
+
+# ── forge://k8s/pods ─────────────────────────────────────────────────────────
+
+@server.resource("forge://k8s/pods")
+def resource_k8s_pods() -> str:
+    """Current Kubernetes pod status across all namespaces."""
+    try:
+        data = _run_tool("k8s pods")
+        return json.dumps(data, indent=2)
+    except Exception as exc:
+        return json.dumps({"ok": False, "error": str(exc)})
+
+
+# ── forge://test/coverage ─────────────────────────────────────────────────────
+
+@server.resource("forge://test/coverage")
+def resource_test_coverage() -> str:
+    """Latest test coverage summary for the cwd project."""
+    try:
+        data = _run_tool("test coverage-report", action="summary")
+        return json.dumps(data, indent=2)
+    except Exception as exc:
+        return json.dumps({"ok": False, "error": str(exc)})
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# PROMPTS — additional workflows (bug, db, docker, deps, k8s, api, go, perf)
+# ─────────────────────────────────────────────────────────────────────────────
+
+@server.prompt()
+def bug_investigation(symptom: str, component: str = "") -> str:
+    """Structured bug hunt: logs + git blame + stacktrace + grep.
+
+    Args:
+        symptom:   Short description of the observed bug (e.g. 'NullPointerException in checkout')
+        component: Optional component/module name to focus the search (e.g. 'payment-service')
+    """
+    scope = f" in `{component}`" if component else ""
+    path_hint = component if component else "."
+    return f"""\
+# Bug Investigation: `{symptom}`{scope}
+
+You are systematically hunting the root cause of a bug.
+Work through each phase **in order**, stopping early if you find the culprit.
+
+## Phase 1 — Reproduce and observe
+```
+# Check current repo state
+git_status()
+git_log(limit=10)
+
+# Find recent changes related to the component
+context_diff_summary()
+```
+
+## Phase 2 — Search for the symptom in code and logs
+```
+# Grep for error message / keyword
+search_grep(pattern="{symptom[:60]}", paths="{path_hint}")
+
+# Search for TODOs or known issues
+search_todo(paths="{path_hint}")
+```
+
+## Phase 3 — Parse any stacktraces
+```
+# If it is a Java service:
+java_stacktrace(cwd="{path_hint}")
+
+# Tail recent application logs
+fs_tail(path="<log-file>", lines=100)
+```
+
+## Phase 4 — Blame and history
+```
+# Find the file most likely containing the bug, then:
+git_blame(file="<suspect-file>")
+
+# See what changed recently in that area
+git_log(path="<suspect-file>", limit=20)
+git_diff(ref="HEAD~5..HEAD", path="<suspect-file>")
+```
+
+## Phase 5 — Check environment
+```
+diag_health()
+diag_env()
+diag_port(port=<service-port>)
+```
+
+## Phase 6 — Run tests to confirm fix scope
+```
+# Run tests for the affected component
+java_maven(goal="test -pl {path_hint}", cwd=".")   # Java
+go_test(pkg="./{path_hint}/...")                   # Go
+npm_run(script="test", cwd="{path_hint}")          # JS/TS
+```
+
+## Resolution checklist
+- [ ] Root cause identified (file + line)
+- [ ] Regression test added or updated
+- [ ] Fix committed with reference to this symptom
+- [ ] Related TODOs / tech-debt items created if needed
+"""
+
+
+@server.prompt()
+def database_migration(migration_name: str, db_type: str = "postgresql") -> str:
+    """Plan, create, test, and prepare rollback for a database migration.
+
+    Args:
+        migration_name: Descriptive name for the migration (e.g. 'add-user-roles-table')
+        db_type:        Database engine: postgresql | mysql | sqlite (default: postgresql)
+    """
+    return f"""\
+# Database Migration: `{migration_name}`
+
+**Database:** {db_type}
+
+## Phase 1 — Understand current schema
+```
+# View all current tables
+db_schema(action="tables", database="<your-database>")
+
+# View schema for tables you plan to modify
+db_schema(action="describe", database="<your-database>", table="<table-name>")
+
+# Check pending migrations
+db_migrations(action="status")
+```
+
+## Phase 2 — Check migration history
+```
+db_migrations(action="list")
+db_migrations(action="pending")
+```
+
+## Phase 3 — Plan the migration
+Before writing SQL, answer:
+- Which tables/columns change?
+- Are there foreign key constraints?
+- Will this lock tables? (large tables need online DDL)
+- What is the rollback path?
+
+```
+# Preview the migration file location
+db_migrations(action="create", name="{migration_name}", preview=True)
+```
+
+## Phase 4 — Create the migration
+```
+db_migrations(action="create", name="{migration_name}")
+# Edit the generated file to add UP and DOWN SQL
+```
+
+Example UP migration (`{db_type}`):
+```sql
+-- UP
+ALTER TABLE users ADD COLUMN role VARCHAR(50) NOT NULL DEFAULT 'member';
+CREATE INDEX idx_users_role ON users(role);
+
+-- DOWN (rollback)
+DROP INDEX IF EXISTS idx_users_role;
+ALTER TABLE users DROP COLUMN role;
+```
+
+## Phase 5 — Validate and run
+```
+# Dry-run against a test/staging database first
+db_migrations(action="run", dry_run=True)
+
+# Apply the migration
+db_migrations(action="run")
+
+# Verify schema updated
+db_schema(action="tables", database="<your-database>")
+db_schema(action="describe", database="<your-database>", table="<affected-table>")
+```
+
+## Phase 6 — Smoke test
+```
+# Run a quick query to verify data integrity
+db_query(query="SELECT COUNT(*) FROM <affected-table>", database="<your-database>")
+```
+
+## Phase 7 — Rollback plan (keep ready)
+```
+# If rollback needed:
+db_migrations(action="rollback", steps=1)
+db_schema(action="tables", database="<your-database>")
+```
+
+## Checklist
+- [ ] Schema change reviewed for locking risk
+- [ ] DOWN migration tested on a copy of production data
+- [ ] Migration idempotent (can be run twice safely)
+- [ ] Application code compatible with both old and new schema (if zero-downtime)
+"""
+
+
+@server.prompt()
+def docker_debug(container_name: str) -> str:
+    """Debug a failing Docker container: logs → inspect → exec → fix.
+
+    Args:
+        container_name: Name or ID of the Docker container to debug
+    """
+    return f"""\
+# Docker Debug: `{container_name}`
+
+## Phase 1 — Observe running containers
+```
+docker_ps()
+```
+
+## Phase 2 — Tail container logs
+```
+# Last 100 lines
+docker_logs(container="{container_name}", tail=100)
+
+# Follow logs for 30 seconds to catch transient errors
+docker_logs(container="{container_name}", follow=True, timeout=30)
+```
+
+## Phase 3 — Inspect container configuration
+```
+docker_inspect(container="{container_name}")
+```
+
+Look for:
+- `State.Status` — is it `running`, `exited`, or `restarting`?
+- `State.ExitCode` — non-zero indicates a crash
+- `State.OOMKilled` — true means the container ran out of memory
+- `HostConfig.PortBindings` — are ports exposed correctly?
+- `Mounts` — are volumes mounted at the expected paths?
+- `Config.Env` — are environment variables set correctly?
+
+## Phase 4 — Check environment and port availability
+```
+diag_health()
+process_port(port=<expected-port>)
+```
+
+## Phase 5 — Exec into the container (if still running)
+```
+docker_exec(container="{container_name}", cmd="sh -c 'env && ps aux'")
+
+# Check disk space inside container
+docker_exec(container="{container_name}", cmd="df -h")
+
+# Check if the expected binary/process is running
+docker_exec(container="{container_name}", cmd="ps aux")
+```
+
+## Phase 6 — Review compose configuration (if applicable)
+```
+docker_compose(action="config")
+docker_compose(action="ps")
+```
+
+## Phase 7 — Common fixes
+
+| Symptom | Likely cause | Fix |
+|---------|-------------|-----|
+| ExitCode 1, no logs | Missing env var | Check `Config.Env`, add to compose |
+| OOMKilled = true | Memory limit too low | Increase `mem_limit` in compose |
+| Port already in use | Host port conflict | `process_port(port=X)` to find owner |
+| Health check failing | Wrong endpoint/port | Review `Healthcheck` in inspect output |
+| Volume not found | Path typo | Check `Mounts` section |
+
+## Phase 8 — Rebuild if config changed
+```
+docker_build(context=".", tag="{container_name}:debug")
+docker_compose(action="up", service="{container_name}", build=True)
+```
+"""
+
+
+@server.prompt()
+def dependency_upgrade(ecosystem: str = "", scope: str = "all") -> str:
+    """Safely upgrade dependencies: audit → upgrade → test → verify.
+
+    Args:
+        ecosystem: 'npm' | 'maven' | 'gradle' | 'go' | 'cargo' | '' (auto-detect)
+        scope:     'security' (CVEs only) | 'minor' (patch+minor) | 'all' (major too)
+    """
+    eco_hint = ecosystem or "auto-detected"
+    return f"""\
+# Dependency Upgrade: `{eco_hint}` (scope: {scope})
+
+## Phase 1 — Audit current state
+```
+# JavaScript / Node.js
+npm_audit(cwd=".")
+
+# Java (Maven / Gradle)
+security_owasp(action="scan", cwd=".")
+security_owasp(action="report", cwd=".")
+
+# Go modules
+go_mod(action="tidy")
+go_mod(action="verify")
+
+# Rust / Cargo
+cargo_check(cwd=".")
+```
+
+## Phase 2 — Identify outdated dependencies
+```
+# Node.js — list outdated packages
+shell_run(cmd="npm outdated --json")
+
+# Maven — display available updates
+java_maven(goal="versions:display-dependency-updates")
+java_maven(goal="versions:display-plugin-updates")
+
+# Go — list available upgrades
+shell_run(cmd="go list -u -m all")
+
+# Cargo
+shell_run(cmd="cargo outdated")
+```
+
+## Phase 3 — Upgrade (adjust scope as needed)
+
+### Security fixes only (`scope=security`)
+```
+# Node.js
+npm_audit(action="fix", cwd=".")
+
+# Maven: update only CVE-affected deps manually in pom.xml
+java_maven_central(action="search", query="<vulnerable-library>")
+```
+
+### Minor + patch updates (`scope=minor`)
+```
+# Node.js
+shell_run(cmd="npm update")
+npm_install(cwd=".")
+
+# Maven
+java_maven(goal="versions:use-latest-releases -DallowMajorUpdates=false")
+java_maven(goal="versions:commit")
+
+# Go
+shell_run(cmd="go get -u ./... && go mod tidy")
+```
+
+### All updates including major (`scope=all`)
+```
+# Review each major bump carefully — breaking changes likely!
+# Node.js
+shell_run(cmd="npx npm-check-updates -u && npm install")
+
+# Maven — manually update version properties in pom.xml
+# then:
+java_maven(goal="dependency:resolve")
+```
+
+## Phase 4 — Verify integrity
+```
+# Node.js
+npm_audit(cwd=".")
+npm_run(script="build", cwd=".")
+
+# Java
+java_maven(goal="verify", cwd=".")
+
+# Go
+go_build(cwd=".")
+go_mod(action="verify")
+
+# Rust
+cargo_build(cwd=".")
+cargo_test(cwd=".")
+```
+
+## Phase 5 — Run full test suite
+```
+npm_run(script="test", cwd=".")         # JS/TS
+java_maven(goal="test", cwd=".")        # Java
+go_test(cwd=".")                        # Go
+cargo_test(cwd=".")                     # Rust
+```
+
+## Phase 6 — Scan for new vulnerabilities introduced
+```
+secrets_scan(cwd=".")
+security_owasp(action="scan", cwd=".")
+npm_audit(cwd=".")
+```
+
+## Checklist
+- [ ] All CVEs resolved (no HIGH/CRITICAL remaining)
+- [ ] All tests passing after upgrade
+- [ ] Changelog / release notes reviewed for breaking changes
+- [ ] Lock file committed (`package-lock.json`, `go.sum`, `Cargo.lock`)
+"""
+
+
+@server.prompt()
+def k8s_deploy(app: str, image: str, namespace: str = "default") -> str:
+    """Deploy an app to Kubernetes: deploy → rollout → verify → health check.
+
+    Args:
+        app:       Application/deployment name (e.g. 'my-api')
+        image:     Full Docker image reference (e.g. 'ghcr.io/org/my-api:v1.2.3')
+        namespace: Kubernetes namespace (default: default)
+    """
+    return f"""\
+# Kubernetes Deploy: `{app}`
+
+**Image:** `{image}`
+**Namespace:** `{namespace}`
+
+## Phase 1 — Pre-deploy checks
+```
+# Verify cluster context
+k8s_contexts()
+
+# Check current pod state
+k8s_pods(namespace="{namespace}")
+
+# Check Helm chart status (if applicable)
+helm_status(release="{app}", namespace="{namespace}")
+```
+
+## Phase 2 — Deploy
+```
+# Option A — Helm upgrade/install
+helm_upgrade(
+    release="{app}",
+    chart="<chart-path-or-repo/chart>",
+    namespace="{namespace}",
+    set_values={{"image.tag": "{image.split(":")[-1] if ":" in image else "latest"}"}},
+)
+
+# Option B — kubectl set image (for existing deployments)
+shell_run(cmd="kubectl set image deployment/{app} {app}={image} -n {namespace}")
+```
+
+## Phase 3 — Watch rollout
+```
+k8s_rollout(
+    action="status",
+    name="{app}",
+    namespace="{namespace}",
+    timeout=300,
+)
+```
+
+If the rollout stalls:
+```
+k8s_rollout(action="history", name="{app}", namespace="{namespace}")
+k8s_logs(namespace="{namespace}", selector="app={app}", tail=50)
+```
+
+## Phase 4 — Verify pods are healthy
+```
+k8s_pods(namespace="{namespace}")
+```
+
+Confirm:
+- All replicas in `Running` state
+- `READY` column shows all containers ready (e.g. `1/1` or `2/2`)
+- `RESTARTS` count is 0 (or not increasing)
+
+## Phase 5 — Check application logs
+```
+k8s_logs(namespace="{namespace}", selector="app={app}", tail=100)
+```
+
+Look for:
+- Startup errors or panics
+- Failed health/readiness probes
+- Database connection failures
+
+## Phase 6 — Network health check
+```
+# If the service exposes an HTTP endpoint:
+net_health(url="http://<service-url>/health")
+net_http(url="http://<service-url>/health", method="GET")
+```
+
+## Rollback procedure
+```
+# Helm rollback
+helm_upgrade(action="rollback", release="{app}", namespace="{namespace}")
+
+# kubectl rollback
+shell_run(cmd="kubectl rollout undo deployment/{app} -n {namespace}")
+
+# Verify rollback
+k8s_rollout(action="status", name="{app}", namespace="{namespace}")
+k8s_pods(namespace="{namespace}")
+```
+
+## Checklist
+- [ ] Rollout completed with 0 errors
+- [ ] All pods Running and Ready
+- [ ] Health endpoint responding 200
+- [ ] No elevated restart count
+- [ ] Previous version rollback tested (optional)
+"""
+
+
+@server.prompt()
+def api_design(api_name: str, description: str) -> str:
+    """Spec-first API design: OpenAPI spec → stub → implement → test.
+
+    Args:
+        api_name:    Short name for the API (e.g. 'payments-api', 'user-service')
+        description: One-paragraph description of what the API does
+    """
+    return f"""\
+# API Design: `{api_name}`
+
+**Description:** {description}
+
+You are following a spec-first approach. Write the contract before the code.
+
+## Phase 1 — Parse any existing spec or generate a new one
+```
+# Check if an OpenAPI spec already exists
+search_find_files(name="openapi*.yaml", paths=".")
+search_find_files(name="openapi*.json", paths=".")
+search_find_files(name="swagger*.yaml", paths=".")
+
+# If one exists, parse it:
+openapi_parse(path="<spec-file>")
+```
+
+If no spec exists, create `openapi.yaml` following this template:
+```yaml
+openapi: "3.1.0"
+info:
+  title: "{api_name}"
+  version: "0.1.0"
+  description: "{description}"
+paths:
+  /health:
+    get:
+      summary: Health check
+      responses:
+        "200":
+          description: OK
+```
+
+## Phase 2 — Review and validate the spec
+```
+openapi_parse(path="openapi.yaml")
+```
+
+Verify:
+- All paths have `operationId`
+- Request/response schemas are defined
+- Authentication scheme is documented
+- Error responses (400, 401, 404, 500) are included
+
+## Phase 3 — Generate stub / scaffold
+```
+# Use template scaffold for the server stub
+template_scaffold(
+    template="api-stub",
+    output="{api_name}",
+    vars={{"api_name": "{api_name}", "spec": "openapi.yaml"}},
+)
+```
+
+## Phase 4 — Check project conventions
+```
+specnative_context(action="read", document="conventions")
+specnative_context(action="read", document="architecture")
+specnative_context(action="read", document="stack")
+```
+
+## Phase 5 — Implement endpoints
+For each path in the spec:
+```
+# Find related existing code
+search_grep(pattern="{api_name}", paths=".")
+
+# Check test coverage as you implement
+test_coverage_report(action="summary")
+```
+
+## Phase 6 — Write and run tests
+```
+# Run tests
+npm_run(script="test")              # Node.js
+java_maven(goal="test")             # Java
+go_test(cwd=".")                    # Go
+
+# Review coverage
+test_coverage_report(action="summary")
+test_coverage_report(action="check", min=80)
+```
+
+## Phase 7 — Security review
+```
+security_eslint(action="scan")      # JS/TS
+security_spotbugs(action="scan", security_only=True)  # Java
+secrets_scan()
+```
+
+## Phase 8 — Validate final spec matches implementation
+```
+openapi_parse(path="openapi.yaml")
+net_health(url="http://localhost:<port>/health")
+net_http(url="http://localhost:<port>/openapi.json", method="GET")
+```
+
+## Checklist
+- [ ] OpenAPI spec committed to repo
+- [ ] All endpoints have request/response schema validation
+- [ ] Auth/AuthZ documented and implemented
+- [ ] Error responses standardised (RFC 7807 Problem Details recommended)
+- [ ] Test coverage ≥ 80%
+- [ ] No secrets or CVEs found
+"""
+
+
+@server.prompt()
+def go_project_analysis(project_dir: str = ".") -> str:
+    """Comprehensive analysis of a Go project: build, test, lint, mod, and security.
+
+    Args:
+        project_dir: Root directory of the Go project (default: cwd)
+    """
+    return f"""\
+# Go Project Analysis: `{project_dir}`
+
+## 1. Module and dependency graph
+```
+go_mod(action="tidy",   cwd="{project_dir}")
+go_mod(action="verify", cwd="{project_dir}")
+go_mod(action="graph",  cwd="{project_dir}")
+```
+
+## 2. Build
+```
+go_build(cwd="{project_dir}")
+```
+
+## 3. Run tests with coverage
+```
+go_test(cwd="{project_dir}", cover=True)
+test_coverage_report(action="summary", cwd="{project_dir}")
+test_coverage_report(action="check",   cwd="{project_dir}", min=80)
+```
+
+## 4. Linting (golangci-lint)
+```
+lint_golangci(cwd="{project_dir}")
+```
+
+## 5. Check for secrets in source
+```
+secrets_scan(cwd="{project_dir}")
+```
+
+## 6. Dependency security (if using govulncheck / OWASP)
+```
+security_owasp(action="scan", cwd="{project_dir}")
+```
+
+## 7. File and structure overview
+```
+fs_tree(path="{project_dir}", max_depth=4)
+context_repo_size(cwd="{project_dir}")
+context_summarize(cwd="{project_dir}")
+```
+
+## 8. Find open TODOs and FIXMEs
+```
+search_todo(paths="{project_dir}")
+```
+
+## 9. Recent changes
+```
+git_log(limit=10, cwd="{project_dir}")
+context_diff_summary(cwd="{project_dir}")
+```
+
+## Summary expectations
+After running the above, you should have:
+- Module dependency tree (flag any `replace` directives)
+- Build success / failure
+- Test pass rate and coverage percentage
+- Lint findings (treat `errcheck` and `govet` as blocking)
+- Known CVEs in dependencies
+- TODO/FIXME count and locations
+"""
+
+
+@server.prompt()
+def performance_analysis(target: str) -> str:
+    """Analyse performance: process top + ports + resource usage + profiling guide.
+
+    Args:
+        target: Process name, URL, or component to profile (e.g. 'my-api', 'http://localhost:8080')
+    """
+    is_url = target.startswith("http://") or target.startswith("https://")
+    return f"""\
+# Performance Analysis: `{target}`
+
+## Phase 1 — System-level resource snapshot
+```
+# Top processes by CPU and memory
+process_top()
+
+# All listening ports and bound services
+process_ports(action="listen")
+
+# Full process list
+process_ps()
+```
+
+## Phase 2 — Identify the target process
+```
+# Find the process by name
+process_ps(filter="{target if not is_url else target.split('//')[-1].split(':')[0]}")
+
+# Inspect it in detail
+process_inspect(name="{target if not is_url else target.split('//')[-1].split(':')[0]}")
+```
+
+## Phase 3 — Network / HTTP performance
+{"" if not is_url else f"""```
+# HTTP response time
+net_http(url="{target}", method="GET")
+
+# Health check latency
+net_health(url="{target}/health")
+```
+"""}
+```
+# Ports in use by the target
+process_port(port=<target-port>)
+```
+
+## Phase 4 — Container performance (if applicable)
+```
+docker_ps()
+docker_inspect(container="<container-name>")
+docker_logs(container="<container-name>", tail=200)
+```
+
+## Phase 5 — Kubernetes resource usage (if applicable)
+```
+k8s_pods(namespace="<namespace>")
+k8s_logs(namespace="<namespace>", selector="app={target}", tail=100)
+```
+
+## Phase 6 — Application-level profiling guides
+
+### Go
+```go
+import _ "net/http/pprof"
+// Then: go tool pprof http://localhost:<port>/debug/pprof/profile
+```
+```
+shell_run(cmd="go tool pprof -http=:8081 http://localhost:<port>/debug/pprof/heap")
+```
+
+### Java
+```
+# Enable JVM flight recorder / async-profiler
+shell_run(cmd="jcmd <pid> JFR.start duration=60s filename=recording.jfr")
+java_stacktrace(cwd=".")  # parse any existing thread dump
+```
+
+### Node.js
+```
+shell_run(cmd="node --inspect <entry-point>")
+# Connect Chrome DevTools to chrome://inspect
+```
+
+## Phase 7 — Identify bottlenecks
+```
+# Check for slow queries (if db is involved)
+db_query(query="SELECT * FROM pg_stat_statements ORDER BY total_time DESC LIMIT 10", database="<db>")
+
+# Review recent git changes for perf regressions
+git_log(limit=20)
+context_diff_summary()
+```
+
+## Performance checklist
+- [ ] CPU usage under load identified (top consumers)
+- [ ] Memory usage stable (no leak trend)
+- [ ] Response time P50/P95 measured
+- [ ] No port conflicts or connection exhaustion
+- [ ] Database query times acceptable
+- [ ] Profiling data collected for hotspots
+"""
+
+
+# ─────────────────────────────────────────────────────────────────────────────
 # Entry point
 # ─────────────────────────────────────────────────────────────────────────────
 
