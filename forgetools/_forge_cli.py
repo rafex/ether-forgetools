@@ -51,6 +51,7 @@ REGISTRY: dict[str, str] = {
     # java
     "java maven":          "forgetools.java.maven",
     "java maven-modules":  "forgetools.java.maven_modules",
+    "java maven-central":  "forgetools.java.maven_central",
     "java gradle":         "forgetools.java.gradle",
     "java stacktrace":     "forgetools.java.parse_stacktrace",
     "java test-report":    "forgetools.java.test_report",

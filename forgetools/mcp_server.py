@@ -937,6 +937,36 @@ Toggle forgetools off → on in `/mcp` to pick up the new tool `{mcp_name}`.
 """
 
 
+# ── forge://java/maven-central ───────────────────────────────────────────────
+
+@server.resource("forge://java/maven-central/{coords}")
+def resource_maven_central(coords: str) -> str:
+    """Maven Central info for an artifact given its coordinates.
+
+    coords format: groupId:artifactId  or  groupId:artifactId:version
+
+    Examples:
+      forge://java/maven-central/org.springframework.boot:spring-boot-starter-web
+      forge://java/maven-central/com.google.guava:guava:33.4.8-jre
+    """
+    try:
+        parts = coords.split(":", 2)
+        if len(parts) < 2:
+            return json.dumps({"ok": False, "error": "coords must be groupId:artifactId[:version]"})
+        g, a = parts[0], parts[1]
+        v    = parts[2] if len(parts) > 2 else None
+
+        if v:
+            data = _run_tool("java maven-central",
+                             action="checksums", group_id=g, artifact_id=a, version=v)
+        else:
+            data = _run_tool("java maven-central",
+                             action="latest", group_id=g, artifact_id=a)
+        return json.dumps(data, indent=2)
+    except Exception as exc:
+        return json.dumps({"ok": False, "error": str(exc)})
+
+
 # ── forge://git/parallel-workflow ────────────────────────────────────────────
 
 @server.resource("forge://git/parallel-workflow")
@@ -1115,6 +1145,81 @@ git_worktree_workflow(action="finalize",  session="auth-refactor")
 # ─────────────────────────────────────────────────────────────────────────────
 # PROMPT — parallel_worktree_workflow
 # ─────────────────────────────────────────────────────────────────────────────
+
+@server.prompt()
+def maven_dependency_research(
+    query: str,
+    project_dir: str = ".",
+) -> str:
+    """Research Maven Central for a dependency: find, compare, get checksums, and add to POM.
+
+    Args:
+        query:       What you're looking for (e.g. 'json serialization', 'jwt library')
+        project_dir: Project directory where pom.xml lives (default: cwd)
+    """
+    return f"""\
+# Maven Dependency Research: `{query}`
+
+You are researching Maven Central to find the best library for: **{query}**
+
+## Phase 1 — Discover candidates
+```
+java_maven_central(action="search", query="{query}", rows=10)
+```
+From the results, pick the top 2-3 candidates with the most `version_count`
+and recent `timestamp`. Note their `group_id` and `artifact_id`.
+
+## Phase 2 — Evaluate each candidate
+For each candidate `groupId:artifactId`:
+```
+# Full details: description, URL, SCM, latest version
+java_maven_central(action="info", coords="<groupId>:<artifactId>")
+
+# Version history (check for active maintenance)
+java_maven_central(action="versions", coords="<groupId>:<artifactId>", rows=10)
+
+# Get dependency snippets for the latest version
+java_maven_central(action="dependency", coords="<groupId>:<artifactId>")
+```
+
+## Phase 3 — Verify integrity before adding
+Once you have chosen the library:
+```
+# Get all checksums for the chosen version
+java_maven_central(action="checksums", coords="<groupId>:<artifactId>:<version>")
+
+# Optionally review the POM for transitive dependencies
+java_maven_central(action="pom", coords="<groupId>:<artifactId>:<version>")
+```
+
+## Phase 4 — Check project context
+```
+# Find the project POM
+java_maven_modules(action="list", dir="{project_dir}")
+
+# Check if the dependency is already present
+search_grep(pattern="<artifactId>.*</artifactId>", paths="{project_dir}/pom.xml")
+```
+
+## Phase 5 — Add to project
+The `dependency` action returns ready-to-paste snippets:
+- `maven_xml`       → paste inside `<dependencies>` in pom.xml
+- `gradle`          → paste in `build.gradle`
+- `gradle_kotlin`   → paste in `build.gradle.kts`
+
+After adding:
+```
+java_maven(goal="dependency:resolve", cwd="{project_dir}")
+```
+
+## Decision checklist
+- Latest version released in last 12 months? (check `timestamp`)
+- More than 10 versions? (indicates stability)
+- SCM URL points to active repo? (check `scm_url`)
+- No known CVEs? (run `security_owasp` after adding)
+- SHA1 matches what the project's security policy requires?
+"""
+
 
 @server.prompt()
 def parallel_worktree_workflow(
