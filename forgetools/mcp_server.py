@@ -937,6 +937,410 @@ Toggle forgetools off → on in `/mcp` to pick up the new tool `{mcp_name}`.
 """
 
 
+# ── forge://git/parallel-workflow ────────────────────────────────────────────
+
+@server.resource("forge://git/parallel-workflow")
+def resource_git_parallel_workflow() -> str:
+    """Status of all active parallel worktree workflow sessions in the cwd repo.
+
+    A parallel workflow session groups N git worktrees under a shared integration
+    branch following the naming convention:
+      branches: ai/<session>-integration, ai/<session>-<task>
+      paths:    ../.claude/worktrees/<session>-<task>
+
+    Returns every session found, with per-worktree dirty/ahead-behind status
+    and a readiness indicator showing which tasks are ready to integrate.
+    """
+    try:
+        import subprocess, os
+
+        # discover active worktrees
+        result = subprocess.run(
+            ["git", "worktree", "list", "--porcelain"],
+            capture_output=True, text=True, timeout=10,
+            cwd=os.getcwd(),
+        )
+        if result.returncode != 0:
+            return json.dumps({"ok": False, "error": "Not a git repository"})
+
+        # parse worktrees
+        wts: list[dict] = []
+        cur: dict = {}
+        for line in result.stdout.splitlines():
+            if line.startswith("worktree "):
+                if cur:
+                    wts.append(cur)
+                cur = {"path": line[9:], "branch": None}
+            elif line.startswith("branch "):
+                cur["branch"] = line[7:].removeprefix("refs/heads/")
+        if cur:
+            wts.append(cur)
+
+        # group by session (pattern: <prefix>/<session>-<task>)
+        import re
+        sessions: dict[str, dict] = {}
+        for wt in wts:
+            br = wt.get("branch") or ""
+            m  = re.match(r'^([^/]+)/([^-]+(?:-[^-]+)*?)-(integration|.+)$', br)
+            if not m:
+                continue
+            prefix, session_candidate, suffix = m.group(1), m.group(2), m.group(3)
+            # integration branch
+            int_m = re.match(r'^([^/]+)/(.+)-integration$', br)
+            if int_m:
+                session = int_m.group(2).rsplit("-", 0)[0] if "-" not in int_m.group(2) else int_m.group(2)
+                # simpler: extract session from "prefix/SESSION-integration"
+                session = br.split("/", 1)[1].removesuffix("-integration")
+                key = f"{prefix}/{session}"
+                sessions.setdefault(key, {
+                    "prefix": prefix, "session": session,
+                    "integration_wt": None, "task_wts": [],
+                })["integration_wt"] = wt
+            else:
+                task_m = re.match(r'^([^/]+)/(.+)-([^-]+)$', br)
+                if task_m:
+                    p2  = task_m.group(1)
+                    rest = task_m.group(2)
+                    task = task_m.group(3)
+                    # heuristic: the rightmost segment is the task name
+                    key = f"{p2}/{rest}"
+                    sessions.setdefault(key, {
+                        "prefix": p2, "session": rest,
+                        "integration_wt": None, "task_wts": [],
+                    })["task_wts"].append({**wt, "task": task})
+
+        # call the tool for proper status if sessions detected
+        if sessions:
+            all_status = {}
+            for key, sess in sessions.items():
+                try:
+                    data = _run_tool(
+                        "git worktree-workflow",
+                        action="status",
+                        session=sess["session"],
+                        branch_prefix=sess["prefix"],
+                        base_branch="main",
+                    )
+                    all_status[key] = data
+                except Exception as exc:
+                    all_status[key] = {"error": str(exc)}
+            return json.dumps({
+                "ok": True,
+                "session_count": len(sessions),
+                "sessions": all_status,
+            }, indent=2)
+
+        return json.dumps({
+            "ok": True,
+            "session_count": 0,
+            "sessions": {},
+            "message": (
+                "No parallel workflow sessions found. "
+                "Sessions use naming: ai/<session>-integration, ai/<session>-<task>. "
+                "Use the `parallel_worktree_workflow` prompt to start one."
+            ),
+        }, indent=2)
+
+    except Exception as exc:
+        return json.dumps({"ok": False, "error": str(exc)})
+
+
+# ── forge://git/worktree-guide ────────────────────────────────────────────────
+
+@server.resource("forge://git/worktree-guide")
+def resource_git_worktree_guide() -> str:
+    """Reference guide for git worktree concepts and the parallel workflow engine.
+
+    Returns the naming conventions, available actions, and agent decision rules
+    for the git_worktree_workflow tool.
+    """
+    return """\
+# Git Parallel Worktree Workflow — Agent Reference
+
+## What it is
+A structured pattern for AI agents to perform multiple independent changes
+simultaneously, each in an isolated git worktree, then merge them through
+a single integration branch before landing on main.
+
+## Naming conventions
+| Concept | Pattern | Example |
+|---------|---------|---------|
+| Session | short slug | `auth-refactor` |
+| Integration branch | `{prefix}/{session}-integration` | `ai/auth-refactor-integration` |
+| Task branch | `{prefix}/{session}-{task}` | `ai/auth-refactor-models` |
+| Worktree path | `{wt_base}/{session}-{task}` | `../.claude/worktrees/auth-refactor-models` |
+
+Default prefix: `ai`
+Default worktree base: `../.claude/worktrees`
+
+## Actions in order
+1. **plan**       — preview all branch/path names, conflict check (no writes)
+2. **init**       — create integration branch + N worktrees (one per task)
+3. **status**     — dirty/clean, ahead/behind for every worktree
+4. **sync**       — rebase/merge base_branch into all task worktrees
+5. **integrate**  — merge completed task branch → integration branch
+6. **finalize**   — merge integration → target branch, clean up worktrees
+7. **abort**      — remove all worktrees + delete all session branches
+
+## Agent decision rules
+- Always run **plan** first; check `conflicts` list before **init**
+- Work in each task's **path** directory (not the main repo)
+- After each task is committed, call **integrate --task <name>**
+- Call **status** anytime to see which tasks are ready to integrate
+- Call **sync** if the base branch has advanced since **init**
+- Only call **finalize** when all tasks are integrated (no errors in **integrate**)
+- If aborting mid-session, call **abort** to leave the repo clean
+
+## Merge methods
+- `merge`  — default; preserves full history, clear audit trail
+- `squash` — condenses each task into one commit; cleaner log
+- `rebase` — linearises history; use only for local-only branches
+
+## MCP tool name
+`git_worktree_workflow`
+
+## Example session
+```
+git_worktree_workflow(action="plan",   session="auth-refactor", tasks=["models","api","tests"])
+git_worktree_workflow(action="init",   session="auth-refactor", tasks=["models","api","tests"])
+# ... work in each worktree ...
+git_worktree_workflow(action="integrate", session="auth-refactor", task="models")
+git_worktree_workflow(action="integrate", session="auth-refactor", task="api")
+git_worktree_workflow(action="integrate", session="auth-refactor", task="tests")
+git_worktree_workflow(action="finalize",  session="auth-refactor")
+```
+"""
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# PROMPT — parallel_worktree_workflow
+# ─────────────────────────────────────────────────────────────────────────────
+
+@server.prompt()
+def parallel_worktree_workflow(
+    session: str,
+    tasks: str,
+    base_branch: str = "main",
+    merge_method: str = "merge",
+) -> str:
+    """AI-agent guide for parallel git worktree development and integration.
+
+    Generates a step-by-step execution plan an agent follows to:
+      1. Create N isolated worktrees (one per task)
+      2. Perform independent changes simultaneously
+      3. Merge through an integration branch
+      4. Land cleanly on the target branch
+
+    Args:
+        session:      Short slug for the session (e.g. 'auth-refactor')
+        tasks:        Comma-separated task names  (e.g. 'models,api,tests')
+        base_branch:  Branch to start from (default: main)
+        merge_method: merge | squash | rebase (default: merge)
+    """
+    task_list  = [t.strip() for t in tasks.split(",") if t.strip()]
+    int_branch = f"ai/{session}-integration"
+    task_items = "\n".join(
+        f"  - `ai/{session}-{t}` → `../.claude/worktrees/{session}-{t}`"
+        for t in task_list
+    )
+    task_status_calls = "\n".join(
+        f'git_worktree_workflow(action="integrate", session="{session}", task="{t}", '
+        f'merge_method="{merge_method}")'
+        for t in task_list
+    )
+
+    return f"""\
+# Parallel Worktree Workflow: `{session}`
+
+**Tasks:** {", ".join(task_list)}
+**Base branch:** `{base_branch}`
+**Integration branch:** `{int_branch}`
+**Merge method:** `{merge_method}`
+
+You are an AI agent operating in parallel across {len(task_list)} isolated git worktrees.
+Follow **every step in order**. Do not skip steps.
+
+---
+
+## Phase 1 — Plan (no writes)
+
+Read the current repo state and preview the topology.
+
+```
+# 1a. Read the worktree guide
+# Resource: forge://git/worktree-guide
+
+# 1b. Verify repo health
+git_status()
+git_worktree(action="list")
+
+# 1c. Preview the session — check for conflicts before creating anything
+git_worktree_workflow(
+    action="plan",
+    session="{session}",
+    tasks={json.dumps(task_list)},
+    base_branch="{base_branch}",
+    merge_method="{merge_method}",
+)
+```
+
+**If `conflicts` list is non-empty** in the plan output:
+- A worktree path or branch already exists
+- Resolve before continuing (rename, remove, or abort that session)
+
+---
+
+## Phase 2 — Init (creates branches + worktrees)
+
+```
+git_worktree_workflow(
+    action="init",
+    session="{session}",
+    tasks={json.dumps(task_list)},
+    base_branch="{base_branch}",
+)
+```
+
+This creates:
+{task_items}
+
+**Expected output**: `created` list with {len(task_list)} worktrees + 1 integration branch.
+If any errors appear, read them — most are path conflicts or branch-already-exists.
+
+---
+
+## Phase 3 — Parallel implementation
+
+Work independently in each task worktree. **Each task is a separate directory.**
+Never commit to `{base_branch}` or `{int_branch}` directly.
+
+For each task `<task>` in [{", ".join(f'"{t}"' for t in task_list)}]:
+
+```
+# Check the worktree is clean before starting
+git_worktree_workflow(action="status", session="{session}")
+
+# Work in the task's directory:
+#   ../.claude/worktrees/{session}-<task>/
+
+# After finishing the task — commit in that worktree:
+git_commit(action="commit", cwd="../.claude/worktrees/{session}-<task>")
+```
+
+**Rules while working:**
+- One worktree = one concern (e.g., `models` only touches the data layer)
+- Avoid modifying the same file in two worktrees (causes merge conflicts)
+- Commit early and often within the worktree; squash later via `merge_method`
+
+---
+
+## Phase 4 — Sync (if base_branch advanced)
+
+If other changes landed on `{base_branch}` while you were working:
+
+```
+git_worktree_workflow(
+    action="sync",
+    session="{session}",
+    base_branch="{base_branch}",
+    merge_method="{merge_method}",
+)
+```
+
+Resolve any conflicts reported in `errors`, then re-run sync.
+
+---
+
+## Phase 5 — Integrate (one task at a time)
+
+After **each** task is committed and clean, integrate it:
+
+```
+{task_status_calls}
+```
+
+After each call, check `errors`. A non-empty `errors` means a merge conflict:
+```
+# In the integration worktree or main repo, resolve conflicts:
+git_status(cwd="../.claude/worktrees/{session}-integration")   # if it exists
+# or:
+git_status()   # if integration branch was checked out in the main repo
+```
+
+Monitor overall progress:
+```
+git_worktree_workflow(action="status", session="{session}")
+```
+
+`ready_to_integrate` — tasks with commits not yet in integration
+`in_progress` — tasks still dirty (uncommitted changes)
+
+---
+
+## Phase 6 — Finalize
+
+When **all** tasks are integrated (`ready_to_integrate` is empty):
+
+```
+git_worktree_workflow(
+    action="finalize",
+    session="{session}",
+    target_branch="{base_branch}",
+    merge_method="{merge_method}",
+    cleanup=True,
+)
+```
+
+This:
+1. Merges `{int_branch}` → `{base_branch}` using `{merge_method}`
+2. Removes all task worktrees (`cleanup=True`)
+3. Deletes task branches and the integration branch
+
+**After finalize:**
+```
+git_status()           # verify {base_branch} is clean
+git_log(limit=5)       # verify the merge commit appears
+
+# Push to remote:
+shell_run(cmd="git push origin {base_branch}")
+
+# Optional: create a PR instead of pushing directly
+gh_pr_create(
+    title="feat({session}): parallel implementation of {tasks}",
+    body="Parallel worktree session `{session}` integrating: {tasks}",
+    base="{base_branch}",
+)
+```
+
+---
+
+## Emergency abort
+
+If something went wrong and you need to clean up:
+
+```
+git_worktree_workflow(action="abort", session="{session}")
+```
+
+This removes all worktrees and deletes all session branches.
+The main repo is returned to the state before `init`.
+
+---
+
+## Quick reference
+
+| Action | When to call |
+|--------|-------------|
+| `plan` | Before init — sanity check, preview names |
+| `init` | Once — creates all worktrees |
+| `status` | Anytime — see dirty/ahead-behind |
+| `sync` | When `{base_branch}` has new commits |
+| `integrate` | After each task is committed |
+| `finalize` | When all tasks integrated |
+| `abort` | Emergency rollback |
+"""
+
+
 # ─────────────────────────────────────────────────────────────────────────────
 # Entry point
 # ─────────────────────────────────────────────────────────────────────────────
