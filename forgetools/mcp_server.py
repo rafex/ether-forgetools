@@ -61,11 +61,44 @@ def _wrap(fn):
     return wrapped
 
 
+def _tool_description(key: str, module_path: str) -> str:
+    """Build a stable MCP description for a forgetools tool."""
+    try:
+        mod = importlib.import_module(module_path)
+    except Exception:
+        mod = None
+
+    if mod is not None:
+        run_doc = inspect.getdoc(getattr(mod, "run", None)) or ""
+        if run_doc:
+            return run_doc.splitlines()[0].strip()
+
+        module_doc = inspect.getdoc(mod) or ""
+        if module_doc:
+            first_line = module_doc.splitlines()[0].strip()
+            if "—" in first_line:
+                _, _, first_line = first_line.partition("—")
+                first_line = first_line.strip()
+            if first_line:
+                return first_line.rstrip(".")
+
+    words = key.replace("-", " ").split()
+    if not words:
+        return "Run a forgetools command"
+
+    category = words[0]
+    action = " ".join(words[1:]) or "command"
+    return f"Run the {category} {action} forgetools command"
+
+
 for _key, _module_path in REGISTRY.items():
     _mod  = importlib.import_module(_module_path)
     _run  = getattr(_mod, "run")
     _name = _key.replace(" ", "_").replace("-", "_")
-    server.tool(name=_name)(_wrap(_run))
+    _description = _tool_description(_key, _module_path)
+    _wrapped = _wrap(_run)
+    _wrapped.__doc__ = _description
+    server.tool(name=_name, description=_description)(_wrapped)
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -106,7 +139,7 @@ def resource_catalog() -> str:
             current_cat = cat
         try:
             mod      = importlib.import_module(module_path)
-            docstring = (inspect.getdoc(mod.run) or "").split("\n")[0]
+            docstring = _tool_description(key, module_path)
             sig      = str(inspect.signature(mod.run))
         except Exception:
             docstring = ""
@@ -2362,6 +2395,16 @@ def performance_analysis(target: str) -> str:
         target: Process name, URL, or component to profile (e.g. 'my-api', 'http://localhost:8080')
     """
     is_url = target.startswith("http://") or target.startswith("https://")
+    http_block = ""
+    if is_url:
+        http_block = f"""```
+# HTTP response time
+net_http(url="{target}", method="GET")
+
+# Health check latency
+net_health(url="{target}/health")
+```
+"""
     return f"""\
 # Performance Analysis: `{target}`
 
@@ -2387,14 +2430,7 @@ process_inspect(name="{target if not is_url else target.split('//')[-1].split(':
 ```
 
 ## Phase 3 — Network / HTTP performance
-{"" if not is_url else f"""```
-# HTTP response time
-net_http(url="{target}", method="GET")
-
-# Health check latency
-net_health(url="{target}/health")
-```
-"""}
+{http_block}
 ```
 # Ports in use by the target
 process_port(port=<target-port>)
