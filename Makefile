@@ -1,57 +1,41 @@
-.PHONY: install install-mcp serve dev docker-build docker-run docker-serve openapi help
+# ─────────────────────────────────────────────────────────────────────────────
+# Makefile — Build System
+#
+# Responsabilidad: Solo gestionar la construcción y configuración estática.
+# Task Runner: Usa Justfile (just)
+# ─────────────────────────────────────────────────────────────────────────────
+
+.PHONY: help install install-mcp clean
 
 PYTHON     ?= python3.13
 VENV       := .venv
 BIN        := $(VENV)/bin
-IMAGE      ?= forgetools-mcp
-DOCKERFILE := container/Dockerfile
 
 help:
-	@echo "forgetools — available targets:"
+	@echo "forgetools — build system (Makefile)"
 	@echo ""
-	@echo "  Local"
-	@echo "  make install       install forgetools (core)"
-	@echo "  make install-mcp   install forgetools + fastmcp"
-	@echo "  make serve         start MCP server locally (stdio)"
-	@echo "  make dev           install-mcp + serve"
+	@echo "  Build / Setup"
+	@echo "  make install       crear entorno virtual e instalar dependencias"
+	@echo "  make install-mcp   instalar dependencias + extras mcp"
+	@echo "  make clean         limpiar artefactos de build"
 	@echo ""
-	@echo "  Container"
-	@echo "  make docker-build  build Docker image ($(IMAGE))"
-	@echo "  make docker-run    run MCP server inside container (stdio)"
-	@echo "  make docker-serve  build + run in one step"
-	@echo ""
-	@echo "  Docs"
-	@echo "  make openapi       regenerate openapi/forgetools.json from live server"
+	@echo "  Task Runner (Justfile)"
+	@echo "  just help          mostrar tareas disponibles"
+	@echo "  just serve         iniciar servidor MCP"
+	@echo "  just dev           modo desarrollo"
 
-# ── Local ──────────────────────────────────────────────────────────────────────
-
-install:
-	$(PYTHON) -m venv $(VENV)
-	$(BIN)/pip install -e .
-
-install-mcp:
-	$(PYTHON) -m venv $(VENV)
-	$(BIN)/pip install -e ".[mcp]"
-
-serve: $(VENV)
-	$(BIN)/forge-mcp
-
-dev: install-mcp serve
+# ── Setup ──────────────────────────────────────────────────────────────────────
 
 $(VENV):
-	$(MAKE) install-mcp
+	$(PYTHON) -m venv $(VENV)
+	$(BIN)/pip install --upgrade pip
 
-# ── Docs ───────────────────────────────────────────────────────────────────────
+install: $(VENV)
+	$(BIN)/pip install -e .
 
-openapi: $(VENV)
-	$(BIN)/python3.13 scripts/gen_openapi.py
+install-mcp: $(VENV)
+	$(BIN)/pip install -e ".[mcp]"
 
-# ── Container ──────────────────────────────────────────────────────────────────
-
-docker-build:
-	docker build -f $(DOCKERFILE) -t $(IMAGE) .
-
-docker-run:
-	docker run --rm -i $(IMAGE)
-
-docker-serve: docker-build docker-run
+clean:
+	rm -rf $(VENV) __pycache__/
+	find . -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true

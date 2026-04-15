@@ -7,12 +7,57 @@ Every script returns a `ForgeResult` JSON object with `ok`, `data`, `errors`, an
 ## Install
 
 ```bash
+# Instalar dependencias básicas (Makefile)
+make install
+
+# Instalar con soporte MCP (Makefile)
+make install-mcp
+
+# O usar pip directamente
 pip install -e .
+pip install -e ".[mcp]"
 ```
 
 ## Usage
 
-**As unified CLI:**
+### Task Runner (Just)
+
+Usa `just` para tareas de desarrollo, ejecución y utilidades:
+
+```bash
+# Mostrar todas las tareas disponibles
+just help
+
+# Modo desarrollo (instala + ejecuta servidor)
+just dev
+
+# Ejecutar servidor MCP localmente
+just serve
+
+# Construir y ejecutar en container
+just docker-serve
+
+# Generar documentación OpenAPI
+just openapi
+```
+
+### Build System (Make)
+
+Usa `make` para gestión de dependencias y construcción estática:
+
+```bash
+# Instalar dependencias básicas
+make install
+
+# Instalar con soporte MCP
+make install-mcp
+
+# Limpiar artefactos
+make clean
+```
+
+### Unified CLI
+
 ```bash
 forge git status
 forge search grep --pattern "TODO" --path ./src
@@ -21,13 +66,15 @@ forge java maven --goal "clean test" --module api
 forge diag health
 ```
 
-**As Python module:**
+### Python Module
+
 ```bash
 python -m forgetools.git.status
 python -m forgetools.search.grep --pattern "TODO" --path ./src --context 3
 ```
 
-**As Python import:**
+### Python Import
+
 ```python
 from forgetools.git import status
 result = status.run(cwd="/path/to/repo")
