@@ -2494,6 +2494,950 @@ context_diff_summary()
 
 
 # ─────────────────────────────────────────────────────────────────────────────
+# PROMPTS — conventional commits
+# ─────────────────────────────────────────────────────────────────────────────
+
+# Conventional Commits reference data (shared by prompts below)
+_CC_TYPES = {
+    "feat":     "New feature visible to the user",
+    "fix":      "Bug fix visible to the user",
+    "docs":     "Documentation only",
+    "style":    "Formatting — no logic change (white-space, semicolons…)",
+    "refactor": "Code restructuring — no feature change, no bug fix",
+    "perf":     "Performance improvement",
+    "test":     "Add or fix tests",
+    "build":    "Build system or external dependencies (mvn, npm, gradle…)",
+    "ci":       "CI/CD configuration (GitHub Actions, Jenkinsfile…)",
+    "chore":    "Maintenance — does not affect source or test files",
+    "revert":   "Revert a previous commit",
+}
+
+_CC_FORMAT = """\
+<type>[optional scope]: <description>
+
+[optional body — explain WHY, not WHAT]
+
+[optional footer(s)]
+  BREAKING CHANGE: <description>   ← triggers MAJOR semver bump
+  Fixes #<issue>
+  Co-authored-by: Name <email>
+"""
+
+_CC_RULES = """\
+- Subject line ≤ 72 characters
+- Type is lowercase; scope is optional but consistent (e.g. auth, api, db)
+- Imperative mood: "add login" not "added login" / "adds login"
+- No period at the end of the subject line
+- Body and footer are separated from subject by a blank line
+- BREAKING CHANGE in footer triggers MAJOR semver bump (or append ! after type: `feat!:`)
+"""
+
+
+@server.prompt()
+def conventional_commit(
+    type: str,
+    description: str,
+    scope: str = "",
+    body: str = "",
+    breaking_change: str = "",
+    issue: str = "",
+    cwd: str = ".",
+) -> str:
+    """Craft and apply a Conventional Commit following the CC spec (conventionalcommits.org).
+
+    Inspects staged changes, validates the commit message, and calls git_commit.
+
+    Args:
+        type:            Commit type — feat | fix | docs | style | refactor | perf | test | build | ci | chore | revert
+        description:     Short imperative summary (≤ 72 chars minus type+scope prefix)
+        scope:           Optional scope in parentheses — e.g. auth, api, db (default: none)
+        body:            Optional body explaining WHY (leave blank to skip)
+        breaking_change: Optional BREAKING CHANGE description (triggers MAJOR semver bump)
+        issue:           Optional issue reference, e.g. '42' → 'Fixes #42'
+        cwd:             Repository directory (default: cwd)
+    """
+    valid_types = list(_CC_TYPES)
+    is_breaking = bool(breaking_change)
+    scope_str   = f"({scope})" if scope else ""
+    bang        = "!" if is_breaking else ""
+    subject     = f"{type}{scope_str}{bang}: {description}"
+
+    footer_lines: list[str] = []
+    if breaking_change:
+        footer_lines.append(f"BREAKING CHANGE: {breaking_change}")
+    if issue:
+        footer_lines.append(f"Fixes #{issue}")
+    footer = "\n".join(footer_lines)
+
+    warnings: list[str] = []
+    if type not in valid_types:
+        warnings.append(
+            f"⚠️  `{type}` is not a standard CC type. Valid: {', '.join(valid_types)}"
+        )
+    if len(subject) > 72:
+        warnings.append(f"⚠️  Subject is {len(subject)} chars — keep it ≤ 72")
+
+    warning_block = ("\n" + "\n".join(warnings) + "\n") if warnings else ""
+
+    body_section  = f"\n{body}" if body else ""
+    footer_section = f"\n{footer}" if footer else ""
+    full_message  = f"{subject}{body_section}{footer_section}"
+
+    types_table = "".join(f"| `{t}` | {d} |\n" for t, d in _CC_TYPES.items())
+
+    return f"""\
+# Conventional Commit: `{subject}`
+{warning_block}
+## Commit message preview
+
+```
+{full_message}
+```
+
+## Step 1 — Verify staged changes
+
+```
+git_status(cwd="{cwd}")
+git_diff(staged=True, cwd="{cwd}")
+```
+
+If nothing is staged, stage your files first:
+```
+shell_run(cmd="git add <files>", cwd="{cwd}")
+```
+
+## Step 2 — Review the diff matches the type `{type}`
+
+| Type | What it covers |
+|------|---------------|
+{types_table}
+## Step 3 — Commit
+
+```
+git_commit(
+    action="commit",
+    message={repr(full_message)},
+    cwd="{cwd}",
+)
+```
+
+## Step 4 — Verify
+
+```
+git_log(limit=1, cwd="{cwd}")
+```
+
+## Conventional Commits format reference
+
+```
+{_CC_FORMAT}
+```
+
+### Rules
+{_CC_RULES}
+"""
+
+
+@server.prompt()
+def commit_amend(
+    new_type: str = "",
+    new_scope: str = "",
+    new_description: str = "",
+    add_staged: bool = False,
+    cwd: str = ".",
+) -> str:
+    """Amend the last commit: fix the message and/or add forgotten staged files.
+
+    Use this when you just committed and realized the message is wrong or you
+    forgot to stage a file. Do NOT use on commits already pushed to a shared branch.
+
+    Args:
+        new_type:        New CC type (leave blank to keep current)
+        new_scope:       New scope (leave blank to keep current)
+        new_description: New description (leave blank to keep current)
+        add_staged:      True if you have additional staged changes to fold in
+        cwd:             Repository directory (default: cwd)
+    """
+    change_msg = bool(new_type or new_description)
+    new_subject = ""
+    if change_msg:
+        scope_str  = f"({new_scope})" if new_scope else ""
+        new_subject = f"{new_type}{scope_str}: {new_description}"
+
+    types_table = "".join(f"| `{t}` | {d} |\n" for t, d in _CC_TYPES.items())
+
+    return f"""\
+# Amend Last Commit
+
+⚠️  **Only amend commits that have NOT been pushed to a shared/remote branch.**
+If the commit is already on `origin`, prefer `git_commit(action="revert")` + new commit.
+
+## Step 1 — Inspect the last commit
+
+```
+git_log(limit=1, cwd="{cwd}")
+git_diff(commit="HEAD~1..HEAD", cwd="{cwd}")
+```
+
+## Step 2 — Check what is currently staged
+
+```
+git_status(cwd="{cwd}")
+```
+{"## Step 3 — Stage additional files to fold in" + chr(10) + "```" + chr(10) + f'git_status(cwd="{cwd}")' + chr(10) + "# Then stage missing files:" + chr(10) + f'shell_run(cmd="git add <forgotten-file>", cwd="{cwd}")' + chr(10) + "```" + chr(10) if add_staged else ""}
+## {"Step 4" if add_staged else "Step 3"} — Amend
+
+{"**New subject:** `" + new_subject + "`" + chr(10) if new_subject else "_(Keeping the existing commit message — only folding in staged changes)_" + chr(10)}
+```
+git_commit(
+    action="amend",
+{"    message=" + repr(new_subject) + "," + chr(10) if new_subject else ""}    cwd="{cwd}",
+)
+```
+
+## {"Step 5" if add_staged else "Step 4"} — Verify
+
+```
+git_log(limit=2, cwd="{cwd}")
+git_diff(commit="HEAD~1..HEAD", cwd="{cwd}")
+```
+
+## Conventional Commits type reference
+
+| Type | Use when… |
+|------|-----------|
+{types_table}
+"""
+
+
+@server.prompt()
+def commit_history_cleanup(
+    base_branch: str = "main",
+    strategy: str = "interactive",
+    cwd: str = ".",
+) -> str:
+    """Clean up commit history before opening a PR: squash WIP commits, fix messages.
+
+    Strategies:
+      interactive — shows all commits ahead of base, guides squash/reword one-by-one
+      squash-all  — collapses all branch commits into a single conventional commit
+      fixup       — applies all fixup! commits automatically
+
+    Args:
+        base_branch: The branch you will merge into (default: main)
+        strategy:    interactive | squash-all | fixup (default: interactive)
+        cwd:         Repository directory (default: cwd)
+    """
+    return f"""\
+# Commit History Cleanup (before PR)
+
+**Base branch:** `{base_branch}`
+**Strategy:** `{strategy}`
+
+## Step 1 — See commits ahead of `{base_branch}`
+
+```
+git_log(limit=30, cwd="{cwd}")
+context_diff_summary(since="{base_branch}", until="HEAD", cwd="{cwd}")
+```
+
+Count how many commits need cleaning. If the count is 1, nothing to do.
+
+## Step 2 — Verify there are no uncommitted changes
+
+```
+git_status(cwd="{cwd}")
+```
+
+Stage or stash anything uncommitted before rebasing.
+
+{"## Strategy: interactive rebase" + chr(10) + chr(10) + "This lets you squash, reword, drop, or reorder commits one-by-one." + chr(10) + chr(10) + "```" + chr(10) + f'# Rebase interactively against {base_branch}' + chr(10) + f'shell_run(cmd="git rebase -i {base_branch}", cwd="{cwd}")' + chr(10) + "```" + chr(10) + chr(10) + "In the editor, change `pick` to:" + chr(10) + "- `r` / `reword` — keep commit but edit the message" + chr(10) + "- `s` / `squash` — merge into previous commit, edit combined message" + chr(10) + "- `f` / `fixup`  — merge into previous commit, discard this message" + chr(10) + "- `d` / `drop`   — remove the commit entirely" + chr(10) + chr(10) + "After rebase completes:" + chr(10) + "```" + chr(10) + f'git_log(limit=10, cwd="{cwd}")' + chr(10) + "```" if strategy == "interactive" else ""}
+{"## Strategy: squash-all" + chr(10) + chr(10) + f"Collapses all commits ahead of `{base_branch}` into one Conventional Commit." + chr(10) + chr(10) + "```" + chr(10) + f'# Soft-reset to base (keeps all changes staged)' + chr(10) + f'shell_run(cmd="git reset --soft $(git merge-base HEAD {base_branch})", cwd="{cwd}")' + chr(10) + f'git_status(cwd="{cwd}")      # all changes now staged' + chr(10) + f'git_diff(staged=True, cwd="{cwd}")' + chr(10) + "```" + chr(10) + chr(10) + "Then craft a single Conventional Commit covering all changes:" + chr(10) + "```" + chr(10) + "# Use the conventional_commit prompt for the merged change" + chr(10) + "git_commit(" + chr(10) + '    action="commit",' + chr(10) + '    message="feat(scope): summarise all changes",' + chr(10) + f'    cwd="{cwd}",' + chr(10) + ")" + chr(10) + "```" if strategy == "squash-all" else ""}
+{"## Strategy: fixup" + chr(10) + chr(10) + "Automatically applies all `fixup!` commits to their targets." + chr(10) + chr(10) + "```" + chr(10) + f'shell_run(cmd="git rebase --autosquash {base_branch}", cwd="{cwd}")' + chr(10) + f'git_log(limit=10, cwd="{cwd}")' + chr(10) + "```" if strategy == "fixup" else ""}
+
+## Step 3 — Final validation
+
+```
+git_log(limit=10, cwd="{cwd}")
+context_diff_summary(since="{base_branch}", until="HEAD", cwd="{cwd}")
+```
+
+All commit messages should follow Conventional Commits:
+```
+{_CC_FORMAT}
+```
+
+### Rules
+{_CC_RULES}
+"""
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# PROMPTS — git worktree (single feature & hotfix)
+# ─────────────────────────────────────────────────────────────────────────────
+
+@server.prompt()
+def worktree_feature(
+    feature: str,
+    base_branch: str = "main",
+    worktree_base: str = "../.claude/worktrees",
+    cwd: str = ".",
+) -> str:
+    """Isolate a single feature in its own git worktree (simpler than parallel workflow).
+
+    Creates one worktree for focused work, then integrates via a PR.
+    Use this for a single self-contained feature. For N parallel tasks use
+    the `parallel_worktree_workflow` prompt instead.
+
+    Args:
+        feature:       Short slug for the feature (e.g. 'add-oauth', 'refactor-auth')
+        base_branch:   Branch to branch from and PR into (default: main)
+        worktree_base: Parent directory for worktrees (default: ../.claude/worktrees)
+        cwd:           Main repository directory (default: cwd)
+    """
+    branch       = f"feat/{feature}"
+    wt_path      = f"{worktree_base}/{feature}"
+    commit_scope = feature.replace("-", "")
+
+    return f"""\
+# Feature Worktree: `{feature}`
+
+**Branch:** `{branch}`
+**Worktree path:** `{wt_path}`
+**Base:** `{base_branch}`
+
+---
+
+## Phase 1 — Prepare
+
+```
+# Verify the repo is clean
+git_status(cwd="{cwd}")
+git_log(limit=5, cwd="{cwd}")
+
+# Check no existing worktree for this feature
+git_worktree(action="list", cwd="{cwd}")
+```
+
+If the worktree already exists, skip Phase 2 and go straight to Phase 3.
+
+---
+
+## Phase 2 — Create worktree
+
+```
+git_worktree(
+    action="add",
+    path="{wt_path}",
+    branch="{branch}",
+    new_branch=True,
+    base="{base_branch}",
+    cwd="{cwd}",
+)
+```
+
+Verify it was created:
+```
+git_worktree(action="list", cwd="{cwd}")
+```
+
+---
+
+## Phase 3 — Work in the worktree
+
+All implementation happens inside `{wt_path}` — never in the main repo.
+
+```
+# Check context from the worktree
+git_status(cwd="{wt_path}")
+fs_tree(path="{wt_path}", max_depth=3)
+
+# Read project conventions (SpecNative-aware repos)
+specnative_context(action="read", document="conventions", cwd="{cwd}")
+specnative_context(action="read", document="architecture", cwd="{cwd}")
+```
+
+### Development loop
+
+```
+# Inspect / search code
+search_grep(pattern="<keyword>", paths="{wt_path}")
+
+# After each logical unit — conventional commit
+git_commit(
+    action="commit",
+    message="feat({commit_scope}): <describe what changed>",
+    cwd="{wt_path}",
+)
+```
+
+Commit often. Each commit should be a single logical change and follow
+Conventional Commits (`feat`, `fix`, `test`, `refactor`, `docs`…).
+
+---
+
+## Phase 4 — Sync with `{base_branch}` (if it advanced)
+
+```
+git_status(cwd="{wt_path}")
+
+# Rebase onto latest base
+shell_run(cmd="git fetch origin {base_branch} && git rebase origin/{base_branch}", cwd="{wt_path}")
+```
+
+Resolve conflicts if any, then:
+```
+shell_run(cmd="git rebase --continue", cwd="{wt_path}")
+```
+
+---
+
+## Phase 5 — Pre-PR cleanup
+
+```
+# Review all commits ahead of base
+context_diff_summary(since="{base_branch}", until="HEAD", cwd="{wt_path}")
+git_log(limit=20, cwd="{wt_path}")
+```
+
+Squash WIP commits using `commit_history_cleanup` prompt if needed.
+
+```
+# Run tests
+java_maven(goal="verify", cwd="{wt_path}")   # Java
+go_test(cwd="{wt_path}")                      # Go
+npm_run(script="test", cwd="{wt_path}")       # JS/TS
+
+# Check for secrets
+secrets_scan(cwd="{wt_path}")
+```
+
+---
+
+## Phase 6 — Open PR
+
+```
+# Push the branch
+shell_run(cmd="git push -u origin {branch}", cwd="{wt_path}")
+
+# Create the PR
+gh_pr_create(
+    title="feat({commit_scope}): <one-line summary>",
+    body="## Summary\\n\\n- <bullet 1>\\n- <bullet 2>\\n\\n## Test plan\\n\\n- [ ] <test item>",
+    base="{base_branch}",
+    draft=False,
+)
+```
+
+---
+
+## Phase 7 — Cleanup after merge
+
+```
+# Remove worktree
+git_worktree(action="remove", path="{wt_path}", cwd="{cwd}")
+
+# Delete local branch
+shell_run(cmd="git branch -d {branch}", cwd="{cwd}")
+
+# Verify
+git_worktree(action="list", cwd="{cwd}")
+git_branch(action="list", cwd="{cwd}")
+```
+"""
+
+
+@server.prompt()
+def worktree_hotfix(
+    hotfix: str,
+    affected_version: str = "",
+    base_branch: str = "main",
+    worktree_base: str = "../.claude/worktrees",
+    cwd: str = ".",
+) -> str:
+    """Emergency hotfix in an isolated worktree — minimal blast radius, fast turnaround.
+
+    Creates a `hotfix/<name>` branch from `base_branch`, applies the fix in an
+    isolated worktree, and opens a PR. Does NOT touch the main checkout.
+
+    Args:
+        hotfix:           Short slug for the issue (e.g. 'null-ptr-checkout', 'sql-injection-login')
+        affected_version: Current production version affected (e.g. 'v2.3.1'), for the PR body
+        base_branch:      Branch to hotfix from — usually main or a release branch (default: main)
+        worktree_base:    Parent directory for worktrees (default: ../.claude/worktrees)
+        cwd:              Main repository directory (default: cwd)
+    """
+    branch   = f"hotfix/{hotfix}"
+    wt_path  = f"{worktree_base}/hotfix-{hotfix}"
+    version_note = f" (affects `{affected_version}`)" if affected_version else ""
+
+    return f"""\
+# Emergency Hotfix: `{hotfix}`{version_note}
+
+**Branch:** `{branch}`
+**Worktree:** `{wt_path}`
+**Base:** `{base_branch}`
+
+⚠️  Hotfix rules:
+- Touch **only** the broken code. No refactoring, no new features.
+- Every change must be covered by a test.
+- PR must pass CI before merge.
+
+---
+
+## Phase 1 — Triage (understand the bug before touching anything)
+
+```
+# Current repo state
+git_status(cwd="{cwd}")
+git_log(limit=10, cwd="{cwd}")
+
+# Find the bug in code
+search_grep(pattern="<error keyword or class>", paths="{cwd}")
+search_todo(paths="{cwd}")
+
+# Check recent changes that might have introduced it
+context_diff_summary(since="{base_branch}~5", until="{base_branch}", cwd="{cwd}")
+```
+
+Document the root cause before proceeding. Only continue once you understand
+**exactly** which file and line is broken.
+
+---
+
+## Phase 2 — Create isolated hotfix worktree
+
+```
+git_worktree(
+    action="add",
+    path="{wt_path}",
+    branch="{branch}",
+    new_branch=True,
+    base="{base_branch}",
+    cwd="{cwd}",
+)
+
+git_worktree(action="list", cwd="{cwd}")
+```
+
+---
+
+## Phase 3 — Apply the minimal fix
+
+Work exclusively inside `{wt_path}`:
+
+```
+# Confirm the bug is reproducible
+java_maven(goal="test -Dtest=<FailingTest>", cwd="{wt_path}")   # Java
+go_test(pkg="./...", run="TestFailing", cwd="{wt_path}")         # Go
+npm_run(script="test -- --grep '<failing test>'", cwd="{wt_path}")  # JS/TS
+```
+
+Apply the fix, then:
+
+```
+# Verify fix passes
+java_maven(goal="test", cwd="{wt_path}")
+go_test(cwd="{wt_path}")
+npm_run(script="test", cwd="{wt_path}")
+
+# Security check (hotfixes are high-risk)
+secrets_scan(cwd="{wt_path}")
+security_spotbugs(action="scan", cwd="{wt_path}", security_only=True)
+```
+
+---
+
+## Phase 4 — Commit
+
+Use `fix:` type. Include issue reference in footer if available.
+
+```
+git_commit(
+    action="commit",
+    message="fix({hotfix}): <concise description of what was broken and how it was fixed>\\n\\nRoot cause: <one sentence>\\n\\nFixes #<issue-number>",
+    cwd="{wt_path}",
+)
+
+git_log(limit=3, cwd="{wt_path}")
+git_diff(commit="{base_branch}..HEAD", cwd="{wt_path}")
+```
+
+---
+
+## Phase 5 — Open PR (mark as high priority)
+
+```
+shell_run(cmd="git push -u origin {branch}", cwd="{wt_path}")
+
+gh_pr_create(
+    title="fix({hotfix}): <concise summary>{version_note}",
+    body="## 🚨 Hotfix{version_note}\\n\\n## Root cause\\n<one paragraph>\\n\\n## Fix\\n<what changed and why it's safe>\\n\\n## Test plan\\n- [ ] Unit test added for the broken case\\n- [ ] Existing test suite passes\\n- [ ] Manually verified in staging",
+    base="{base_branch}",
+    draft=False,
+)
+```
+
+---
+
+## Phase 6 — Monitor CI
+
+```
+gh_actions(limit=3)
+```
+
+If CI fails:
+```
+gh_actions_logs(action="failed", run_id=<run-id>)
+```
+
+---
+
+## Phase 7 — Post-merge cleanup
+
+```
+git_worktree(action="remove", path="{wt_path}", cwd="{cwd}")
+shell_run(cmd="git branch -d {branch}", cwd="{cwd}")
+git_worktree(action="list", cwd="{cwd}")
+```
+
+If the hotfix needs to be back-ported to a release branch:
+```
+git_cherry_pick(commit="<fix-sha>", cwd="{cwd}")
+```
+"""
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# PROMPTS — GitHub Pull Requests
+# ─────────────────────────────────────────────────────────────────────────────
+
+@server.prompt()
+def pr_create_flow(
+    title: str,
+    base_branch: str = "main",
+    draft: bool = False,
+    type: str = "feat",
+    scope: str = "",
+    issue: str = "",
+    cwd: str = ".",
+) -> str:
+    """Complete flow to create a well-structured GitHub Pull Request.
+
+    Checks branch state, cleans commit history, writes the PR body from the
+    diff, and calls gh_pr_create with a conventional title.
+
+    Args:
+        title:       Short PR title (will be prefixed with CC type, e.g. 'feat(auth): <title>')
+        base_branch: Target branch for the PR (default: main)
+        draft:       Open as draft PR (default: False)
+        type:        Conventional Commits type for the PR title (default: feat)
+        scope:       Optional CC scope, e.g. auth, api, db
+        issue:       GitHub issue number this PR closes (e.g. '42')
+        cwd:         Repository directory (default: cwd)
+    """
+    scope_str   = f"({scope})" if scope else ""
+    cc_title    = f"{type}{scope_str}: {title}"
+    close_kw    = f"Closes #{issue}" if issue else ""
+    types_table = "".join(f"| `{t}` | {d} |\n" for t, d in _CC_TYPES.items())
+
+    return f"""\
+# Create Pull Request: `{cc_title}`
+
+**Target:** `{base_branch}`
+**Draft:** `{"yes" if draft else "no"}`
+{"**Closes:** #" + issue if issue else ""}
+
+---
+
+## Step 1 — Verify branch and commits
+
+```
+git_status(cwd="{cwd}")
+git_branch(action="current", cwd="{cwd}")
+git_log(limit=20, cwd="{cwd}")
+```
+
+Confirm you are **not** on `{base_branch}`. If you are, create a feature branch first:
+```
+shell_run(cmd="git checkout -b {type}/{scope or title.lower().replace(' ', '-')}", cwd="{cwd}")
+```
+
+---
+
+## Step 2 — Inspect what will go into the PR
+
+```
+context_diff_summary(since="{base_branch}", until="HEAD", cwd="{cwd}")
+git_diff(commit="{base_branch}..HEAD", cwd="{cwd}")
+```
+
+Use the diff to draft the PR body (Phases 4–5 below).
+
+---
+
+## Step 3 — Clean commit history (optional but recommended)
+
+If there are WIP or fixup commits, use `commit_history_cleanup` first:
+```
+# squash WIP into clean conventional commits
+# see: commit_history_cleanup(base_branch="{base_branch}", strategy="interactive")
+```
+
+All commits should follow Conventional Commits before opening the PR.
+
+---
+
+## Step 4 — Pre-flight checks
+
+```
+# No uncommitted changes
+git_status(cwd="{cwd}")
+
+# Tests pass
+java_maven(goal="verify", cwd="{cwd}")      # Java
+go_test(cwd="{cwd}")                         # Go
+npm_run(script="test", cwd="{cwd}")          # JS/TS
+
+# No secrets
+secrets_scan(cwd="{cwd}")
+
+# Lint clean
+lint_eslint(cwd="{cwd}")
+lint_pylint(cwd="{cwd}")
+lint_checkstyle(cwd="{cwd}")
+```
+
+---
+
+## Step 5 — Push branch
+
+```
+shell_run(cmd="git push -u origin HEAD", cwd="{cwd}")
+```
+
+---
+
+## Step 6 — Open the PR
+
+```
+gh_pr_create(
+    title="{cc_title}",
+    body=\"\"\"## Summary
+
+- <bullet: what changed>
+- <bullet: why it was needed>
+- <bullet: any trade-offs>
+
+## Changes
+
+<!-- Auto-populated from diff — fill in from context_diff_summary output -->
+| File | Change |
+|------|--------|
+| `<file>` | <what changed> |
+
+## Test plan
+
+- [ ] Unit tests added / updated
+- [ ] Integration tests pass
+- [ ] Manually tested: <describe scenario>
+- [ ] No regressions in existing tests
+
+## Screenshots / logs (if applicable)
+
+<!-- paste output, screenshots, or benchmark numbers -->
+{close_kw}\"\"\",
+    base="{base_branch}",
+    draft={"True" if draft else "False"},
+)
+```
+
+---
+
+## Step 7 — Post-creation
+
+```
+# Confirm PR was created
+gh_pr_list(state="open")
+
+# Check CI triggered
+gh_actions(limit=3)
+```
+
+Add reviewers or labels via:
+```
+shell_run(cmd="gh pr edit --add-reviewer <username> --add-label <label>", cwd="{cwd}")
+```
+
+---
+
+## PR title conventions (Conventional Commits)
+
+| Type | When to use |
+|------|-------------|
+{types_table}
+"""
+
+
+@server.prompt()
+def pr_stack(
+    stack: str,
+    base_branch: str = "main",
+    cwd: str = ".",
+) -> str:
+    """Manage a stack of dependent Pull Requests (stacked PRs / PR chains).
+
+    Use stacked PRs when a large change is easier to review in layers:
+      A (base) → B (depends on A) → C (depends on B)
+
+    Each PR is small, focused, and independently reviewable.
+
+    Args:
+        stack:       Comma-separated PR names in dependency order, e.g. 'db-schema,api-layer,ui-layer'
+        base_branch: The final landing branch (default: main)
+        cwd:         Repository directory (default: cwd)
+    """
+    layers = [s.strip() for s in stack.split(",") if s.strip()]
+    if not layers:
+        layers = ["layer-1", "layer-2", "layer-3"]
+
+    branches = [base_branch] + [f"feat/{l}" for l in layers]
+
+    branch_tree = "\n".join(
+        f"  {'  ' * i}`{branches[i]}` ← `{branches[i+1]}`"
+        for i in range(len(layers))
+    )
+
+    create_steps = ""
+    for i, layer in enumerate(layers):
+        parent  = branches[i]
+        current = branches[i + 1]
+        create_steps += f"""\
+### PR {i+1}: `{current}` → `{parent}`
+
+```
+shell_run(cmd="git checkout {current}", cwd="{cwd}")
+shell_run(cmd="git push -u origin {current}", cwd="{cwd}")
+
+gh_pr_create(
+    title="feat({layer}): <describe this layer>",
+    body="Part {i+1}/{len(layers)} of stack: `{stack}`\\n\\n## Summary\\n- <what this layer does>\\n\\n## Dependencies\\n- Depends on: #{'{PR_' + str(i) + '_NUMBER}' if i > 0 else 'none — this is the base PR'}",
+    base="{parent}",
+    draft={"True" if i < len(layers)-1 else "False"},
+)
+```
+
+"""
+
+    update_steps = "\n".join(
+        f"shell_run(cmd=\"git checkout feat/{l} && git rebase feat/{layers[i-1] if i > 0 else base_branch}\", cwd=\"{cwd}\")"
+        for i, l in enumerate(layers)
+    )
+
+    return f"""\
+# Stacked PRs: `{stack}`
+
+**Stack depth:** {len(layers)}
+**Landing branch:** `{base_branch}`
+
+## Dependency tree
+
+```
+{base_branch} (final target)
+{branch_tree}
+```
+
+Each PR targets the branch **below** it in the stack, NOT `{base_branch}` directly.
+GitHub will show the correct diff for each layer.
+
+---
+
+## Phase 1 — Create branches
+
+```
+# Start from base
+shell_run(cmd="git checkout {base_branch} && git pull", cwd="{cwd}")
+```
+
+"""     + "\n".join(
+        f'```\n'
+        f'shell_run(cmd="git checkout -b feat/{l} {branches[i]}", cwd="{cwd}")\n'
+        f'```\n'
+        for i, l in enumerate(layers)
+    ) + f"""
+
+---
+
+## Phase 2 — Implement each layer (bottom-up)
+
+Work on `feat/{layers[0]}` first, commit, then `feat/{layers[1]}`, etc.
+Each layer should contain only the changes relevant to its concern.
+
+```
+# For each layer:
+git_status(cwd="{cwd}")
+git_commit(action="commit", message="feat(<layer>): <description>", cwd="{cwd}")
+```
+
+---
+
+## Phase 3 — Open PRs (bottom-up, base PR first)
+
+{create_steps}
+
+---
+
+## Phase 4 — Update stack after review feedback
+
+If `feat/{layers[0]}` changes after review, rebase all dependent layers:
+
+```
+{update_steps}
+```
+
+Then force-push each updated branch:
+```
+{"".join(f'shell_run(cmd="git push --force-with-lease origin feat/{l}", cwd="{cwd}")' + chr(10) for l in layers)}
+```
+
+---
+
+## Phase 5 — Merge in order (base first)
+
+Merge bottom-up. After each merge, GitHub automatically re-targets the next PR.
+
+```
+# Merge PR 1 (feat/{layers[0]} → {base_branch})
+gh_pr_merge(number=<PR_1_NUMBER>, method="squash")
+
+# GitHub now retargets PR 2 to {base_branch} — verify:
+gh_pr_list(state="open")
+
+# Merge PR 2, then PR 3…
+```
+
+---
+
+## Phase 6 — Cleanup
+
+```
+{"".join(f'shell_run(cmd="git branch -d feat/{l}", cwd="{cwd}")' + chr(10) for l in layers)}
+git_branch(action="list", cwd="{cwd}")
+```
+
+---
+
+## Stacked PR rules
+
+- Each PR = one concern (schema | API | UI — not all three)
+- Commit messages follow Conventional Commits in every layer
+- Keep each PR ≤ 400 lines of diff — reviewers lose context above that
+- Mark all but the base PR as **draft** until the base is approved
+- Update the entire stack every time the base branch advances
+"""
+
+
+# ─────────────────────────────────────────────────────────────────────────────
 # Entry point
 # ─────────────────────────────────────────────────────────────────────────────
 
