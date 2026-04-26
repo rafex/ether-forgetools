@@ -3494,7 +3494,7 @@ def best_practice_commits(
         include_untracked: Incluir archivos sin trackear en el análisis (default: False)
     """
     branch_note = f"`{branch}`" if branch else "la rama actual"
-    push_target = f"{remote}/{branch}" if branch else f"{remote} HEAD"
+    push_target = f"{remote} {branch}" if branch else f"{remote} HEAD"
 
     if include_untracked:
         untracked_block = (
