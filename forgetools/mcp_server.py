@@ -3438,6 +3438,295 @@ git_branch(action="list", cwd="{cwd}")
 
 
 # ─────────────────────────────────────────────────────────────────────────────
+# PROMPT — best_practice_commits
+# ─────────────────────────────────────────────────────────────────────────────
+
+# Grouping heuristics reference (used inside the prompt text)
+_GROUPING_RULES = """\
+1. **Un commit por concern** — cambios en distintos módulos/features van en commits separados.
+2. **Tests con su fuente** — los tests que cubren un cambio van en el mismo commit que ese cambio.
+3. **Tipos CC mezclados → separa** — un `feat:` y un `fix:` en la misma sesión son 2 commits distintos.
+4. **Config/CI siempre aparte** — `.github/`, `Dockerfile`, `pom.xml`, `pyproject.toml`, etc.
+   van en `ci:`, `build:` o `chore:` independiente del código de aplicación.
+5. **Docs aparte** — cambios sólo en `*.md`, `docs/` van en un commit `docs:` separado.
+6. **Breaking change → commit propio** — si un cambio rompe la API pública, aíslalo con `!` o footer
+   `BREAKING CHANGE:` para que el bump de versión sea obvio en el historial.
+7. **Si todo es una sola feature cohesiva** → un único `feat(scope): …` está bien.
+"""
+
+_GROUPING_FILE_SIGNALS = """\
+| Patrón de archivo              | Tipo CC sugerido |
+|-------------------------------|-----------------|
+| `src/**`, `lib/**`, `*.py`, `*.ts`, `*.java`, `*.go` (nueva funcionalidad) | `feat` |
+| `src/**`, `lib/**`, `*.py`, `*.ts` (corrección de bug) | `fix` |
+| `**/test*`, `*_test.*`, `*.spec.*`, `**/__tests__/**` | va con su fuente |
+| `*.md`, `docs/**`, `README*` | `docs` |
+| `.github/**`, `Jenkinsfile`, `*.yml` (CI) | `ci` |
+| `Dockerfile*`, `docker-compose*`, `*.containerfile` | `build` |
+| `pom.xml`, `build.gradle`, `package.json`, `pyproject.toml`, `go.mod` | `build` o `chore` |
+| `*.env*`, `.editorconfig`, `.gitignore`, `Makefile` | `chore` |
+| `db/migrations/**`, `**/schema.*` | `feat` o `fix` (según si añade o corrige) |
+| `ARCHITECTURE.md`, `DECISIONS.md`, `CONVENTIONS.md` | `docs` |
+"""
+
+
+@server.prompt()
+def best_practice_commits(
+    cwd: str = ".",
+    remote: str = "origin",
+    branch: str = "",
+    include_untracked: bool = False,
+) -> str:
+    """Analiza todos los cambios del repo, propone el plan de commits siguiendo
+    Conventional Commits y espera confirmación del usuario antes de ejecutar.
+
+    Flujo:
+      1. Inspecciona status + diff completo (staged, unstaged, opcionalmente untracked)
+      2. Agrupa los cambios por concern siguiendo las reglas de buenas prácticas
+      3. Presenta el plan: N commits con mensaje CC + lista de archivos
+      4. **Pausa y pregunta** al usuario si está de acuerdo
+      5. Ejecuta sólo tras confirmación explícita (stage por grupos → commit → push opcional)
+
+    Args:
+        cwd:               Directorio del repositorio (default: cwd actual)
+        remote:            Remote al que se hará push si el usuario confirma (default: origin)
+        branch:            Rama a pushear (vacío = rama actual)
+        include_untracked: Incluir archivos sin trackear en el análisis (default: False)
+    """
+    branch_note = f"`{branch}`" if branch else "la rama actual"
+    push_target = f"{remote}/{branch}" if branch else f"{remote} HEAD"
+
+    if include_untracked:
+        untracked_block = (
+            "```\n"
+            "# 1e. Archivos sin trackear\n"
+            f'shell_run(cmd="git ls-files --others --exclude-standard", cwd="{cwd}")\n'
+            "```"
+        )
+    else:
+        untracked_block = (
+            "_(Archivos sin trackear excluidos. "
+            "Pasa `include_untracked=True` para incluirlos.)_"
+        )
+
+    types_table = "".join(f"| `{t}` | {d} |\n" for t, d in _CC_TYPES.items())
+
+    since_ref = f"origin/{branch}" if branch else "HEAD~1"
+
+    return f"""\
+# Best-Practice Commits
+
+Analiza los cambios locales, propón un plan de commits con Conventional Commits
+y **pide confirmación antes de ejecutar nada**.
+
+---
+
+## FASE 1 — Recopilar cambios
+
+Ejecuta estas herramientas en orden:
+
+```
+# 1a. Estado general
+git_status(cwd="{cwd}")
+```
+
+```
+# 1b. Diff de cambios staged (si los hay)
+git_diff(staged=True, cwd="{cwd}")
+```
+
+```
+# 1c. Diff de cambios unstaged
+git_diff(cwd="{cwd}")
+```
+
+```
+# 1d. Historial reciente para entender el contexto
+git_log(limit=10, cwd="{cwd}")
+```
+
+{untracked_block}
+
+---
+
+## FASE 2 — Analizar y agrupar
+
+Con la información recopilada, aplica estas reglas para agrupar los archivos en commits:
+
+### Reglas de agrupación
+{_GROUPING_RULES}
+
+### Señales por tipo de archivo
+{_GROUPING_FILE_SIGNALS}
+
+### Algoritmo de decisión
+
+```
+Para cada archivo modificado:
+  1. ¿Es config/CI/build? → grupo "infra" (ci:/build:/chore:)
+  2. ¿Es doc/md? → grupo "docs" (docs:)
+  3. ¿Es test y tiene fuente relacionada cambiada? → mismo grupo que la fuente
+  4. ¿Es código de aplicación?
+     → ¿Corrige un bug? → grupo "fix" del módulo correspondiente
+     → ¿Añade funcionalidad? → grupo "feat" del módulo correspondiente
+  5. ¿Cruza módulos distintos? → split en grupos por módulo
+```
+
+---
+
+## FASE 3 — Construir el plan de commits
+
+Tras aplicar el análisis, elabora un plan con este formato exacto:
+
+```
+════════════════════════════════════════════════════════
+ PLAN DE COMMITS PROPUESTO
+════════════════════════════════════════════════════════
+
+Commit 1/N
+  Mensaje : feat(scope): descripción imperativa ≤ 72 chars
+  Archivos: [
+    path/al/archivo1.py
+    path/al/archivo2.py
+    tests/test_archivo1.py
+  ]
+  Motivo  : (una línea explicando por qué van juntos)
+
+Commit 2/N
+  Mensaje : fix(scope): descripción
+  Archivos: [
+    path/otro/archivo.py
+  ]
+  Motivo  : corrección independiente de la feature anterior
+
+...
+
+Total: N commits | +X líneas | -Y líneas
+Push a: {remote}/{branch_note}
+════════════════════════════════════════════════════════
+```
+
+### Reglas del mensaje CC
+{_CC_RULES}
+
+---
+
+## FASE 4 — ⏸ PAUSA: pedir confirmación
+
+**Después de presentar el plan, DEBES preguntar explícitamente al usuario:**
+
+```
+¿Estás de acuerdo con este plan de N commit(s)?
+
+Opciones:
+  ✅  sí / yes / ok        → ejecutar el plan tal como está
+  ✏️   ajustar <número>     → modificar el mensaje o los archivos del commit N
+  ➕  split <número>        → dividir el commit N en dos
+  ➖  merge <n1> <n2>       → fusionar los commits N1 y N2
+  ❌  cancelar              → no hacer nada
+
+Tu respuesta:
+```
+
+**No ejecutes ningún `git_commit` ni `shell_run` hasta recibir la respuesta.**
+
+---
+
+## FASE 5 — Ejecutar el plan aprobado
+
+Para cada commit en el orden propuesto:
+
+### 5a. Limpiar el staging area
+```
+shell_run(cmd="git reset HEAD", cwd="{cwd}")
+```
+
+### 5b. Por cada commit del plan (repite el bloque N veces)
+
+```
+# Stage SÓLO los archivos de este commit
+shell_run(cmd="git add <archivo1> <archivo2> ...", cwd="{cwd}")
+
+# Verificar que sólo están los archivos correctos
+git_diff(staged=True, cwd="{cwd}")
+```
+
+```
+# Crear el commit
+git_commit(
+    action="commit",
+    message="<mensaje del plan>",
+    cwd="{cwd}",
+)
+```
+
+```
+# Confirmar resultado antes del siguiente commit
+git_log(limit=1, cwd="{cwd}")
+```
+
+### 5c. Verificar el resultado completo
+```
+git_log(limit=10, cwd="{cwd}")
+context_diff_summary(since="{since_ref}", until="HEAD", cwd="{cwd}")
+```
+
+---
+
+## FASE 6 — ⏸ PAUSA: confirmar push
+
+Antes de hacer push, informa el estado y pregunta:
+
+```
+Commits creados:
+  <lista de los commits recién creados con sha corto y mensaje>
+
+¿Deseas hacer push a `{remote}/{branch_note}` ahora?
+
+  ✅  sí / yes / push  → ejecutar git push
+  ❌  no / cancelar    → terminar aquí (puedes hacer push manual después)
+
+Tu respuesta:
+```
+
+---
+
+## FASE 7 — Push (sólo si se confirma)
+
+```
+shell_run(
+    cmd="git push {push_target}",
+    cwd="{cwd}",
+)
+```
+
+Verificar:
+```
+git_log(limit=5, cwd="{cwd}")
+gh_actions(limit=2)
+```
+
+---
+
+## Referencia rápida de tipos CC
+
+| Tipo | Cuándo |
+|------|--------|
+{types_table}
+## Anti-patrones que debes evitar
+
+| ❌ Mal | ✅ Bien |
+|--------|---------|
+| `fix: varios arreglos y nueva feature` | Separa fix y feat en commits distintos |
+| `WIP`, `tmp`, `asdf` como mensaje | Mensaje descriptivo siempre |
+| Un commit con 20 archivos de 3 módulos | Agrupa por concern, divide por módulo |
+| `feat: update` | `feat(auth): add JWT refresh token rotation` |
+| Mezclar código y cambios de CI | `ci:` commit separado |
+| Olvidar el scope cuando hay varios módulos | `feat(payment):`, `fix(cart):`, etc. |
+"""
+
+
+# ─────────────────────────────────────────────────────────────────────────────
 # Entry point
 # ─────────────────────────────────────────────────────────────────────────────
 
