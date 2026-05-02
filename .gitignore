@@ -9,3 +9,13 @@ __pycache__/
 .opencode/node_modules/
 # opencode — exportaciones de sesión
 session-ses_*.md
+
+# opencode (local, no versionar)
+.opencode/sessions*db
+.opencode/sessions.db-shm
+.opencode/sessions.db-wal
+.opencode/worktrees.db
+.opencode/worktrees.log
+
+# macOS metadata files (AppleDouble)
+._*
