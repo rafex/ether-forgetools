@@ -170,6 +170,8 @@ REGISTRY: dict[str, str] = {
     "diff dirs":             "forgetools.diff.dirs",
     "diff json":             "forgetools.diff.json",
     "diff yaml":             "forgetools.diff.yaml",
+    # web — webpage content extraction
+    "web fetch":             "forgetools.web.fetch",
 }
 
 
