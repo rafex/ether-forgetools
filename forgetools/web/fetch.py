@@ -269,14 +269,7 @@ def _parse_lxml(
                 txt = _ws("".join(h.itertext()))
                 if txt:
                     headings.append({"level": lvl, "text": txt})
-        # Sort by document order (lxml yields them in order already per level)
-        # Re-sort globally by tree position
-        headings = sorted(
-            headings,
-            key=lambda x: x["text"],  # good enough proxy; lxml order preserved per loop
-        )
-        # Actually lxml iterates in document order within each xpath call;
-        # since we call per level, merge without sorting to keep doc order:
+        # Merge headings in document order (lxml xpath preserves it per level)
         headings_ordered: list[dict] = []
         for lvl in (1, 2, 3):
             for h in content_root.xpath(f".//h{lvl}"):

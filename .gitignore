@@ -5,17 +5,15 @@ __pycache__/
 .opencode
 # opencode (local, no versionar)
 .opencode/sessions.db
-.opencode/worktrees/
-.opencode/node_modules/
-# opencode — exportaciones de sesión
-session-ses_*.md
-
-# opencode (local, no versionar)
 .opencode/sessions*db
 .opencode/sessions.db-shm
 .opencode/sessions.db-wal
+.opencode/worktrees/
 .opencode/worktrees.db
 .opencode/worktrees.log
+.opencode/node_modules/
+# opencode — exportaciones de sesión
+session-ses_*.md
 
 # macOS metadata files (AppleDouble)
 ._*
