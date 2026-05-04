@@ -10,6 +10,7 @@
 PYTHON     ?= python3.13
 VENV       := .venv
 BIN        := $(VENV)/bin
+export COPYFILE_DISABLE := 1
 
 help:
 	@echo "forgetools — build system (Makefile)"
@@ -44,5 +45,4 @@ clean:
 	find . -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
 
 clean-apple-double:
-	find $(VENV)/lib -name "._*.dist-info" -delete 2>/dev/null || true
-	find $(VENV)/lib -name "._*.pth"       -delete 2>/dev/null || true
+	find $(VENV)/lib -name "._*" -delete 2>/dev/null || true

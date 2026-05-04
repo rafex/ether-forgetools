@@ -10,6 +10,7 @@ RESOURCES — read-only data snapshots consumed without a tool call:
               forge://diag/health              system health (tools available)
               forge://diag/env                 environment variables (filtered)
               forge://specnative/{document}    any SpecNative context doc
+              forge://config/gitignore         .gitignore current content + missing preset analysis
 PROMPTS   — workflow starters that sequence tools for common tasks:
               start_feature                    worktree + spec + plan
               code_review                      diff + context + pr
@@ -21,6 +22,7 @@ PROMPTS   — workflow starters that sequence tools for common tasks:
               specnative_workflow              spec-first full lifecycle
               multi_repo_health                side-by-side repos health check
               new_tool_scaffold                scaffold a new forgetools module
+              gitignore_setup                  audit + patch .gitignore for macOS + Claude Code
 
 Usage:
     forge-mcp                  # stdio (default, for Claude Code / opencode)
@@ -266,6 +268,45 @@ def resource_specnative_status() -> str:
         return json.dumps(data, indent=2)
     except Exception as exc:
         return json.dumps({"ok": False, "error": str(exc)})
+
+
+# ── forge://config/gitignore ──────────────────────────────────────────────────
+
+@server.resource("forge://config/gitignore")
+def resource_config_gitignore() -> str:
+    """Current .gitignore content + analysis of missing macOS and Claude Code patterns."""
+    import os
+    from forgetools.config.gitignore import _PRESETS
+
+    cwd = os.getcwd()
+    gitignore_path = os.path.join(cwd, ".gitignore")
+
+    if not os.path.exists(gitignore_path):
+        return json.dumps({
+            "ok": False,
+            "path": gitignore_path,
+            "error": ".gitignore not found",
+            "suggestion": "Run config_gitignore(preset='all') to create it",
+        }, indent=2)
+
+    with open(gitignore_path, encoding="utf-8") as f:
+        content = f.read()
+
+    existing = {ln.strip() for ln in content.splitlines()}
+
+    analysis: dict[str, list[str]] = {}
+    for key, cfg in _PRESETS.items():
+        missing = [ln for ln in cfg["lines"] if ln not in existing]
+        if missing:
+            analysis[key] = missing
+
+    return json.dumps({
+        "ok": True,
+        "path": gitignore_path,
+        "content": content,
+        "missing_patterns": analysis,
+        "fully_covered": not analysis,
+    }, indent=2)
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -3723,6 +3764,102 @@ gh_actions(limit=2)
 | `feat: update` | `feat(auth): add JWT refresh token rotation` |
 | Mezclar código y cambios de CI | `ci:` commit separado |
 | Olvidar el scope cuando hay varios módulos | `feat(payment):`, `fix(cart):`, etc. |
+"""
+
+
+# ── gitignore_setup ──────────────────────────────────────────────────────────
+
+@server.prompt()
+def gitignore_setup(preset: str = "all", cwd: str = ".") -> str:
+    """Audit and patch .gitignore for macOS metadata and Claude Code files.
+
+    Reads the current .gitignore, identifies missing patterns, and applies
+    the selected preset without duplicating existing entries.
+
+    Args:
+        preset: Pattern set to apply — 'macos' | 'claude' | 'all' (default)
+        cwd:    Repository root to operate on (default: current directory)
+    """
+    preset_descriptions = {
+        "macos":  "archivos de metadatos de macOS (._*, .DS_Store, .Trashes, etc.)",
+        "claude": "archivos locales de Claude Code (.claude/ excepto config compartida)",
+        "all":    "macOS + Claude Code (recomendado)",
+    }
+    desc = preset_descriptions.get(preset, preset)
+
+    return f"""\
+# Configurar .gitignore — preset: `{preset}`
+
+**Objetivo:** Agregar patrones para {desc} al `.gitignore` del repositorio en `{cwd}`.
+
+---
+
+## Paso 1 — Auditar el estado actual
+
+Lee el resource para ver el contenido actual y los patrones faltantes:
+```
+forge://config/gitignore
+```
+
+O con la tool directamente en modo dry-run:
+```
+config_gitignore(preset="{preset}", dry_run=True, cwd="{cwd}")
+```
+
+Revisa la sección `missing_patterns` del resultado.
+
+---
+
+## Paso 2 — Aplicar los patrones faltantes
+
+Si hay patrones faltantes, aplícalos:
+```
+config_gitignore(preset="{preset}", dry_run=False, cwd="{cwd}")
+```
+
+El tool es **idempotente** — no duplica líneas ya existentes.
+
+---
+
+## Paso 3 — Verificar el resultado
+
+Confirma que los patrones quedaron registrados:
+```
+forge://config/gitignore
+```
+
+Verifica que `fully_covered` sea `true` y `missing_patterns` esté vacío.
+
+---
+
+## Paso 4 — Commitear el cambio
+
+```
+git_status(cwd="{cwd}")
+git_commit(message="chore: add macOS + Claude Code gitignore patterns", cwd="{cwd}")
+```
+
+---
+
+## Referencia de patrones
+
+### macOS
+| Patrón | Qué ignora |
+|--------|-----------|
+| `._*` | Apple Double (metadatos de archivos) |
+| `.DS_Store` | Configuración de carpetas del Finder |
+| `.AppleDouble/` | Carpetas de metadatos legacy |
+| `.LSOverride` | Overrides de Launch Services |
+| `.Spotlight-V100` | Índice de Spotlight |
+| `.Trashes` | Archivos en papelera del volumen |
+
+### Claude Code
+| Patrón | Qué ignora |
+|--------|-----------|
+| `.claude/` | Todo el directorio (sesiones, memoria, worktrees) |
+| `!.claude/launch.json` | **Excepción**: config de servidores dev |
+| `!.claude/settings.json` | **Excepción**: config del proyecto |
+| `!.claude/CLAUDE.md` | **Excepción**: documentación para agentes |
 """
 
 

@@ -17,3 +17,17 @@ session-ses_*.md
 
 # macOS metadata files (AppleDouble)
 ._*
+
+# macOS files
+._*
+.DS_Store
+.AppleDouble/
+.LSOverride
+.Spotlight-V100
+.Trashes
+
+# Claude Code — ignorar todo excepto config compartida
+.claude/
+!.claude/launch.json    # ✓ Compartir configuración de servidores
+!.claude/settings.json  # ✓ Compartir configuración del proyecto
+!.claude/CLAUDE.md      # ✓ Documentación para agentes

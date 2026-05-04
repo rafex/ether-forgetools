@@ -154,6 +154,7 @@ REGISTRY: dict[str, str] = {
     "context repo-size":     "forgetools.context.repo_size",
     # config
     "config validate":       "forgetools.config.validate",
+    "config gitignore":      "forgetools.config.gitignore",
     # git worktree
     "git worktree":           "forgetools.git.worktree",
     "git worktree-workflow":  "forgetools.git.worktree_workflow",
