@@ -4,6 +4,10 @@
 
 Every script returns a `ForgeResult` JSON object with `ok`, `data`, `errors`, and `suggestion` — no raw shell output to parse.
 
+## Local Policies
+
+- Bastion Podman port publication policy: [docs/policies/podman-port-allocation-bastion.md](docs/policies/podman-port-allocation-bastion.md)
+
 ## Install
 
 ```bash

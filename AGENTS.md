@@ -46,6 +46,27 @@ En caso de error:
 
 ---
 
+## Politica local obligatoria
+
+### Podman Port Allocation Policy (Bastion)
+
+La politica versionada vive en `docs/policies/podman-port-allocation-bastion.md` y tiene prioridad sobre defaults, documentacion externa y ejemplos generados.
+
+Cuando generes o modifiques artefactos para `bastion` que publiquen puertos con Podman, debes:
+
+- usar solo estos rangos de host:
+  - `30000-30099` para web/frontend
+  - `30100-30199` para api/backend
+  - `30200-30299` para database
+  - `30300-30399` para temporal/experimental
+- inspeccionar puertos ocupados con `podman ps --format '{{.Ports}}'`
+- elegir el primer puerto libre del rango correspondiente
+- fallar si el rango esta lleno
+
+Nunca uses `-p 80:80`, `-p 443:443`, `-p 8080:8080`, puertos aleatorios, ni puertos fuera de los rangos permitidos sin autorizacion explicita.
+
+---
+
 ## Cómo invocar los scripts
 
 Tienes tres formas. Usa la que mejor encaje en tu contexto:

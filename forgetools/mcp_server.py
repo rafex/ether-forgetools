@@ -9,6 +9,7 @@ RESOURCES — read-only data snapshots consumed without a tool call:
               forge://context/repo             repo size + language breakdown
               forge://diag/health              system health (tools available)
               forge://diag/env                 environment variables (filtered)
+              forge://policy/podman-ports-bastion  mandatory Podman port policy for bastion
               forge://specnative/{document}    any SpecNative context doc
               forge://config/gitignore         .gitignore current content + missing preset analysis
 PROMPTS   — workflow starters that sequence tools for common tasks:
@@ -123,6 +124,12 @@ def _git(*args: str, cwd: str | None = None) -> str:
         return result.stdout.strip()
     except Exception:
         return ""
+
+
+def _read_repo_doc(relative_path: str) -> str:
+    """Read a repository documentation file relative to the project root."""
+    path = Path(__file__).resolve().parent.parent / relative_path
+    return path.read_text(encoding="utf-8")
 
 
 # ── forge://catalog ───────────────────────────────────────────────────────────
@@ -266,6 +273,17 @@ def resource_specnative_status() -> str:
     try:
         data = _run_tool("specnative status", action="status")
         return json.dumps(data, indent=2)
+    except Exception as exc:
+        return json.dumps({"ok": False, "error": str(exc)})
+
+
+# ── forge://policy/podman-ports-bastion ──────────────────────────────────────
+
+@server.resource("forge://policy/podman-ports-bastion")
+def resource_policy_podman_ports_bastion() -> str:
+    """Mandatory Podman port allocation policy for the bastion host."""
+    try:
+        return _read_repo_doc("docs/policies/podman-port-allocation-bastion.md")
     except Exception as exc:
         return json.dumps({"ok": False, "error": str(exc)})
 
