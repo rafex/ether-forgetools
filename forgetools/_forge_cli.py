@@ -173,6 +173,9 @@ REGISTRY: dict[str, str] = {
     "diff yaml":             "forgetools.diff.yaml",
     # web — webpage content extraction
     "web fetch":             "forgetools.web.fetch",
+    # websearch — search engine + browsing workflows
+    "websearch ddg-search":  "forgetools.websearch.ddg_search",
+    "websearch visit":       "forgetools.websearch.visit",
 }
 
 

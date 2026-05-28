@@ -5,7 +5,7 @@
 # Task Runner: Usa Justfile (just)
 # ─────────────────────────────────────────────────────────────────────────────
 
-.PHONY: help install install-mcp install-mcp-all install-mcp-file install-mcp-git install-mcp-docs install-mcp-specnative install-mcp-linux install-mcp-java clean clean-apple-double
+.PHONY: help install install-mcp install-mcp-all install-mcp-file install-mcp-git install-mcp-docs install-mcp-specnative install-mcp-linux install-mcp-java install-mcp-websearch clean clean-apple-double
 
 PYTHON     ?= python3.13
 VENV       := .venv
@@ -25,6 +25,7 @@ help:
 	@echo "  make install-mcp-specnative instalar MCP dominio specnative/context"
 	@echo "  make install-mcp-linux      instalar MCP dominio linux/process/net/diag"
 	@echo "  make install-mcp-java       instalar MCP dominio java + resources/prompts"
+	@echo "  make install-mcp-websearch  instalar MCP dominio websearch (DDGS + navegacion)"
 	@echo "  make clean         limpiar artefactos de build"
 	@echo "  make clean-apple-double  eliminar archivos ._* de macOS en el venv"
 	@echo ""
@@ -65,8 +66,11 @@ install-mcp-linux: install-mcp
 install-mcp-java: install-mcp
 	@echo "MCP listo: forge-mcp-java"
 
-install-mcp-all: install-mcp-file install-mcp-git install-mcp-docs install-mcp-specnative install-mcp-linux install-mcp-java
-	@echo "MCPs de dominio listos: file git docs specnative linux java"
+install-mcp-websearch: install-mcp
+	@echo "MCP listo: forge-mcp-websearch"
+
+install-mcp-all: install-mcp-file install-mcp-git install-mcp-docs install-mcp-specnative install-mcp-linux install-mcp-java install-mcp-websearch
+	@echo "MCPs de dominio listos: file git docs specnative linux java websearch"
 
 clean:
 	rm -rf $(VENV) __pycache__/

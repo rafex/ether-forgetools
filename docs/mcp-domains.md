@@ -17,6 +17,7 @@ make install-mcp-docs
 make install-mcp-specnative
 make install-mcp-linux
 make install-mcp-java
+make install-mcp-websearch
 ```
 
 Instalar todos los MCP de dominio:
@@ -92,7 +93,24 @@ make install-mcp-all
 - Casos de uso:
   - build/test Java y analisis de stacktraces
   - calidad y seguridad (checkstyle/spotbugs/owasp)
-  - guia de estandares y prompts de workflow
+- guia de estandares y prompts de workflow
+
+### 8) Dominio WebSearch
+
+- Binario: `forge-mcp-websearch`
+- Server name: `forgetools-websearch`
+- Categorias: `websearch`, `web`
+- Casos de uso:
+  - busqueda web con DuckDuckGo (DDGS)
+  - lectura/navegacion de paginas para extraccion estructurada
+
+## Capacidades especiales de `mcp-websearch`
+
+### Tools
+
+- `websearch_ddg_search`
+- `websearch_visit`
+- `web_fetch` (legacy del dominio web, tambien disponible aqui)
 
 ## Capacidades especiales de `mcp-java`
 
@@ -149,6 +167,10 @@ Este resource lista tools disponibles en ese servidor de dominio.
     "forgetools-java": {
       "type": "local",
       "command": ["forge-mcp-java"]
+    },
+    "forgetools-websearch": {
+      "type": "local",
+      "command": ["forge-mcp-websearch"]
     }
   }
 }
