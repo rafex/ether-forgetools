@@ -5,7 +5,7 @@
 # Task Runner: Usa Justfile (just)
 # ─────────────────────────────────────────────────────────────────────────────
 
-.PHONY: help install install-mcp clean clean-apple-double
+.PHONY: help install install-mcp install-mcp-all install-mcp-file install-mcp-git install-mcp-docs install-mcp-specnative install-mcp-linux install-mcp-java clean clean-apple-double
 
 PYTHON     ?= python3.13
 VENV       := .venv
@@ -18,6 +18,13 @@ help:
 	@echo "  Build / Setup"
 	@echo "  make install       crear entorno virtual e instalar dependencias"
 	@echo "  make install-mcp   instalar dependencias + extras mcp"
+	@echo "  make install-mcp-all        instalar MCP monolitico + todos los MCP por dominio"
+	@echo "  make install-mcp-file       instalar MCP dominio file"
+	@echo "  make install-mcp-git        instalar MCP dominio git/github"
+	@echo "  make install-mcp-docs       instalar MCP dominio docs/web/openapi"
+	@echo "  make install-mcp-specnative instalar MCP dominio specnative/context"
+	@echo "  make install-mcp-linux      instalar MCP dominio linux/process/net/diag"
+	@echo "  make install-mcp-java       instalar MCP dominio java + resources/prompts"
 	@echo "  make clean         limpiar artefactos de build"
 	@echo "  make clean-apple-double  eliminar archivos ._* de macOS en el venv"
 	@echo ""
@@ -39,6 +46,27 @@ install: $(VENV)
 install-mcp: $(VENV)
 	$(BIN)/pip install -e ".[mcp]"
 	$(MAKE) clean-apple-double
+
+install-mcp-file: install-mcp
+	@echo "MCP listo: forge-mcp-file"
+
+install-mcp-git: install-mcp
+	@echo "MCP listo: forge-mcp-git"
+
+install-mcp-docs: install-mcp
+	@echo "MCP listo: forge-mcp-docs"
+
+install-mcp-specnative: install-mcp
+	@echo "MCP listo: forge-mcp-specnative"
+
+install-mcp-linux: install-mcp
+	@echo "MCP listo: forge-mcp-linux"
+
+install-mcp-java: install-mcp
+	@echo "MCP listo: forge-mcp-java"
+
+install-mcp-all: install-mcp-file install-mcp-git install-mcp-docs install-mcp-specnative install-mcp-linux install-mcp-java
+	@echo "MCPs de dominio listos: file git docs specnative linux java"
 
 clean:
 	rm -rf $(VENV) __pycache__/

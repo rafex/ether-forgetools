@@ -121,6 +121,9 @@ See [AGENTS.md](AGENTS.md) for full agent usage guide.
 
 Exposes all forgetools as MCP tools for use with [opencode](https://opencode.ai) or any MCP-compatible agent.
 
+Domain MCP guide (install, capabilities, config):
+- [docs/mcp-domains.md](docs/mcp-domains.md)
+
 ### Install with MCP support
 
 ```bash
