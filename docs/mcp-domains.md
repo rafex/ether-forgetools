@@ -34,6 +34,12 @@ make install-mcp-all
 - Server name: `forgetools`
 - Alcance: todas las tools del registry.
 
+Uso:
+
+```bash
+forge-mcp
+```
+
 ### 2) Dominio File
 
 - Binario: `forge-mcp-file`
@@ -44,6 +50,12 @@ make install-mcp-all
   - busqueda/refactor
   - validacion/configuracion de repos
 
+Uso:
+
+```bash
+forge-mcp-file
+```
+
 ### 3) Dominio Git/GitHub
 
 - Binario: `forge-mcp-git`
@@ -52,6 +64,12 @@ make install-mcp-all
 - Casos de uso:
   - cambios locales, ramas, worktrees, tags, submodulos
   - PRs/issues/actions/releases en GitHub
+
+Uso:
+
+```bash
+forge-mcp-git
+```
 
 ### 4) Dominio Docs
 
@@ -63,6 +81,12 @@ make install-mcp-all
   - parseo OpenAPI
   - extraccion de contenido web
 
+Uso:
+
+```bash
+forge-mcp-docs
+```
+
 ### 5) Dominio SpecNative
 
 - Binario: `forge-mcp-specnative`
@@ -72,6 +96,12 @@ make install-mcp-all
   - estado/iniciativas SpecNative
   - contexto del repo para agentes
   - catalogo del ecosistema ether
+
+Uso:
+
+```bash
+forge-mcp-specnative
+```
 
 ### 6) Dominio Linux
 
@@ -85,6 +115,12 @@ make install-mcp-all
   - comandos shell controlados
   - escaneo de secretos
 
+Uso:
+
+```bash
+forge-mcp-linux
+```
+
 ### 7) Dominio Java (especial)
 
 - Binario: `forge-mcp-java`
@@ -95,6 +131,12 @@ make install-mcp-all
   - calidad y seguridad (checkstyle/spotbugs/owasp)
 - guia de estandares y prompts de workflow
 
+Uso:
+
+```bash
+forge-mcp-java
+```
+
 ### 8) Dominio WebSearch
 
 - Binario: `forge-mcp-websearch`
@@ -104,6 +146,12 @@ make install-mcp-all
   - busqueda web con DuckDuckGo (DDGS)
   - lectura/navegacion de paginas para extraccion estructurada
 
+Uso:
+
+```bash
+forge-mcp-websearch
+```
+
 ## Capacidades especiales de `mcp-websearch`
 
 ### Tools
@@ -111,6 +159,19 @@ make install-mcp-all
 - `websearch_ddg_search`
 - `websearch_visit`
 - `web_fetch` (legacy del dominio web, tambien disponible aqui)
+
+### Ejemplos CLI
+
+```bash
+# Search
+forge websearch ddg-search --query "openapi mcp examples" --max-results 5
+
+# News search
+forge websearch ddg-search --query "java 2026 release" --source news --max-results 5
+
+# Visit/extract
+forge websearch visit --url https://example.com --include-links
+```
 
 ## Capacidades especiales de `mcp-java`
 
@@ -181,7 +242,7 @@ Este resource lista tools disponibles en ese servidor de dominio.
 Levantar manualmente un MCP de dominio por stdio:
 
 ```bash
-forge-mcp-java
+forge-mcp-websearch
 ```
 
 Inspeccionar herramientas via catalog del MCP activo:

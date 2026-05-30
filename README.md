@@ -17,6 +17,9 @@ make install
 # Instalar con soporte MCP (Makefile)
 make install-mcp
 
+# Instalar todos los MCP por dominio
+make install-mcp-all
+
 # O usar pip directamente
 pip install -e .
 pip install -e ".[mcp]"
@@ -55,6 +58,9 @@ make install
 
 # Instalar con soporte MCP
 make install-mcp
+
+# Instalar MCP por dominio (ejemplo)
+make install-mcp-websearch
 
 # Limpiar artefactos
 make clean
@@ -145,19 +151,27 @@ Add to `~/.config/opencode/config.json`:
 }
 ```
 
-### Available MCP tools (35)
+### MCP binaries disponibles
 
-| Category | Tools |
+| Binary | Scope |
 |---|---|
-| `git` | `git_status`, `git_log`, `git_diff`, `git_branch`, `git_blame`, `git_stash`, `git_conflicts` |
-| `gh` | `gh_pr_list`, `gh_pr_create`, `gh_pr_review`, `gh_issue_list`, `gh_actions` |
-| `k8s` | `k8s_pods`, `k8s_logs`, `k8s_rollout`, `k8s_contexts` |
-| `search` | `search_grep`, `search_find_files`, `search_replace`, `search_todo` |
-| `edit` | `edit_insert`, `edit_replace_lines`, `edit_bulk_rename` |
-| `java` | `java_maven`, `java_gradle`, `java_stacktrace`, `java_test_report` |
-| `fs` | `fs_tree`, `fs_read` |
-| `diag` | `diag_health`, `diag_env`, `diag_port` |
-| `net` | `net_http`, `net_health` |
-| `docs` | `docs_changelog` |
+| `forge-mcp` | Monolito (todas las tools) |
+| `forge-mcp-file` | File/content ops |
+| `forge-mcp-git` | Git + GitHub |
+| `forge-mcp-docs` | Docs/OpenAPI/Web extraction |
+| `forge-mcp-specnative` | SpecNative + context |
+| `forge-mcp-linux` | Process/diag/net/shell/secrets |
+| `forge-mcp-java` | Java/lint/test/security + resources/prompts |
+| `forge-mcp-websearch` | DDGS search + web navigation |
+
+### WebSearch quickstart
+
+```bash
+# Buscar en web con DDGS
+forge websearch ddg-search --query "specnative mcp" --max-results 5
+
+# Navegar/extraccion de contenido
+forge websearch visit --url https://example.com --include-links
+```
 
 Every tool returns `{ "ok": bool, "tool": str, "data": ..., "errors": [], "duration_ms": int }`.
