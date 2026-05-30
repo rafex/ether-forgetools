@@ -11,18 +11,19 @@ Every script returns a `ForgeResult` JSON object with `ok`, `data`, `errors`, an
 ## Install
 
 ```bash
-# Instalar dependencias básicas (Makefile)
+# Instalar dependencias básicas con uv (Makefile)
 make install
 
-# Instalar con soporte MCP (Makefile)
+# Instalar con soporte MCP (uv + extras)
 make install-mcp
 
 # Instalar todos los MCP por dominio
 make install-mcp-all
 
-# O usar pip directamente
-pip install -e .
-pip install -e ".[mcp]"
+# O usar uv directamente
+uv venv --python 3.13 .venv
+uv pip install --python .venv/bin/python -e .
+uv pip install --python .venv/bin/python -e ".[mcp]"
 ```
 
 ## Usage
@@ -50,7 +51,7 @@ just openapi
 
 ### Build System (Make)
 
-Usa `make` para gestión de dependencias y construcción estática:
+Usa `make` para gestion de dependencias y construccion estatica (basado en `uv`):
 
 ```bash
 # Instalar dependencias básicas
@@ -133,7 +134,7 @@ Domain MCP guide (install, capabilities, config):
 ### Install with MCP support
 
 ```bash
-pip install -e ".[mcp]"
+make install-mcp
 ```
 
 ### Configure opencode

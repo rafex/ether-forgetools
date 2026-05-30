@@ -14,13 +14,6 @@ dependencies = []
 [project.scripts]
 forge     = "forgetools._forge_cli:main"
 forge-mcp = "forgetools.mcp_server:main"
-forge-mcp-file = "forgetools.mcp_file_server:main"
-forge-mcp-git = "forgetools.mcp_git_server:main"
-forge-mcp-docs = "forgetools.mcp_docs_server:main"
-forge-mcp-specnative = "forgetools.mcp_specnative_server:main"
-forge-mcp-linux = "forgetools.mcp_linux_server:main"
-forge-mcp-java = "forgetools.mcp_java_server:main"
-forge-mcp-websearch = "forgetools.mcp_websearch_server:main"
 
 [project.optional-dependencies]
 mcp = ["fastmcp>=3.2.3", "ddgs>=9.0.0"]

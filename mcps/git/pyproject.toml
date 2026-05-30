@@ -1,0 +1,15 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "forgetools-mcp-git"
+version = "0.1.0"
+description = "Domain MCP server for git and github workflows"
+readme = "../../README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+dependencies = []
+
+[project.scripts]
+forge-mcp-git = "forgetools.mcp_git_server:main"

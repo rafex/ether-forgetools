@@ -2,6 +2,21 @@
 
 Guia operativa de instalacion y uso de los MCP de `forgetools`.
 
+## Layout de empaquetado
+
+- `pyproject.toml` (raiz): paquete base `forgetools` + `forge` + `forge-mcp` monolitico.
+- `mcps/<dominio>/pyproject.toml`: paquete de cada MCP de dominio.
+
+Dominios actuales con `pyproject.toml` propio:
+
+- `mcps/file/pyproject.toml`
+- `mcps/git/pyproject.toml`
+- `mcps/docs/pyproject.toml`
+- `mcps/specnative/pyproject.toml`
+- `mcps/linux/pyproject.toml`
+- `mcps/java/pyproject.toml`
+- `mcps/websearch/pyproject.toml`
+
 ## 1) Instalacion
 
 ### Base
@@ -10,10 +25,18 @@ Guia operativa de instalacion y uso de los MCP de `forgetools`.
 make install
 ```
 
-### Con soporte MCP (incluye fastmcp + ddgs)
+### Con soporte MCP (incluye fastmcp + ddgs, via uv)
 
 ```bash
 make install-mcp
+```
+
+### Uso directo con uv (alternativa)
+
+```bash
+uv venv --python 3.13 .venv
+uv pip install --python .venv/bin/python -e .
+uv pip install --python .venv/bin/python -e ".[mcp]"
 ```
 
 ### MCPs de dominio
