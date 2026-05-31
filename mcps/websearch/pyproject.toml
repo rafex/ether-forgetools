@@ -13,3 +13,6 @@ dependencies = []
 
 [project.scripts]
 forge-mcp-websearch = "forgetools.mcp_websearch_server:main"
+
+[tool.hatch.build.targets.wheel]
+only-include = ["pyproject.toml"]

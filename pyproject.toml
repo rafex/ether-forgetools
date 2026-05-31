@@ -13,7 +13,6 @@ dependencies = []
 
 [project.scripts]
 forge     = "forgetools._forge_cli:main"
-forge-mcp = "forgetools.mcp_server:main"
 
 [project.optional-dependencies]
 mcp = ["fastmcp>=3.2.3", "ddgs>=9.0.0"]

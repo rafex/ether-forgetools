@@ -14,10 +14,10 @@ Every script returns a `ForgeResult` JSON object with `ok`, `data`, `errors`, an
 # Instalar dependencias básicas con uv (Makefile)
 make install
 
-# Instalar con soporte MCP (uv + extras)
+# Instalar todos los MCP por dominio
 make install-mcp
 
-# Instalar todos los MCP por dominio
+# Alias explicito equivalente
 make install-mcp-all
 
 # O usar uv directamente
@@ -57,7 +57,7 @@ Usa `make` para gestion de dependencias y construccion estatica (basado en `uv`)
 # Instalar dependencias básicas
 make install
 
-# Instalar con soporte MCP
+# Instalar todos los MCP por dominio
 make install-mcp
 
 # Instalar MCP por dominio (ejemplo)
@@ -134,7 +134,20 @@ Domain MCP guide (install, capabilities, config):
 ### Install with MCP support
 
 ```bash
+# Todos los MCP por dominio
 make install-mcp
+
+# MCP individual (cada uno usa su propio pyproject.toml en mcps/<dominio>/)
+make install-mcp-file
+make install-mcp-git
+make install-mcp-docs
+make install-mcp-specnative
+make install-mcp-linux
+make install-mcp-java
+make install-mcp-websearch
+make install-mcp-containers
+make install-mcp-build
+make install-mcp-data
 ```
 
 ### Configure opencode
@@ -144,10 +157,16 @@ Add to `~/.config/opencode/config.json`:
 ```json
 {
   "mcp": {
-    "forgetools": {
-      "type": "local",
-      "command": ["forge-mcp"]
-    }
+    "forgetools-file": { "type": "local", "command": ["forge-mcp-file"] },
+    "forgetools-git": { "type": "local", "command": ["forge-mcp-git"] },
+    "forgetools-docs": { "type": "local", "command": ["forge-mcp-docs"] },
+    "forgetools-specnative": { "type": "local", "command": ["forge-mcp-specnative"] },
+    "forgetools-linux": { "type": "local", "command": ["forge-mcp-linux"] },
+    "forgetools-java": { "type": "local", "command": ["forge-mcp-java"] },
+    "forgetools-websearch": { "type": "local", "command": ["forge-mcp-websearch"] },
+    "forgetools-containers": { "type": "local", "command": ["forge-mcp-containers"] },
+    "forgetools-build": { "type": "local", "command": ["forge-mcp-build"] },
+    "forgetools-data": { "type": "local", "command": ["forge-mcp-data"] }
   }
 }
 ```
@@ -156,7 +175,6 @@ Add to `~/.config/opencode/config.json`:
 
 | Binary | Scope |
 |---|---|
-| `forge-mcp` | Monolito (todas las tools) |
 | `forge-mcp-file` | File/content ops |
 | `forge-mcp-git` | Git + GitHub |
 | `forge-mcp-docs` | Docs/OpenAPI/Web extraction |
@@ -164,6 +182,9 @@ Add to `~/.config/opencode/config.json`:
 | `forge-mcp-linux` | Process/diag/net/shell/secrets |
 | `forge-mcp-java` | Java/lint/test/security + resources/prompts |
 | `forge-mcp-websearch` | DDGS search + web navigation |
+| `forge-mcp-containers` | Docker/Kubernetes/Helm |
+| `forge-mcp-build` | Go/npm/Cargo/Make |
+| `forge-mcp-data` | Database query/schema/migrations |
 
 ### WebSearch quickstart
 

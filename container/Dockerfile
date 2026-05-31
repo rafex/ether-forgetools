@@ -8,9 +8,11 @@ RUN apk add --no-cache git curl
 # Copy project files
 COPY pyproject.toml .
 COPY forgetools/ forgetools/
+COPY mcps/ mcps/
 
-# Install forgetools + MCP deps
-RUN pip install --no-cache-dir -e ".[mcp]"
+# Install forgetools + all domain MCP entrypoints
+RUN pip install --no-cache-dir -e ".[mcp]" \
+    && for domain in mcps/*; do pip install --no-cache-dir --no-deps -e "$domain"; done
 
-# MCP servers communicate over stdio — no port needed
-ENTRYPOINT ["forge-mcp"]
+# MCP servers communicate over stdio - no port needed
+ENTRYPOINT ["forge-mcp-file"]

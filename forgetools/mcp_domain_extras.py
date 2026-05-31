@@ -1,0 +1,332 @@
+"""Domain resources and prompts shared by split MCP servers."""
+from __future__ import annotations
+
+import importlib
+import json
+import os
+import subprocess
+from pathlib import Path
+from typing import Any
+
+from fastmcp import FastMCP
+
+from forgetools._forge_cli import REGISTRY
+from forgetools.mcp_prompts import PROMPTS
+
+
+def _run_tool(key: str, **kwargs) -> dict[str, Any]:
+    mod = importlib.import_module(REGISTRY[key])
+    return mod.run(**kwargs).to_dict()
+
+
+def _read_repo_doc(relative_path: str) -> str:
+    path = Path(__file__).resolve().parent.parent / relative_path
+    return path.read_text(encoding="utf-8")
+
+
+def _json_error(exc: Exception) -> str:
+    return json.dumps({"ok": False, "error": str(exc)})
+
+
+PROMPTS_BY_DOMAIN: dict[str, tuple[str, ...]] = {
+    "file": ("new_tool_scaffold", "gitignore_setup"),
+    "git": (
+        "code_review",
+        "release_workflow",
+        "debug_ci_failure",
+        "parallel_worktree_workflow",
+        "multi_repo_health",
+        "conventional_commit",
+        "commit_amend",
+        "commit_history_cleanup",
+        "worktree_feature",
+        "worktree_hotfix",
+        "pr_create_flow",
+        "pr_stack",
+        "best_practice_commits",
+    ),
+    "specnative": ("start_feature", "repo_health_check", "specnative_workflow"),
+    "java": ("java_project_analysis", "maven_dependency_research", "security_audit"),
+    "build": ("dependency_upgrade", "go_project_analysis"),
+    "data": ("database_migration",),
+    "containers": ("docker_debug", "k8s_deploy"),
+    "docs": ("api_design",),
+    "linux": ("bug_investigation", "performance_analysis"),
+}
+
+
+def register_domain_prompts(server: FastMCP, domain: str) -> None:
+    for name in PROMPTS_BY_DOMAIN.get(domain, ()):
+        server.prompt()(PROMPTS[name])
+
+
+def register_domain_resources(server: FastMCP, domain: str) -> None:
+    if domain == "git":
+        _register_git_resources(server)
+    elif domain == "specnative":
+        _register_specnative_resources(server)
+    elif domain == "linux":
+        _register_linux_resources(server)
+    elif domain == "file":
+        _register_file_resources(server)
+    elif domain == "java":
+        _register_java_resources(server)
+    elif domain == "containers":
+        _register_container_resources(server)
+    elif domain == "data":
+        _register_data_resources(server)
+
+
+def _register_git_resources(server: FastMCP) -> None:
+    @server.resource("forge://git/status")
+    def resource_git_status() -> str:
+        """Current git working-tree status of the cwd repository."""
+        try:
+            return json.dumps(_run_tool("git status"), indent=2)
+        except Exception as exc:
+            return _json_error(exc)
+
+    @server.resource("forge://git/log")
+    def resource_git_log() -> str:
+        """Last 20 commits of the cwd repository."""
+        try:
+            return json.dumps(_run_tool("git log", limit=20), indent=2)
+        except Exception as exc:
+            return _json_error(exc)
+
+    @server.resource("forge://git/worktrees")
+    def resource_git_worktrees() -> str:
+        """Active git worktrees for the cwd repository."""
+        try:
+            return json.dumps(_run_tool("git worktree", action="list"), indent=2)
+        except Exception as exc:
+            return _json_error(exc)
+
+    @server.resource("forge://git/branches")
+    def resource_git_branches() -> str:
+        """All branches with ahead/behind tracking information for the cwd repository."""
+        try:
+            return json.dumps(_run_tool("git branch", action="list"), indent=2)
+        except Exception as exc:
+            return _json_error(exc)
+
+    @server.resource("forge://gh/open-prs")
+    def resource_gh_open_prs() -> str:
+        """Open pull requests for the current repository."""
+        try:
+            return json.dumps(_run_tool("gh pr-list", state="open"), indent=2)
+        except Exception as exc:
+            return _json_error(exc)
+
+    @server.resource("forge://gh/ci-status")
+    def resource_gh_ci_status() -> str:
+        """Latest GitHub Actions workflow runs for the current repository."""
+        try:
+            return json.dumps(_run_tool("gh actions", limit=3), indent=2)
+        except Exception as exc:
+            return _json_error(exc)
+
+    @server.resource("forge://git/parallel-workflow")
+    def resource_git_parallel_workflow() -> str:
+        """Status of active parallel worktree workflow sessions in the cwd repo."""
+        try:
+            result = subprocess.run(
+                ["git", "worktree", "list", "--porcelain"],
+                capture_output=True,
+                text=True,
+                timeout=10,
+                cwd=os.getcwd(),
+            )
+            if result.returncode != 0:
+                return json.dumps({"ok": False, "error": "Not a git repository"})
+            return json.dumps({"ok": True, "worktrees_porcelain": result.stdout}, indent=2)
+        except Exception as exc:
+            return _json_error(exc)
+
+    @server.resource("forge://git/worktree-guide")
+    def resource_git_worktree_guide() -> str:
+        """Reference guide for git worktree concepts and the parallel workflow engine."""
+        return """# Git Parallel Worktree Workflow
+
+Use `git_worktree_workflow` with actions in this order:
+
+1. plan
+2. init
+3. status
+4. sync
+5. integrate
+6. finalize
+7. abort
+
+Naming conventions:
+- integration branch: `{prefix}/{session}-integration`
+- task branch: `{prefix}/{session}-{task}`
+- worktree path: `{wt_base}/{session}-{task}`
+"""
+
+
+def _register_specnative_resources(server: FastMCP) -> None:
+    specnative_docs = (
+        "product",
+        "architecture",
+        "stack",
+        "conventions",
+        "commands",
+        "decisions",
+        "roadmap",
+        "traceability",
+        "agents",
+        "schema",
+        "ci",
+        "cd",
+        "spec",
+    )
+
+    @server.resource("forge://context/repo")
+    def resource_context_repo() -> str:
+        """Repository size, language breakdown, and git metadata for cwd."""
+        try:
+            return json.dumps(_run_tool("context repo-size"), indent=2)
+        except Exception as exc:
+            return _json_error(exc)
+
+    @server.resource("forge://context/summary")
+    def resource_context_summary() -> str:
+        """AI-readable codebase summary: structure, languages, and key patterns."""
+        try:
+            return json.dumps(_run_tool("context summarize"), indent=2)
+        except Exception as exc:
+            return _json_error(exc)
+
+    @server.resource("forge://specnative/{document}")
+    def resource_specnative(document: str) -> str:
+        """Read a SpecNative context document from the current repository."""
+        if document not in specnative_docs:
+            return json.dumps({"ok": False, "error": f"Unknown document '{document}'", "valid": list(specnative_docs)})
+        try:
+            return json.dumps(_run_tool("specnative context", action="read", document=document), indent=2)
+        except Exception as exc:
+            return _json_error(exc)
+
+    @server.resource("forge://specnative/status")
+    def resource_specnative_status() -> str:
+        """All SpecNative specs with their states and task counts for the current repo."""
+        try:
+            return json.dumps(_run_tool("specnative status", action="status"), indent=2)
+        except Exception as exc:
+            return _json_error(exc)
+
+
+def _register_linux_resources(server: FastMCP) -> None:
+    @server.resource("forge://diag/health")
+    def resource_diag_health() -> str:
+        """System health: availability of required development tools."""
+        try:
+            return json.dumps(_run_tool("diag health"), indent=2)
+        except Exception as exc:
+            return _json_error(exc)
+
+    @server.resource("forge://diag/env")
+    def resource_diag_env() -> str:
+        """Environment variables relevant to development tools."""
+        try:
+            return json.dumps(_run_tool("diag env"), indent=2)
+        except Exception as exc:
+            return _json_error(exc)
+
+    @server.resource("forge://process/listening")
+    def resource_process_listening() -> str:
+        """Snapshot of all listening ports on the local machine."""
+        try:
+            return json.dumps(_run_tool("process ports", action="listen"), indent=2)
+        except Exception as exc:
+            return _json_error(exc)
+
+
+def _register_file_resources(server: FastMCP) -> None:
+    @server.resource("forge://config/gitignore")
+    def resource_config_gitignore() -> str:
+        """Current .gitignore content and missing preset analysis."""
+        try:
+            from forgetools.config.gitignore import _PRESETS
+
+            gitignore_path = os.path.join(os.getcwd(), ".gitignore")
+            if not os.path.exists(gitignore_path):
+                return json.dumps({"ok": False, "path": gitignore_path, "error": ".gitignore not found"}, indent=2)
+            with open(gitignore_path, encoding="utf-8") as f:
+                content = f.read()
+            existing = {ln.strip() for ln in content.splitlines()}
+            analysis = {
+                key: [ln for ln in cfg["lines"] if ln not in existing]
+                for key, cfg in _PRESETS.items()
+            }
+            analysis = {key: missing for key, missing in analysis.items() if missing}
+            return json.dumps(
+                {"ok": True, "path": gitignore_path, "content": content, "missing_patterns": analysis, "fully_covered": not analysis},
+                indent=2,
+            )
+        except Exception as exc:
+            return _json_error(exc)
+
+
+def _register_java_resources(server: FastMCP) -> None:
+    @server.resource("forge://java/maven-central/{coords}")
+    def resource_maven_central(coords: str) -> str:
+        """Maven Central info for an artifact given groupId:artifactId[:version]."""
+        try:
+            parts = coords.split(":", 2)
+            if len(parts) < 2:
+                return json.dumps({"ok": False, "error": "coords must be groupId:artifactId[:version]"})
+            group_id, artifact_id = parts[0], parts[1]
+            version = parts[2] if len(parts) > 2 else None
+            if version:
+                data = _run_tool("java maven-central", action="checksums", group_id=group_id, artifact_id=artifact_id, version=version)
+            else:
+                data = _run_tool("java maven-central", action="latest", group_id=group_id, artifact_id=artifact_id)
+            return json.dumps(data, indent=2)
+        except Exception as exc:
+            return _json_error(exc)
+
+    @server.resource("forge://test/coverage")
+    def resource_test_coverage() -> str:
+        """Latest test coverage summary for the cwd project."""
+        try:
+            return json.dumps(_run_tool("test coverage-report", action="summary"), indent=2)
+        except Exception as exc:
+            return _json_error(exc)
+
+
+def _register_container_resources(server: FastMCP) -> None:
+    @server.resource("forge://policy/podman-ports-bastion")
+    def resource_policy_podman_ports_bastion() -> str:
+        """Mandatory Podman port allocation policy for the bastion host."""
+        try:
+            return _read_repo_doc("docs/policies/podman-port-allocation-bastion.md")
+        except Exception as exc:
+            return _json_error(exc)
+
+    @server.resource("forge://docker/containers")
+    def resource_docker_containers() -> str:
+        """Running Docker containers snapshot."""
+        try:
+            return json.dumps(_run_tool("docker ps"), indent=2)
+        except Exception as exc:
+            return _json_error(exc)
+
+    @server.resource("forge://k8s/pods")
+    def resource_k8s_pods() -> str:
+        """Current Kubernetes pod status across all namespaces."""
+        try:
+            return json.dumps(_run_tool("k8s pods"), indent=2)
+        except Exception as exc:
+            return _json_error(exc)
+
+
+def _register_data_resources(server: FastMCP) -> None:
+    @server.resource("forge://db/schema/{database}")
+    def resource_db_schema(database: str) -> str:
+        """Database schema snapshot for the given database name."""
+        try:
+            return json.dumps(_run_tool("db schema", action="tables", database=database), indent=2)
+        except Exception as exc:
+            return _json_error(exc)

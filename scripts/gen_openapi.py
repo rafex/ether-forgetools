@@ -1,18 +1,30 @@
-"""Generate openapi/forgetools.json from the live forge-mcp server."""
+"""Generate openapi/forgetools.json from the live domain MCP servers."""
 from __future__ import annotations
 
 import json
 import os
 import subprocess
-import sys
+
+DOMAIN_MCP_BINARIES = [
+    "forge-mcp-file",
+    "forge-mcp-git",
+    "forge-mcp-docs",
+    "forge-mcp-specnative",
+    "forge-mcp-linux",
+    "forge-mcp-java",
+    "forge-mcp-websearch",
+    "forge-mcp-containers",
+    "forge-mcp-build",
+    "forge-mcp-data",
+]
 
 
-def get_tools() -> list[dict]:
+def get_tools(command: str) -> list[dict]:
     venv_bin = os.path.join(os.path.dirname(__file__), "..", ".venv", "bin")
-    forge_mcp = os.path.join(venv_bin, "forge-mcp")
+    server_bin = os.path.join(venv_bin, command)
 
     proc = subprocess.Popen(
-        [forge_mcp],
+        [server_bin],
         stdin=subprocess.PIPE,
         stdout=subprocess.PIPE,
         stderr=subprocess.DEVNULL,
@@ -38,6 +50,16 @@ def get_tools() -> list[dict]:
     proc.terminate()
 
     return resp["result"]["tools"]
+
+
+def get_domain_tools() -> list[dict]:
+    tools_by_name: dict[str, dict] = {}
+
+    for command in DOMAIN_MCP_BINARIES:
+        for tool in get_tools(command):
+            tools_by_name.setdefault(tool["name"], tool)
+
+    return list(tools_by_name.values())
 
 
 def build_spec(tools: list[dict]) -> dict:
@@ -71,7 +93,7 @@ def build_spec(tools: list[dict]) -> dict:
     return {
         "openapi": "3.1.0",
         "info": {
-            "title": "forgetools MCP",
+            "title": "forgetools domain MCPs",
             "version": "0.1.0",
             "description": (
                 "Structured Python toolkit for code agents. "
@@ -103,7 +125,7 @@ def main() -> None:
     root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     out_path = os.path.join(root, "openapi", "forgetools.json")
 
-    tools = get_tools()
+    tools = get_domain_tools()
     spec = build_spec(tools)
 
     os.makedirs(os.path.dirname(out_path), exist_ok=True)

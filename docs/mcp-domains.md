@@ -8,6 +8,9 @@ Guia de uso para los MCP disponibles en `forgetools`, con listado de capacidades
 make install-mcp
 ```
 
+`make install-mcp` instala todos los MCP de dominio. El paquete base se instala con `make install-core`.
+Cada MCP de dominio se instala desde su propio `pyproject.toml` en `mcps/<dominio>/`.
+
 ## Instalacion por dominio
 
 ```bash
@@ -18,6 +21,9 @@ make install-mcp-specnative
 make install-mcp-linux
 make install-mcp-java
 make install-mcp-websearch
+make install-mcp-containers
+make install-mcp-build
+make install-mcp-data
 ```
 
 Instalar todos los MCP de dominio:
@@ -26,21 +32,24 @@ Instalar todos los MCP de dominio:
 make install-mcp-all
 ```
 
+## Mapeo de pyproject por MCP
+
+| MCP | pyproject.toml |
+|---|---|
+| `forge-mcp-file` | `./mcps/file/pyproject.toml` |
+| `forge-mcp-git` | `./mcps/git/pyproject.toml` |
+| `forge-mcp-docs` | `./mcps/docs/pyproject.toml` |
+| `forge-mcp-specnative` | `./mcps/specnative/pyproject.toml` |
+| `forge-mcp-linux` | `./mcps/linux/pyproject.toml` |
+| `forge-mcp-java` | `./mcps/java/pyproject.toml` |
+| `forge-mcp-websearch` | `./mcps/websearch/pyproject.toml` |
+| `forge-mcp-containers` | `./mcps/containers/pyproject.toml` |
+| `forge-mcp-build` | `./mcps/build/pyproject.toml` |
+| `forge-mcp-data` | `./mcps/data/pyproject.toml` |
+
 ## MCP disponibles
 
-### 1) Monolitico
-
-- Binario: `forge-mcp`
-- Server name: `forgetools`
-- Alcance: todas las tools del registry.
-
-Uso:
-
-```bash
-forge-mcp
-```
-
-### 2) Dominio File
+### 1) Dominio File
 
 - Binario: `forge-mcp-file`
 - Server name: `forgetools-file`
@@ -56,7 +65,7 @@ Uso:
 forge-mcp-file
 ```
 
-### 3) Dominio Git/GitHub
+### 2) Dominio Git/GitHub
 
 - Binario: `forge-mcp-git`
 - Server name: `forgetools-git`
@@ -71,7 +80,7 @@ Uso:
 forge-mcp-git
 ```
 
-### 4) Dominio Docs
+### 3) Dominio Docs
 
 - Binario: `forge-mcp-docs`
 - Server name: `forgetools-docs`
@@ -87,7 +96,7 @@ Uso:
 forge-mcp-docs
 ```
 
-### 5) Dominio SpecNative
+### 4) Dominio SpecNative
 
 - Binario: `forge-mcp-specnative`
 - Server name: `forgetools-specnative`
@@ -103,7 +112,7 @@ Uso:
 forge-mcp-specnative
 ```
 
-### 6) Dominio Linux
+### 5) Dominio Linux
 
 - Binario: `forge-mcp-linux`
 - Server name: `forgetools-linux`
@@ -121,7 +130,7 @@ Uso:
 forge-mcp-linux
 ```
 
-### 7) Dominio Java (especial)
+### 6) Dominio Java (especial)
 
 - Binario: `forge-mcp-java`
 - Server name: `forgetools-java`
@@ -137,7 +146,7 @@ Uso:
 forge-mcp-java
 ```
 
-### 8) Dominio WebSearch
+### 7) Dominio WebSearch
 
 - Binario: `forge-mcp-websearch`
 - Server name: `forgetools-websearch`
@@ -150,6 +159,55 @@ Uso:
 
 ```bash
 forge-mcp-websearch
+```
+
+### 8) Dominio Containers
+
+- Binario: `forge-mcp-containers`
+- Server name: `forgetools-containers`
+- Categorias: `docker`, `k8s`, `helm`
+- Casos de uso:
+  - contenedores Docker
+  - diagnostico Kubernetes
+  - operaciones Helm
+
+Uso:
+
+```bash
+forge-mcp-containers
+```
+
+### 9) Dominio Build
+
+- Binario: `forge-mcp-build`
+- Server name: `forgetools-build`
+- Categorias: `go`, `npm`, `cargo`, `make`
+- Casos de uso:
+  - build/test Go
+  - npm run/install/audit
+  - cargo build/test/check
+  - ejecucion de targets Make
+
+Uso:
+
+```bash
+forge-mcp-build
+```
+
+### 10) Dominio Data
+
+- Binario: `forge-mcp-data`
+- Server name: `forgetools-data`
+- Categorias: `db`
+- Casos de uso:
+  - queries
+  - schema inspection
+  - migrations
+
+Uso:
+
+```bash
+forge-mcp-data
 ```
 
 ## Capacidades especiales de `mcp-websearch`
@@ -200,7 +258,13 @@ Todos los MCP por dominio exponen:
 
 Este resource lista tools disponibles en ese servidor de dominio.
 
-## Configuracion de ejemplo (opencode)
+## Configuracion de clientes
+
+La guia completa con ejemplos para Codex, Claude Code, opencode y VS Code esta en:
+
+- `docs/mcp-usage-installation.md`
+
+Ejemplo compacto para opencode:
 
 ```json
 {
@@ -232,6 +296,18 @@ Este resource lista tools disponibles en ese servidor de dominio.
     "forgetools-websearch": {
       "type": "local",
       "command": ["forge-mcp-websearch"]
+    },
+    "forgetools-containers": {
+      "type": "local",
+      "command": ["forge-mcp-containers"]
+    },
+    "forgetools-build": {
+      "type": "local",
+      "command": ["forge-mcp-build"]
+    },
+    "forgetools-data": {
+      "type": "local",
+      "command": ["forge-mcp-data"]
     }
   }
 }

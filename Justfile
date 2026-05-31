@@ -13,6 +13,7 @@ BIN  := VENV + "/bin"
 PYTHON := "python3.13"
 IMAGE := "forgetools-mcp"
 DOCKERFILE := "container/Dockerfile"
+MCP := "forge-mcp-file"
 
 # ─────────────────────────────────────────────────────────────────────────────
 # 🏠 Local Development
@@ -28,7 +29,7 @@ install-mcp:
 
 # Arrancar servidor MCP localmente (stdio)
 serve: install-mcp
-    {{ BIN }}/forge-mcp
+    {{ BIN }}/{{ MCP }}
 
 # Instalar + arrancar (modo desarrollo)
 dev: install-mcp serve

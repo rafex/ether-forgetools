@@ -5,7 +5,7 @@
 # Task Runner: Usa Justfile (just)
 # ─────────────────────────────────────────────────────────────────────────────
 
-.PHONY: help install install-mcp install-mcp-all install-mcp-file install-mcp-git install-mcp-docs install-mcp-specnative install-mcp-linux install-mcp-java install-mcp-websearch clean clean-apple-double
+.PHONY: help install install-core install-mcp install-mcp-all install-mcp-file install-mcp-git install-mcp-docs install-mcp-specnative install-mcp-linux install-mcp-java install-mcp-websearch install-mcp-containers install-mcp-build install-mcp-data clean clean-apple-double
 
 UV         ?= uv
 PYTHON     ?= python3.13
@@ -18,8 +18,9 @@ help:
 	@echo ""
 	@echo "  Build / Setup"
 	@echo "  make install       crear entorno virtual (uv) e instalar dependencias"
-	@echo "  make install-mcp   instalar dependencias + extras mcp con uv"
-	@echo "  make install-mcp-all        instalar MCP monolitico + todos los MCP por dominio"
+	@echo "  make install-core  instalar paquete base + extras MCP"
+	@echo "  make install-mcp   instalar todos los MCP por dominio"
+	@echo "  make install-mcp-all        instalar todos los MCP por dominio"
 	@echo "  make install-mcp-file       instalar MCP dominio file"
 	@echo "  make install-mcp-git        instalar MCP dominio git/github"
 	@echo "  make install-mcp-docs       instalar MCP dominio docs/web/openapi"
@@ -27,6 +28,9 @@ help:
 	@echo "  make install-mcp-linux      instalar MCP dominio linux/process/net/diag"
 	@echo "  make install-mcp-java       instalar MCP dominio java + resources/prompts"
 	@echo "  make install-mcp-websearch  instalar MCP dominio websearch (DDGS + navegacion)"
+	@echo "  make install-mcp-containers instalar MCP dominio docker/k8s/helm"
+	@echo "  make install-mcp-build      instalar MCP dominio go/npm/cargo/make"
+	@echo "  make install-mcp-data       instalar MCP dominio db"
 	@echo "  make clean         limpiar artefactos de build"
 	@echo "  make clean-apple-double  eliminar archivos ._* de macOS en el venv"
 	@echo ""
@@ -45,40 +49,54 @@ install: $(VENV)
 	$(UV) pip install --python $(BIN)/python -e .
 	$(MAKE) clean-apple-double
 
-install-mcp: $(VENV)
+install-core: $(VENV)
 	$(UV) pip install --python $(BIN)/python -e ".[mcp]"
 	$(MAKE) clean-apple-double
 
-install-mcp-file: install-mcp
+install-mcp: install-mcp-all
+
+install-mcp-file: install-core
 	$(UV) pip install --python $(BIN)/python --no-deps -e ./mcps/file
 	@echo "MCP listo: forge-mcp-file"
 
-install-mcp-git: install-mcp
+install-mcp-git: install-core
 	$(UV) pip install --python $(BIN)/python --no-deps -e ./mcps/git
 	@echo "MCP listo: forge-mcp-git"
 
-install-mcp-docs: install-mcp
+install-mcp-docs: install-core
 	$(UV) pip install --python $(BIN)/python --no-deps -e ./mcps/docs
 	@echo "MCP listo: forge-mcp-docs"
 
-install-mcp-specnative: install-mcp
+install-mcp-specnative: install-core
 	$(UV) pip install --python $(BIN)/python --no-deps -e ./mcps/specnative
 	@echo "MCP listo: forge-mcp-specnative"
 
-install-mcp-linux: install-mcp
+install-mcp-linux: install-core
 	$(UV) pip install --python $(BIN)/python --no-deps -e ./mcps/linux
 	@echo "MCP listo: forge-mcp-linux"
 
-install-mcp-java: install-mcp
+install-mcp-java: install-core
 	$(UV) pip install --python $(BIN)/python --no-deps -e ./mcps/java
 	@echo "MCP listo: forge-mcp-java"
 
-install-mcp-websearch: install-mcp
+install-mcp-websearch: install-core
 	$(UV) pip install --python $(BIN)/python --no-deps -e ./mcps/websearch
 	@echo "MCP listo: forge-mcp-websearch"
 
-install-mcp-all: install-mcp-file install-mcp-git install-mcp-docs install-mcp-specnative install-mcp-linux install-mcp-java install-mcp-websearch
-	@echo "MCPs de dominio listos: file git docs specnative linux java websearch"
+install-mcp-containers: install-core
+	$(UV) pip install --python $(BIN)/python --no-deps -e ./mcps/containers
+	@echo "MCP listo: forge-mcp-containers"
+
+install-mcp-build: install-core
+	$(UV) pip install --python $(BIN)/python --no-deps -e ./mcps/build
+	@echo "MCP listo: forge-mcp-build"
+
+install-mcp-data: install-core
+	$(UV) pip install --python $(BIN)/python --no-deps -e ./mcps/data
+	@echo "MCP listo: forge-mcp-data"
+
+install-mcp-all: install-mcp-file install-mcp-git install-mcp-docs install-mcp-specnative install-mcp-linux install-mcp-java install-mcp-websearch install-mcp-containers install-mcp-build install-mcp-data
+	@echo "MCPs de dominio listos: file git docs specnative linux java websearch containers build data"
 
 clean:
 	rm -rf $(VENV) __pycache__/

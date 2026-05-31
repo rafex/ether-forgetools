@@ -13,3 +13,6 @@ dependencies = []
 
 [project.scripts]
 forge-mcp-specnative = "forgetools.mcp_specnative_server:main"
+
+[tool.hatch.build.targets.wheel]
+only-include = ["pyproject.toml"]

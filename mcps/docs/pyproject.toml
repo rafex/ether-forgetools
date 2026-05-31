@@ -13,3 +13,6 @@ dependencies = []
 
 [project.scripts]
 forge-mcp-docs = "forgetools.mcp_docs_server:main"
+
+[tool.hatch.build.targets.wheel]
+only-include = ["pyproject.toml"]
