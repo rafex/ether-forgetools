@@ -4,6 +4,7 @@ from __future__ import annotations
 import functools
 import importlib
 import inspect
+import json
 from typing import Iterable
 
 from fastmcp import FastMCP
@@ -59,7 +60,8 @@ def _domain_registry(categories: Iterable[str]) -> dict[str, str]:
 def build_domain_server(name: str, categories: Iterable[str]) -> FastMCP:
     """Create a FastMCP server that only exposes tools for given categories."""
     server = FastMCP(name)
-    domain_registry = _domain_registry(categories)
+    category_list = tuple(categories)
+    domain_registry = _domain_registry(category_list)
 
     for key, module_path in domain_registry.items():
         mod = importlib.import_module(module_path)
@@ -88,5 +90,28 @@ def build_domain_server(name: str, categories: Iterable[str]) -> FastMCP:
             lines.append(f"- forge key: `forge {key}`")
             lines.append(f"- description: {_tool_description(key, module_path)}")
         return "\n".join(lines)
+
+    @server.resource("forge://capabilities")
+    def resource_capabilities() -> str:
+        """Machine-readable capabilities manifest for this domain server."""
+        tools = [
+            {
+                "name": key.replace(" ", "_").replace("-", "_"),
+                "forge_key": f"forge {key}",
+                "category": key.split(" ", 1)[0],
+                "description": _tool_description(key, module_path),
+            }
+            for key, module_path in domain_registry.items()
+        ]
+        return json.dumps(
+            {
+                "name": name,
+                "version": "0.1.0",
+                "categories": list(category_list),
+                "tools": tools,
+                "resources": ["forge://catalog", "forge://capabilities"],
+            },
+            indent=2,
+        )
 
     return server

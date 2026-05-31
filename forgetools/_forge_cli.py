@@ -176,6 +176,36 @@ REGISTRY: dict[str, str] = {
     # websearch — search engine + browsing workflows
     "websearch ddg-search":  "forgetools.websearch.ddg_search",
     "websearch visit":       "forgetools.websearch.visit",
+    # python — uv based Python workflows
+    "python uv":             "forgetools.python.uv",
+    "python pytest":         "forgetools.python.pytest",
+    "python ruff":           "forgetools.python.ruff",
+    "python mypy":           "forgetools.python.mypy",
+    # frontend — web app diagnostics
+    "frontend detect":       "forgetools.frontend.detect",
+    "frontend assets":       "forgetools.frontend.assets",
+    # office — document conversion/extraction
+    "office markdown-html":  "forgetools.office.markdown_html",
+    "office pdf-merge":      "forgetools.office.pdf_merge",
+    "office pdf-text":       "forgetools.office.pdf_text",
+    # observability — logs and runtime diagnosis
+    "observability log-tail":  "forgetools.observability.log_tail",
+    "observability log-parse": "forgetools.observability.log_parse",
+    # podman — bastion-safe rootless container workflows
+    "podman ps":             "forgetools.podman.ps",
+    "podman logs":           "forgetools.podman.logs",
+    "podman ports":          "forgetools.podman.ports",
+    "podman select-port":    "forgetools.podman.select_port",
+    "podman validate-ports": "forgetools.podman.validate_ports",
+    # cloud — provider identity/context
+    "cloud whoami":          "forgetools.cloud.whoami",
+    # ai — local/remote AI tooling
+    "ai ollama":             "forgetools.ai.ollama",
+    # release — release orchestration
+    "release precheck":      "forgetools.release.precheck",
+    # deps — dependency metadata research
+    "deps pypi":             "forgetools.deps.pypi",
+    "deps npm":              "forgetools.deps.npm",
 }
 
 

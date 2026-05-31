@@ -1,0 +1,40 @@
+name: MCP
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  validate-mcps:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+
+      - name: Install all MCP domains
+        run: make install-mcp
+
+      - name: Compile Python sources
+        run: .venv/bin/python -m py_compile $(find forgetools -name '*.py')
+
+      - name: Generate OpenAPI
+        run: .venv/bin/python scripts/gen_openapi.py
+
+      - name: Validate OpenAPI tool count
+        run: |
+          .venv/bin/python - <<'PY'
+          import json
+          from pathlib import Path
+          spec = json.loads(Path("openapi/forgetools.json").read_text())
+          count = len(spec["paths"])
+          assert count >= 146, f"Expected at least 146 tools, got {count}"
+          print(f"OpenAPI tools: {count}")
+          PY

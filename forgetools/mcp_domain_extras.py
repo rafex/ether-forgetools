@@ -52,6 +52,16 @@ PROMPTS_BY_DOMAIN: dict[str, tuple[str, ...]] = {
     "containers": ("docker_debug", "k8s_deploy"),
     "docs": ("api_design",),
     "linux": ("bug_investigation", "performance_analysis"),
+    "quality": ("code_review", "security_audit", "repo_health_check"),
+    "office": ("api_design",),
+    "python": ("new_tool_scaffold", "dependency_upgrade"),
+    "frontend": ("bug_investigation", "performance_analysis"),
+    "observability": ("bug_investigation", "performance_analysis"),
+    "cloud": ("repo_health_check",),
+    "podman": ("docker_debug",),
+    "ai": ("performance_analysis",),
+    "release": ("release_workflow",),
+    "deps": ("dependency_upgrade", "maven_dependency_research"),
 }
 
 
@@ -75,6 +85,12 @@ def register_domain_resources(server: FastMCP, domain: str) -> None:
         _register_container_resources(server)
     elif domain == "data":
         _register_data_resources(server)
+    elif domain == "podman":
+        _register_podman_resources(server)
+    elif domain == "python":
+        _register_python_resources(server)
+    elif domain == "quality":
+        _register_quality_resources(server)
 
 
 def _register_git_resources(server: FastMCP) -> None:
@@ -162,6 +178,48 @@ Naming conventions:
 - integration branch: `{prefix}/{session}-integration`
 - task branch: `{prefix}/{session}-{task}`
 - worktree path: `{wt_base}/{session}-{task}`
+"""
+
+
+def _register_podman_resources(server: FastMCP) -> None:
+    @server.resource("forge://podman/policy/bastion-ports")
+    def resource_podman_policy() -> str:
+        """Bastion Podman port allocation policy."""
+        return _read_repo_doc("docs/policies/podman-port-allocation-bastion.md")
+
+    @server.resource("forge://podman/ports")
+    def resource_podman_ports() -> str:
+        """Occupied and available Podman published ports grouped by policy range."""
+        try:
+            return json.dumps(_run_tool("podman ports"), indent=2)
+        except Exception as exc:
+            return _json_error(exc)
+
+
+def _register_python_resources(server: FastMCP) -> None:
+    @server.resource("forge://python/standards/uv")
+    def resource_python_uv() -> str:
+        """Local Python/uv workflow standards."""
+        return """# Python/uv Standards
+
+- Use `uv` for virtualenv, dependency installation, locking, and command execution.
+- Prefer `uv sync` for reproducible environments.
+- Prefer `uv run pytest`, `uv run ruff check`, and `uv run mypy` when project config exists.
+- Keep per-MCP packaging in its own `mcps/<domain>/pyproject.toml`.
+"""
+
+
+def _register_quality_resources(server: FastMCP) -> None:
+    @server.resource("forge://quality/gates")
+    def resource_quality_gates() -> str:
+        """Recommended quality gates before commit or release."""
+        return """# Quality Gates
+
+- Lint must pass for touched language/toolchain.
+- Tests covering changed behavior must pass.
+- Coverage regressions must be reviewed.
+- Security scanners must have no critical/high findings unless explicitly accepted.
+- Secret scan must be clean before pushing.
 """
 
 

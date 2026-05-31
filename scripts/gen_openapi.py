@@ -16,6 +16,16 @@ DOMAIN_MCP_BINARIES = [
     "forge-mcp-containers",
     "forge-mcp-build",
     "forge-mcp-data",
+    "forge-mcp-quality",
+    "forge-mcp-office",
+    "forge-mcp-python",
+    "forge-mcp-frontend",
+    "forge-mcp-observability",
+    "forge-mcp-cloud",
+    "forge-mcp-podman",
+    "forge-mcp-ai",
+    "forge-mcp-release",
+    "forge-mcp-deps",
 ]
 
 

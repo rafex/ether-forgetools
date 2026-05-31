@@ -15,13 +15,25 @@ Estado actual: el monolito fue eliminado y existen 10 MCP por dominio:
 
 Este backlog separa dominios nuevos pendientes de la evolucion necesaria en dominios existentes.
 
+## Estado de implementacion
+
+- [x] Se crearon MCP instalables para `quality`, `office`, `python`, `frontend`, `observability`, `cloud`, `podman`, `ai`, `release` y `deps`.
+- [x] `mcp-quality` concentra `lint`, `test`, `security` y `secrets`.
+- [x] `mcp-java` quedo enfocado en categoria `java`.
+- [x] `mcp-linux` quedo enfocado en `process`, `diag`, `net` y `shell`.
+- [x] Todos los MCP exponen `forge://catalog` y `forge://capabilities`.
+- [x] `make install-mcp` instala todos los dominios.
+- [x] `scripts/gen_openapi.py` incluye todos los dominios.
+- [x] CI valida instalacion MCP, compilacion Python y generacion OpenAPI.
+- [ ] Quedan pendientes implementaciones profundas marcadas abajo: integraciones cloud completas, generacion DOCX/PDF avanzada, browser real y snapshots de contrato.
+
 ## Prioridad inmediata
 
-- [ ] Crear `mcp-quality` para mover y agrupar `lint`, `test`, `security`, `secrets` y coverage.
-- [ ] Crear `mcp-office` o evolucionar `mcp-docs` para PDF, DOCX, hojas, merge de documentos y generacion de reportes.
-- [ ] Crear soporte Podman real dentro de `mcp-containers` o como `mcp-podman`, respetando `docs/policies/podman-port-allocation-bastion.md`.
-- [ ] Crear `mcp-python` para tooling Python dedicado: `uv`, pytest, ruff, mypy, packaging y virtualenvs.
-- [ ] Separar prompts/resources comunes en manifiestos por dominio para que cada MCP declare capacidades, prompts y resources versionados.
+- [x] Crear `mcp-quality` para mover y agrupar `lint`, `test`, `security`, `secrets` y coverage.
+- [x] Crear `mcp-office` o evolucionar `mcp-docs` para PDF, DOCX, hojas, merge de documentos y generacion de reportes.
+- [x] Crear soporte Podman real dentro de `mcp-containers` o como `mcp-podman`, respetando `docs/policies/podman-port-allocation-bastion.md`.
+- [x] Crear `mcp-python` para tooling Python dedicado: `uv`, pytest, ruff, mypy, packaging y virtualenvs.
+- [x] Separar prompts/resources comunes en manifiestos por dominio para que cada MCP declare capacidades, prompts y resources versionados.
 
 ## Dominios nuevos sugeridos
 
@@ -230,8 +242,8 @@ Objetivo: investigacion y actualizacion de dependencias por ecosistema.
 - [ ] Crear `capabilities.json` por MCP con tools/resources/prompts/version.
 - [ ] Generar docs automaticamente desde capabilities.
 - [ ] Agregar tests MCP para `tools/list`, `resources/list`, `prompts/list`.
-- [ ] Agregar CI que valide que `make install-mcp` instala todos los dominios.
-- [ ] Agregar CI que valide que `scripts/gen_openapi.py` genera 125+ tools.
+- [x] Agregar CI que valide que `make install-mcp` instala todos los dominios.
+- [x] Agregar CI que valide que `scripts/gen_openapi.py` genera 125+ tools.
 - [ ] Agregar snapshot de tools por dominio para detectar regresiones.
 - [ ] Normalizar nombres de tools y descripciones.
 - [ ] Definir politica de dependencias opcionales por dominio.

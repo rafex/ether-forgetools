@@ -1,0 +1,15 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "forgetools-mcp-frontend"
+version = "0.1.0"
+requires-python = ">=3.11"
+dependencies = ["forgetools"]
+
+[project.scripts]
+forge-mcp-frontend = "forgetools.mcp_frontend_server:main"
+
+[tool.hatch.build.targets.wheel]
+only-include = ["pyproject.toml"]

@@ -24,6 +24,16 @@ make install-mcp-websearch
 make install-mcp-containers
 make install-mcp-build
 make install-mcp-data
+make install-mcp-quality
+make install-mcp-office
+make install-mcp-python
+make install-mcp-frontend
+make install-mcp-observability
+make install-mcp-cloud
+make install-mcp-podman
+make install-mcp-ai
+make install-mcp-release
+make install-mcp-deps
 ```
 
 Instalar todos los MCP de dominio:
@@ -46,6 +56,16 @@ make install-mcp-all
 | `forge-mcp-containers` | `./mcps/containers/pyproject.toml` |
 | `forge-mcp-build` | `./mcps/build/pyproject.toml` |
 | `forge-mcp-data` | `./mcps/data/pyproject.toml` |
+| `forge-mcp-quality` | `./mcps/quality/pyproject.toml` |
+| `forge-mcp-office` | `./mcps/office/pyproject.toml` |
+| `forge-mcp-python` | `./mcps/python/pyproject.toml` |
+| `forge-mcp-frontend` | `./mcps/frontend/pyproject.toml` |
+| `forge-mcp-observability` | `./mcps/observability/pyproject.toml` |
+| `forge-mcp-cloud` | `./mcps/cloud/pyproject.toml` |
+| `forge-mcp-podman` | `./mcps/podman/pyproject.toml` |
+| `forge-mcp-ai` | `./mcps/ai/pyproject.toml` |
+| `forge-mcp-release` | `./mcps/release/pyproject.toml` |
+| `forge-mcp-deps` | `./mcps/deps/pyproject.toml` |
 
 ## MCP disponibles
 
@@ -134,10 +154,10 @@ forge-mcp-linux
 
 - Binario: `forge-mcp-java`
 - Server name: `forgetools-java`
-- Categorias: `java`, `lint`, `test`, `security`
+- Categorias: `java`
 - Casos de uso:
   - build/test Java y analisis de stacktraces
-  - calidad y seguridad (checkstyle/spotbugs/owasp)
+  - Maven/Gradle, JDT, Maven Central y formato Java
 - guia de estandares y prompts de workflow
 
 Uso:
@@ -210,6 +230,99 @@ Uso:
 forge-mcp-data
 ```
 
+### 11) Dominio Quality
+
+- Binario: `forge-mcp-quality`
+- Server name: `forgetools-quality`
+- Categorias: `lint`, `test`, `security`, `secrets`
+- Casos de uso:
+  - quality gates transversales
+  - lint/tests/coverage/security
+  - secret scanning
+
+### 12) Dominio Office
+
+- Binario: `forge-mcp-office`
+- Server name: `forgetools-office`
+- Categorias: `office`
+- Casos de uso:
+  - Markdown a HTML
+  - merge/extraccion de PDFs usando herramientas locales cuando existan
+
+### 13) Dominio Python
+
+- Binario: `forge-mcp-python`
+- Server name: `forgetools-python`
+- Categorias: `python`
+- Casos de uso:
+  - `uv`
+  - pytest
+  - ruff
+  - mypy
+
+### 14) Dominio Frontend
+
+- Binario: `forge-mcp-frontend`
+- Server name: `forgetools-frontend`
+- Categorias: `frontend`, `npm`
+- Casos de uso:
+  - deteccion de stack frontend
+  - assets locales rotos
+  - scripts npm
+
+### 15) Dominio Observability
+
+- Binario: `forge-mcp-observability`
+- Server name: `forgetools-observability`
+- Categorias: `observability`
+- Casos de uso:
+  - tail/filter de logs
+  - parseo de JSON lines logs
+
+### 16) Dominio Cloud
+
+- Binario: `forge-mcp-cloud`
+- Server name: `forgetools-cloud`
+- Categorias: `cloud`
+- Casos de uso:
+  - identidad activa AWS/GCP/Azure
+
+### 17) Dominio Podman
+
+- Binario: `forge-mcp-podman`
+- Server name: `forgetools-podman`
+- Categorias: `podman`
+- Casos de uso:
+  - inspeccion de contenedores Podman
+  - seleccion de puertos permitidos en bastion
+  - validacion de manifests contra politica de puertos
+
+### 18) Dominio AI
+
+- Binario: `forge-mcp-ai`
+- Server name: `forgetools-ai`
+- Categorias: `ai`
+- Casos de uso:
+  - Ollama list/pull/run
+
+### 19) Dominio Release
+
+- Binario: `forge-mcp-release`
+- Server name: `forgetools-release`
+- Categorias: `release`, `gh`, `docs`
+- Casos de uso:
+  - precheck de releases
+  - releases GitHub y changelog
+
+### 20) Dominio Deps
+
+- Binario: `forge-mcp-deps`
+- Server name: `forgetools-deps`
+- Categorias: `deps`, `java`, `npm`
+- Casos de uso:
+  - metadata PyPI/npm
+  - investigacion Maven/npm
+
 ## Capacidades especiales de `mcp-websearch`
 
 ### Tools
@@ -255,6 +368,7 @@ forge websearch visit --url https://example.com --include-links
 Todos los MCP por dominio exponen:
 
 - `forge://catalog`
+- `forge://capabilities`
 
 Este resource lista tools disponibles en ese servidor de dominio.
 

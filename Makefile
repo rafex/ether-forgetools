@@ -5,7 +5,7 @@
 # Task Runner: Usa Justfile (just)
 # ─────────────────────────────────────────────────────────────────────────────
 
-.PHONY: help install install-core install-mcp install-mcp-all install-mcp-file install-mcp-git install-mcp-docs install-mcp-specnative install-mcp-linux install-mcp-java install-mcp-websearch install-mcp-containers install-mcp-build install-mcp-data clean clean-apple-double
+.PHONY: help install install-core install-mcp install-mcp-all install-mcp-file install-mcp-git install-mcp-docs install-mcp-specnative install-mcp-linux install-mcp-java install-mcp-websearch install-mcp-containers install-mcp-build install-mcp-data install-mcp-quality install-mcp-office install-mcp-python install-mcp-frontend install-mcp-observability install-mcp-cloud install-mcp-podman install-mcp-ai install-mcp-release install-mcp-deps clean clean-apple-double
 
 UV         ?= uv
 PYTHON     ?= python3.13
@@ -31,6 +31,16 @@ help:
 	@echo "  make install-mcp-containers instalar MCP dominio docker/k8s/helm"
 	@echo "  make install-mcp-build      instalar MCP dominio go/npm/cargo/make"
 	@echo "  make install-mcp-data       instalar MCP dominio db"
+	@echo "  make install-mcp-quality    instalar MCP dominio quality/lint/test/security"
+	@echo "  make install-mcp-office     instalar MCP dominio office/pdf/docs"
+	@echo "  make install-mcp-python     instalar MCP dominio python/uv"
+	@echo "  make install-mcp-frontend   instalar MCP dominio frontend"
+	@echo "  make install-mcp-observability instalar MCP dominio logs/observability"
+	@echo "  make install-mcp-cloud      instalar MCP dominio cloud"
+	@echo "  make install-mcp-podman     instalar MCP dominio podman/bastion"
+	@echo "  make install-mcp-ai         instalar MCP dominio ai"
+	@echo "  make install-mcp-release    instalar MCP dominio release"
+	@echo "  make install-mcp-deps       instalar MCP dominio deps"
 	@echo "  make clean         limpiar artefactos de build"
 	@echo "  make clean-apple-double  eliminar archivos ._* de macOS en el venv"
 	@echo ""
@@ -95,8 +105,48 @@ install-mcp-data: install-core
 	$(UV) pip install --python $(BIN)/python --no-deps -e ./mcps/data
 	@echo "MCP listo: forge-mcp-data"
 
-install-mcp-all: install-mcp-file install-mcp-git install-mcp-docs install-mcp-specnative install-mcp-linux install-mcp-java install-mcp-websearch install-mcp-containers install-mcp-build install-mcp-data
-	@echo "MCPs de dominio listos: file git docs specnative linux java websearch containers build data"
+install-mcp-quality: install-core
+	$(UV) pip install --python $(BIN)/python --no-deps -e ./mcps/quality
+	@echo "MCP listo: forge-mcp-quality"
+
+install-mcp-office: install-core
+	$(UV) pip install --python $(BIN)/python --no-deps -e ./mcps/office
+	@echo "MCP listo: forge-mcp-office"
+
+install-mcp-python: install-core
+	$(UV) pip install --python $(BIN)/python --no-deps -e ./mcps/python
+	@echo "MCP listo: forge-mcp-python"
+
+install-mcp-frontend: install-core
+	$(UV) pip install --python $(BIN)/python --no-deps -e ./mcps/frontend
+	@echo "MCP listo: forge-mcp-frontend"
+
+install-mcp-observability: install-core
+	$(UV) pip install --python $(BIN)/python --no-deps -e ./mcps/observability
+	@echo "MCP listo: forge-mcp-observability"
+
+install-mcp-cloud: install-core
+	$(UV) pip install --python $(BIN)/python --no-deps -e ./mcps/cloud
+	@echo "MCP listo: forge-mcp-cloud"
+
+install-mcp-podman: install-core
+	$(UV) pip install --python $(BIN)/python --no-deps -e ./mcps/podman
+	@echo "MCP listo: forge-mcp-podman"
+
+install-mcp-ai: install-core
+	$(UV) pip install --python $(BIN)/python --no-deps -e ./mcps/ai
+	@echo "MCP listo: forge-mcp-ai"
+
+install-mcp-release: install-core
+	$(UV) pip install --python $(BIN)/python --no-deps -e ./mcps/release
+	@echo "MCP listo: forge-mcp-release"
+
+install-mcp-deps: install-core
+	$(UV) pip install --python $(BIN)/python --no-deps -e ./mcps/deps
+	@echo "MCP listo: forge-mcp-deps"
+
+install-mcp-all: install-mcp-file install-mcp-git install-mcp-docs install-mcp-specnative install-mcp-linux install-mcp-java install-mcp-websearch install-mcp-containers install-mcp-build install-mcp-data install-mcp-quality install-mcp-office install-mcp-python install-mcp-frontend install-mcp-observability install-mcp-cloud install-mcp-podman install-mcp-ai install-mcp-release install-mcp-deps
+	@echo "MCPs de dominio listos: file git docs specnative linux java websearch containers build data quality office python frontend observability cloud podman ai release deps"
 
 clean:
 	rm -rf $(VENV) __pycache__/

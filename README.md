@@ -148,6 +148,16 @@ make install-mcp-websearch
 make install-mcp-containers
 make install-mcp-build
 make install-mcp-data
+make install-mcp-quality
+make install-mcp-office
+make install-mcp-python
+make install-mcp-frontend
+make install-mcp-observability
+make install-mcp-cloud
+make install-mcp-podman
+make install-mcp-ai
+make install-mcp-release
+make install-mcp-deps
 ```
 
 ### Configure opencode
@@ -166,7 +176,17 @@ Add to `~/.config/opencode/config.json`:
     "forgetools-websearch": { "type": "local", "command": ["forge-mcp-websearch"] },
     "forgetools-containers": { "type": "local", "command": ["forge-mcp-containers"] },
     "forgetools-build": { "type": "local", "command": ["forge-mcp-build"] },
-    "forgetools-data": { "type": "local", "command": ["forge-mcp-data"] }
+    "forgetools-data": { "type": "local", "command": ["forge-mcp-data"] },
+    "forgetools-quality": { "type": "local", "command": ["forge-mcp-quality"] },
+    "forgetools-office": { "type": "local", "command": ["forge-mcp-office"] },
+    "forgetools-python": { "type": "local", "command": ["forge-mcp-python"] },
+    "forgetools-frontend": { "type": "local", "command": ["forge-mcp-frontend"] },
+    "forgetools-observability": { "type": "local", "command": ["forge-mcp-observability"] },
+    "forgetools-cloud": { "type": "local", "command": ["forge-mcp-cloud"] },
+    "forgetools-podman": { "type": "local", "command": ["forge-mcp-podman"] },
+    "forgetools-ai": { "type": "local", "command": ["forge-mcp-ai"] },
+    "forgetools-release": { "type": "local", "command": ["forge-mcp-release"] },
+    "forgetools-deps": { "type": "local", "command": ["forge-mcp-deps"] }
   }
 }
 ```
@@ -180,11 +200,21 @@ Add to `~/.config/opencode/config.json`:
 | `forge-mcp-docs` | Docs/OpenAPI/Web extraction |
 | `forge-mcp-specnative` | SpecNative + context |
 | `forge-mcp-linux` | Process/diag/net/shell/secrets |
-| `forge-mcp-java` | Java/lint/test/security + resources/prompts |
+| `forge-mcp-java` | Java build/JDT/Maven Central + resources/prompts |
 | `forge-mcp-websearch` | DDGS search + web navigation |
 | `forge-mcp-containers` | Docker/Kubernetes/Helm |
 | `forge-mcp-build` | Go/npm/Cargo/Make |
 | `forge-mcp-data` | Database query/schema/migrations |
+| `forge-mcp-quality` | Lint/test/security/secrets |
+| `forge-mcp-office` | Office docs/PDF helpers |
+| `forge-mcp-python` | Python/uv/pytest/ruff/mypy |
+| `forge-mcp-frontend` | Frontend diagnostics |
+| `forge-mcp-observability` | Logs/observability |
+| `forge-mcp-cloud` | Cloud identity/context |
+| `forge-mcp-podman` | Podman bastion workflows |
+| `forge-mcp-ai` | Ollama/local AI |
+| `forge-mcp-release` | Release prechecks |
+| `forge-mcp-deps` | Dependency metadata research |
 
 ### WebSearch quickstart
 
