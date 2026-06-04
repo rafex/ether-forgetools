@@ -1,9 +1,9 @@
 {
   "binary": "forge-mcp-git",
   "counts": {
-    "prompts": 13,
-    "resources": 10,
-    "tools": 33
+    "prompts": 17,
+    "resources": 12,
+    "tools": 39
   },
   "domain": "git",
   "prompts": [
@@ -130,6 +130,58 @@
       ],
       "description": "Diagnose and fix a failing GitHub Actions workflow run.",
       "name": "debug_ci_failure"
+    },
+    {
+      "arguments": [
+        {
+          "name": "commits",
+          "required": true
+        },
+        {
+          "name": "targets",
+          "required": true
+        }
+      ],
+      "description": "Plan and execute a safe backport workflow.",
+      "name": "git_backport_workflow"
+    },
+    {
+      "arguments": [
+        {
+          "name": "scope",
+          "required": false
+        }
+      ],
+      "description": "Split current changes into an explicit multi-commit plan.",
+      "name": "git_multi_commit_workflow"
+    },
+    {
+      "arguments": [
+        {
+          "name": "tasks",
+          "required": true
+        },
+        {
+          "name": "base",
+          "required": false
+        }
+      ],
+      "description": "Plan and execute a stacked PR workflow safely.",
+      "name": "git_stacked_pr_workflow"
+    },
+    {
+      "arguments": [
+        {
+          "name": "session",
+          "required": true
+        },
+        {
+          "name": "base_branch",
+          "required": false
+        }
+      ],
+      "description": "Manage, integrate, and merge multiple worktree tasks safely.",
+      "name": "git_worktree_parallel_merge_workflow"
     },
     {
       "arguments": [
@@ -308,6 +360,11 @@
       "uri": "forge://gh/open-prs"
     },
     {
+      "description": "Aggregated GitHub repository status: PRs, checks, reviewers, issues, and branches.",
+      "name": "resource_gh_repo_status",
+      "uri": "forge://gh/repo-status"
+    },
+    {
       "description": "All branches with ahead/behind tracking information for the cwd repository.",
       "name": "resource_git_branches",
       "uri": "forge://git/branches"
@@ -321,6 +378,11 @@
       "description": "Status of active parallel worktree workflow sessions in the cwd repo.",
       "name": "resource_git_parallel_workflow",
       "uri": "forge://git/parallel-workflow"
+    },
+    {
+      "description": "Reference guide for stacked PR and backport planning tools.",
+      "name": "resource_git_pr_workflows",
+      "uri": "forge://git/pr-workflows"
     },
     {
       "description": "Current git working-tree status of the cwd repository.",
@@ -578,6 +640,30 @@
       ]
     },
     {
+      "description": "Aggregate repository PRs, checks, reviewers, issues, and branch state",
+      "name": "gh_repo_status",
+      "properties": [
+        "branch",
+        "cwd",
+        "limit"
+      ],
+      "required": []
+    },
+    {
+      "description": "Plan safe cherry-pick backports to release branches",
+      "name": "git_backport_plan",
+      "properties": [
+        "branch_prefix",
+        "commits",
+        "cwd",
+        "targets"
+      ],
+      "required": [
+        "commits",
+        "targets"
+      ]
+    },
+    {
       "description": "forgetools.git.blame \u2014 Git blame with structured output",
       "name": "git_blame",
       "properties": [
@@ -621,6 +707,15 @@
         "lang",
         "message",
         "stage_all"
+      ],
+      "required": []
+    },
+    {
+      "description": "Build an explicit multi-commit plan from changed files",
+      "name": "git_commit_plan",
+      "properties": [
+        "cwd",
+        "mode"
       ],
       "required": []
     },
@@ -690,6 +785,30 @@
       ]
     },
     {
+      "description": "Validate branch, remote, and protection status before push or merge",
+      "name": "git_preflight",
+      "properties": [
+        "action",
+        "branch",
+        "cwd",
+        "remote"
+      ],
+      "required": []
+    },
+    {
+      "description": "Plan stacked PR branches from ordered task names",
+      "name": "git_stack_plan",
+      "properties": [
+        "base",
+        "cwd",
+        "prefix",
+        "tasks"
+      ],
+      "required": [
+        "tasks"
+      ]
+    },
+    {
       "description": "forgetools.git.stash \u2014 List and manage git stashes",
       "name": "git_stash",
       "properties": [
@@ -754,6 +873,20 @@
         "reason"
       ],
       "required": []
+    },
+    {
+      "description": "Plan integration and merge readiness for worktree sessions",
+      "name": "git_worktree_merge_plan",
+      "properties": [
+        "base_branch",
+        "branch_prefix",
+        "cwd",
+        "session",
+        "target_branch"
+      ],
+      "required": [
+        "session"
+      ]
     },
     {
       "description": "Manage parallel git worktree workflows from plan through integration",

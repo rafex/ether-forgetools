@@ -8,7 +8,7 @@
   "counts": {
     "prompts": 1,
     "resources": 2,
-    "tools": 19
+    "tools": 20
   },
   "domain": "release",
   "prompts": [
@@ -295,6 +295,16 @@
       "required": [
         "tag"
       ]
+    },
+    {
+      "description": "Aggregate repository PRs, checks, reviewers, issues, and branch state",
+      "name": "gh_repo_status",
+      "properties": [
+        "branch",
+        "cwd",
+        "limit"
+      ],
+      "required": []
     },
     {
       "description": "Run basic pre-release checks",

@@ -93,6 +93,8 @@ forge-mcp-file
 - Casos de uso:
   - cambios locales, ramas, worktrees, tags, submodulos
   - PRs/issues/actions/releases en GitHub
+  - stacked PRs, backports y planes multi-commit
+  - preflight antes de push/merge y estado agregado GitHub
 
 Uso:
 

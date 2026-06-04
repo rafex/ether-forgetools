@@ -33,6 +33,17 @@ def test_capabilities_exist_for_each_domain() -> None:
 
 
 def test_mcp_snapshots_match_generated_metadata() -> None:
+    generated_files = [
+        *sorted(str(path.relative_to(ROOT)) for path in (ROOT / "mcps").glob("*/capabilities.json")),
+        *sorted(str(path.relative_to(ROOT)) for path in (ROOT / "snapshots" / "mcp").glob("*.json")),
+        "docs/generated/mcp-capabilities.md",
+    ]
+    before = {
+        path: (ROOT / path).read_text(encoding="utf-8")
+        for path in generated_files
+        if (ROOT / path).exists()
+    }
+
     proc = subprocess.run(
         [sys.executable, "scripts/gen_mcp_metadata.py"],
         cwd=ROOT,
@@ -42,18 +53,12 @@ def test_mcp_snapshots_match_generated_metadata() -> None:
     )
     assert proc.returncode == 0, proc.stderr or proc.stdout
 
-    generated_files = [
-        *sorted(str(path.relative_to(ROOT)) for path in (ROOT / "mcps").glob("*/capabilities.json")),
-        *sorted(str(path.relative_to(ROOT)) for path in (ROOT / "snapshots" / "mcp").glob("*.json")),
-        "docs/generated/mcp-capabilities.md",
-    ]
-    status = subprocess.run(
-        ["git", "diff", "--exit-code", "--", *generated_files],
-        cwd=ROOT,
-        capture_output=True,
-        text=True,
-    )
-    assert status.returncode == 0, status.stdout
+    after = {
+        path: (ROOT / path).read_text(encoding="utf-8")
+        for path in generated_files
+        if (ROOT / path).exists()
+    }
+    assert after == before
 
 
 def test_mcp_tools_have_descriptions() -> None:

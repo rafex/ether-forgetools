@@ -34,6 +34,7 @@ REGISTRY: dict[str, str] = {
     "gh actions-trigger":  "forgetools.gh.actions_trigger",
     "gh actions-logs":     "forgetools.gh.actions_logs",
     "gh branch":           "forgetools.gh.branch",
+    "gh repo-status":      "forgetools.gh.repo_status",
     # k8s
     "k8s pods":            "forgetools.k8s.pods",
     "k8s logs":            "forgetools.k8s.logs",
@@ -158,7 +159,12 @@ REGISTRY: dict[str, str] = {
     # git worktree
     "git worktree":           "forgetools.git.worktree",
     "git worktree-workflow":  "forgetools.git.worktree_workflow",
+    "git worktree-merge-plan": "forgetools.git.worktree_merge_plan",
     "git commit":             "forgetools.git.commit",
+    "git commit-plan":        "forgetools.git.commit_plan",
+    "git stack-plan":         "forgetools.git.stack_plan",
+    "git backport-plan":      "forgetools.git.backport_plan",
+    "git preflight":          "forgetools.git.preflight",
     # text
     "text audit-chars":      "forgetools.text.audit_chars",
     # ether ecosystem

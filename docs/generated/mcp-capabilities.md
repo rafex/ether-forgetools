@@ -13,7 +13,7 @@ Documento generado por `scripts/gen_mcp_metadata.py`.
 | `forge-mcp-docs` | `docs`, `openapi`, `web` | 3 | 2 | 1 | `mcps/docs/capabilities.json` |
 | `forge-mcp-file` | `fs`, `search`, `edit`, `diff`, `text`, `template`, `json`, `config` | 22 | 3 | 2 | `mcps/file/capabilities.json` |
 | `forge-mcp-frontend` | `frontend`, `npm` | 5 | 2 | 2 | `mcps/frontend/capabilities.json` |
-| `forge-mcp-git` | `git`, `gh` | 33 | 10 | 13 | `mcps/git/capabilities.json` |
+| `forge-mcp-git` | `git`, `gh` | 39 | 12 | 17 | `mcps/git/capabilities.json` |
 | `forge-mcp-java` | `java` | 8 | 6 | 5 | `mcps/java/capabilities.json` |
 | `forge-mcp-linux` | `process`, `diag`, `net`, `shell` | 12 | 5 | 2 | `mcps/linux/capabilities.json` |
 | `forge-mcp-observability` | `observability` | 2 | 2 | 2 | `mcps/observability/capabilities.json` |
@@ -21,7 +21,7 @@ Documento generado por `scripts/gen_mcp_metadata.py`.
 | `forge-mcp-podman` | `podman` | 5 | 4 | 1 | `mcps/podman/capabilities.json` |
 | `forge-mcp-python` | `python` | 4 | 3 | 2 | `mcps/python/capabilities.json` |
 | `forge-mcp-quality` | `lint`, `test`, `security`, `secrets` | 11 | 3 | 3 | `mcps/quality/capabilities.json` |
-| `forge-mcp-release` | `release`, `gh`, `docs` | 19 | 2 | 1 | `mcps/release/capabilities.json` |
+| `forge-mcp-release` | `release`, `gh`, `docs` | 20 | 2 | 1 | `mcps/release/capabilities.json` |
 | `forge-mcp-specnative` | `specnative`, `context`, `ether` | 7 | 5 | 3 | `mcps/specnative/capabilities.json` |
 | `forge-mcp-websearch` | `websearch`, `web` | 3 | 2 | 0 | `mcps/websearch/capabilities.json` |
 
@@ -292,9 +292,9 @@ Prompts:
 
 - Server: `forgetools-git`
 - Categorias: `git`, `gh`
-- Tools: 33
-- Resources: 10
-- Prompts: 13
+- Tools: 39
+- Resources: 12
+- Prompts: 17
 
 Tools:
 
@@ -315,21 +315,27 @@ Tools:
 - `gh_pr_merge`: Merge a GitHub pull request using the selected merge strategy
 - `gh_pr_review`: forgetools.gh.pr_review — View PR review comments and status
 - `gh_release`: forgetools.gh.release — Create a GitHub release
+- `gh_repo_status`: Aggregate repository PRs, checks, reviewers, issues, and branch state
+- `git_backport_plan`: Plan safe cherry-pick backports to release branches
 - `git_blame`: forgetools.git.blame — Git blame with structured output
 - `git_branch`: forgetools.git.branch — List and manage git branches
 - `git_cherry_pick`: pick commits onto the current branch
 - `git_commit`: Create structured git commits with validation and optional dry-run planning
+- `git_commit_plan`: Build an explicit multi-commit plan from changed files
 - `git_conflicts`: forgetools.git.conflicts — List conflicted files
 - `git_diff`: forgetools.git.diff — Git diff with structured output
 - `git_log`: forgetools.git.log — Git commit history
 - `git_multi_repo`: Inspect and coordinate git status across multiple repositories
 - `git_pr_workflow`: forgetools.git.pr_workflow — Create a GitHub PR via branch + push + gh pr create
+- `git_preflight`: Validate branch, remote, and protection status before push or merge
+- `git_stack_plan`: Plan stacked PR branches from ordered task names
 - `git_stash`: forgetools.git.stash — List and manage git stashes
 - `git_status`: forgetools.git.status — Git repository status
 - `git_submodule_status`: forgetools.git.submodule_status — Git submodule status
 - `git_submodule_sync`: forgetools.git.submodule_sync — Sync and update git submodules
 - `git_tag`: forgetools.git.tag — List, create, or delete git tags
 - `git_worktree`: Manage git worktrees: list, add, remove, move, prune, lock/unlock, status
+- `git_worktree_merge_plan`: Plan integration and merge readiness for worktree sessions
 - `git_worktree_workflow`: Manage parallel git worktree workflows from plan through integration
 
 Resources:
@@ -338,9 +344,11 @@ Resources:
 - `forge://catalog`: List tools available in this domain server.
 - `forge://gh/ci-status`: Latest GitHub Actions workflow runs for the current repository.
 - `forge://gh/open-prs`: Open pull requests for the current repository.
+- `forge://gh/repo-status`: Aggregated GitHub repository status: PRs, checks, reviewers, issues, and branches.
 - `forge://git/branches`: All branches with ahead/behind tracking information for the cwd repository.
 - `forge://git/log`: Last 20 commits of the cwd repository.
 - `forge://git/parallel-workflow`: Status of active parallel worktree workflow sessions in the cwd repo.
+- `forge://git/pr-workflows`: Reference guide for stacked PR and backport planning tools.
 - `forge://git/status`: Current git working-tree status of the cwd repository.
 - `forge://git/worktree-guide`: Reference guide for git worktree concepts and the parallel workflow engine.
 - `forge://git/worktrees`: Active git worktrees for the cwd repository.
@@ -353,6 +361,10 @@ Prompts:
 - `commit_history_cleanup`: Clean up commit history before opening a PR: squash WIP commits, fix messages.
 - `conventional_commit`: Craft and apply a Conventional Commit following the CC spec (conventionalcommits.org).
 - `debug_ci_failure`: Diagnose and fix a failing GitHub Actions workflow run.
+- `git_backport_workflow`: Plan and execute a safe backport workflow.
+- `git_multi_commit_workflow`: Split current changes into an explicit multi-commit plan.
+- `git_stacked_pr_workflow`: Plan and execute a stacked PR workflow safely.
+- `git_worktree_parallel_merge_workflow`: Manage, integrate, and merge multiple worktree tasks safely.
 - `multi_repo_health`: Health check for multiple side-by-side git repositories.
 - `parallel_worktree_workflow`: AI-agent guide for parallel git worktree development and integration.
 - `pr_create_flow`: Complete flow to create a well-structured GitHub Pull Request.
@@ -581,7 +593,7 @@ Prompts:
 
 - Server: `forgetools-release`
 - Categorias: `release`, `gh`, `docs`
-- Tools: 19
+- Tools: 20
 - Resources: 2
 - Prompts: 1
 
@@ -605,6 +617,7 @@ Tools:
 - `gh_pr_merge`: Merge a GitHub pull request using the selected merge strategy
 - `gh_pr_review`: forgetools.gh.pr_review — View PR review comments and status
 - `gh_release`: forgetools.gh.release — Create a GitHub release
+- `gh_repo_status`: Aggregate repository PRs, checks, reviewers, issues, and branch state
 - `release_precheck`: Run basic pre-release checks
 
 Resources:

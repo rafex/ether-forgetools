@@ -39,7 +39,7 @@ Cobertura actual:
 - [x] Los prompts estan distribuidos por dominio mediante `PROMPTS_BY_DOMAIN`.
 - [x] Existen resources especificos para `git`, `specnative`, `linux`, `file`, `java`, `containers`, `data`, `podman`, `python` y `quality`.
 - [x] `scripts/gen_openapi.py` incluye todos los dominios actuales.
-- [x] `openapi/forgetools.json` contiene 153 tools y no tiene summaries vacios.
+- [x] `openapi/forgetools.json` contiene 158 tools y no tiene summaries vacios.
 - [x] La documentacion incluye instalacion y ejemplos de configuracion para Codex, Claude Code, opencode y VS Code.
 
 Pendiente general:
@@ -86,15 +86,18 @@ Implementado:
 - [x] PRs, issues, releases, Actions, branches y GitHub API basica.
 - [x] Resources de status, log, worktrees, branches, PRs abiertos y CI.
 - [x] Prompts de review, release, CI, commits, PRs y worktrees.
+- [x] Planes para stacked PRs y backports.
+- [x] Validacion preflight de rama, remote, working tree y branch protection.
+- [x] Estado GitHub agregado: PRs, checks, reviewers, issues y branches.
+- [x] Plan multi-commit explicito desde archivos cambiados.
+- [x] Worktree workflow para cambios multiples: plan/init/status/sync/integrate/finalize/abort.
+- [x] Plan de merge readiness para sesiones worktree.
 
 Pendiente:
 
-- [ ] Agregar workflows guiados para stacked PRs y backports.
-- [ ] Agregar validacion de rama protegida y remote antes de push/merge.
-- [ ] Agregar resource de estado GitHub completo: PRs, checks, reviewers, issues.
-- [ ] Mejorar `git_commit` para planes multi-commit con confirmacion explicita.
-- [ ] Agregar soporte para release branches con convenciones configurables.
-- [ ] Agregar tests de contrato para tools Git/GitHub.
+- [ ] Agregar ejecucion asistida de stacked PRs con confirmacion explicita.
+- [ ] Agregar ejecucion asistida de backports con confirmacion explicita.
+- [ ] Agregar convenciones configurables para release branches.
 
 ### `mcp-docs`
 

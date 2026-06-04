@@ -144,6 +144,14 @@ def _register_git_resources(server: FastMCP) -> None:
         except Exception as exc:
             return _json_error(exc)
 
+    @server.resource("forge://gh/repo-status")
+    def resource_gh_repo_status() -> str:
+        """Aggregated GitHub repository status: PRs, checks, reviewers, issues, and branches."""
+        try:
+            return json.dumps(_run_tool("gh repo-status"), indent=2)
+        except Exception as exc:
+            return _json_error(exc)
+
     @server.resource("forge://git/parallel-workflow")
     def resource_git_parallel_workflow() -> str:
         """Status of active parallel worktree workflow sessions in the cwd repo."""
@@ -180,6 +188,31 @@ Naming conventions:
 - integration branch: `{prefix}/{session}-integration`
 - task branch: `{prefix}/{session}-{task}`
 - worktree path: `{wt_base}/{session}-{task}`
+
+Merge readiness:
+- Use `git_worktree_merge_plan` before integrating tasks.
+- Dirty task worktrees must be committed or stashed before integration.
+- Tasks behind the integration branch should run `sync` first.
+- Integrate one task at a time, then run tests from the integration branch.
+"""
+
+    @server.resource("forge://git/pr-workflows")
+    def resource_git_pr_workflows() -> str:
+        """Reference guide for stacked PR and backport planning tools."""
+        return """# Git PR Workflows
+
+Stacked PRs:
+- Use `git_stack_plan(tasks="api,ui,docs", base="main")`.
+- Create branches in the returned order.
+- Each PR targets the previous stack branch.
+
+Backports:
+- Use `git_backport_plan(commits="abc123,def456", targets="release/1.2,release/1.3")`.
+- Cherry-pick with `-x`, run target branch tests, and open one PR per target branch.
+
+Preflight:
+- Use `git_preflight(action="push")` before pushing.
+- Use `git_preflight(action="merge", branch="main")` before merging into protected branches.
 """
 
 

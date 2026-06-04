@@ -41,7 +41,7 @@ jobs:
           from pathlib import Path
           spec = json.loads(Path("openapi/forgetools.json").read_text())
           count = len(spec["paths"])
-          assert count >= 153, f"Expected at least 153 tools, got {count}"
+          assert count >= 159, f"Expected at least 159 tools, got {count}"
           print(f"OpenAPI tools: {count}")
           PY
 
