@@ -1,0 +1,104 @@
+{
+  "binary": "forge-mcp-python",
+  "counts": {
+    "prompts": 2,
+    "resources": 3,
+    "tools": 4
+  },
+  "domain": "python",
+  "prompts": [
+    {
+      "arguments": [
+        {
+          "name": "ecosystem",
+          "required": false
+        },
+        {
+          "name": "scope",
+          "required": false
+        }
+      ],
+      "description": "Safely upgrade dependencies: audit \u2192 upgrade \u2192 test \u2192 verify.",
+      "name": "dependency_upgrade"
+    },
+    {
+      "arguments": [
+        {
+          "name": "tool_name",
+          "required": true
+        },
+        {
+          "name": "category",
+          "required": true
+        },
+        {
+          "name": "description",
+          "required": true
+        }
+      ],
+      "description": "Scaffold a new forgetools module following the ForgeResult pattern.",
+      "name": "new_tool_scaffold"
+    }
+  ],
+  "resources": [
+    {
+      "description": "Machine-readable capabilities manifest for this domain server.",
+      "name": "resource_capabilities",
+      "uri": "forge://capabilities"
+    },
+    {
+      "description": "List tools available in this domain server.",
+      "name": "resource_catalog",
+      "uri": "forge://catalog"
+    },
+    {
+      "description": "Local Python/uv workflow standards.",
+      "name": "resource_python_uv",
+      "uri": "forge://python/standards/uv"
+    }
+  ],
+  "schema_version": "1.0",
+  "tools": [
+    {
+      "description": "Run mypy type checks",
+      "name": "python_mypy",
+      "properties": [
+        "cwd",
+        "extra_args",
+        "path"
+      ],
+      "required": []
+    },
+    {
+      "description": "Run pytest and return structured output",
+      "name": "python_pytest",
+      "properties": [
+        "cwd",
+        "extra_args",
+        "path"
+      ],
+      "required": []
+    },
+    {
+      "description": "Run ruff check/format",
+      "name": "python_ruff",
+      "properties": [
+        "action",
+        "cwd",
+        "extra_args",
+        "path"
+      ],
+      "required": []
+    },
+    {
+      "description": "Run uv commands for Python projects",
+      "name": "python_uv",
+      "properties": [
+        "action",
+        "args",
+        "cwd"
+      ],
+      "required": []
+    }
+  ]
+}

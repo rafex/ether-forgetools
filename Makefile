@@ -66,83 +66,83 @@ install-core: $(VENV)
 install-mcp: install-mcp-all
 
 install-mcp-file: install-core
-	$(UV) pip install --python $(BIN)/python --no-deps -e ./mcps/file
+	$(UV) pip install --python $(BIN)/python -e ./mcps/file
 	@echo "MCP listo: forge-mcp-file"
 
 install-mcp-git: install-core
-	$(UV) pip install --python $(BIN)/python --no-deps -e ./mcps/git
+	$(UV) pip install --python $(BIN)/python -e ./mcps/git
 	@echo "MCP listo: forge-mcp-git"
 
 install-mcp-docs: install-core
-	$(UV) pip install --python $(BIN)/python --no-deps -e ./mcps/docs
+	$(UV) pip install --python $(BIN)/python -e ./mcps/docs
 	@echo "MCP listo: forge-mcp-docs"
 
 install-mcp-specnative: install-core
-	$(UV) pip install --python $(BIN)/python --no-deps -e ./mcps/specnative
+	$(UV) pip install --python $(BIN)/python -e ./mcps/specnative
 	@echo "MCP listo: forge-mcp-specnative"
 
 install-mcp-linux: install-core
-	$(UV) pip install --python $(BIN)/python --no-deps -e ./mcps/linux
+	$(UV) pip install --python $(BIN)/python -e ./mcps/linux
 	@echo "MCP listo: forge-mcp-linux"
 
 install-mcp-java: install-core
-	$(UV) pip install --python $(BIN)/python --no-deps -e ./mcps/java
+	$(UV) pip install --python $(BIN)/python -e ./mcps/java
 	@echo "MCP listo: forge-mcp-java"
 
 install-mcp-websearch: install-core
-	$(UV) pip install --python $(BIN)/python --no-deps -e ./mcps/websearch
+	$(UV) pip install --python $(BIN)/python -e ./mcps/websearch
 	@echo "MCP listo: forge-mcp-websearch"
 
 install-mcp-containers: install-core
-	$(UV) pip install --python $(BIN)/python --no-deps -e ./mcps/containers
+	$(UV) pip install --python $(BIN)/python -e ./mcps/containers
 	@echo "MCP listo: forge-mcp-containers"
 
 install-mcp-build: install-core
-	$(UV) pip install --python $(BIN)/python --no-deps -e ./mcps/build
+	$(UV) pip install --python $(BIN)/python -e ./mcps/build
 	@echo "MCP listo: forge-mcp-build"
 
 install-mcp-data: install-core
-	$(UV) pip install --python $(BIN)/python --no-deps -e ./mcps/data
+	$(UV) pip install --python $(BIN)/python -e ./mcps/data
 	@echo "MCP listo: forge-mcp-data"
 
 install-mcp-quality: install-core
-	$(UV) pip install --python $(BIN)/python --no-deps -e ./mcps/quality
+	$(UV) pip install --python $(BIN)/python -e ./mcps/quality
 	@echo "MCP listo: forge-mcp-quality"
 
 install-mcp-office: install-core
-	$(UV) pip install --python $(BIN)/python --no-deps -e ./mcps/office
+	$(UV) pip install --python $(BIN)/python -e ./mcps/office
 	@echo "MCP listo: forge-mcp-office"
 
 install-mcp-python: install-core
-	$(UV) pip install --python $(BIN)/python --no-deps -e ./mcps/python
+	$(UV) pip install --python $(BIN)/python -e ./mcps/python
 	@echo "MCP listo: forge-mcp-python"
 
 install-mcp-frontend: install-core
-	$(UV) pip install --python $(BIN)/python --no-deps -e ./mcps/frontend
+	$(UV) pip install --python $(BIN)/python -e ./mcps/frontend
 	@echo "MCP listo: forge-mcp-frontend"
 
 install-mcp-observability: install-core
-	$(UV) pip install --python $(BIN)/python --no-deps -e ./mcps/observability
+	$(UV) pip install --python $(BIN)/python -e ./mcps/observability
 	@echo "MCP listo: forge-mcp-observability"
 
 install-mcp-cloud: install-core
-	$(UV) pip install --python $(BIN)/python --no-deps -e ./mcps/cloud
+	$(UV) pip install --python $(BIN)/python -e ./mcps/cloud
 	@echo "MCP listo: forge-mcp-cloud"
 
 install-mcp-podman: install-core
-	$(UV) pip install --python $(BIN)/python --no-deps -e ./mcps/podman
+	$(UV) pip install --python $(BIN)/python -e ./mcps/podman
 	@echo "MCP listo: forge-mcp-podman"
 
 install-mcp-ai: install-core
-	$(UV) pip install --python $(BIN)/python --no-deps -e ./mcps/ai
+	$(UV) pip install --python $(BIN)/python -e ./mcps/ai
 	@echo "MCP listo: forge-mcp-ai"
 
 install-mcp-release: install-core
-	$(UV) pip install --python $(BIN)/python --no-deps -e ./mcps/release
+	$(UV) pip install --python $(BIN)/python -e ./mcps/release
 	@echo "MCP listo: forge-mcp-release"
 
 install-mcp-deps: install-core
-	$(UV) pip install --python $(BIN)/python --no-deps -e ./mcps/deps
+	$(UV) pip install --python $(BIN)/python -e ./mcps/deps
 	@echo "MCP listo: forge-mcp-deps"
 
 install-mcp-all: install-mcp-file install-mcp-git install-mcp-docs install-mcp-specnative install-mcp-linux install-mcp-java install-mcp-websearch install-mcp-containers install-mcp-build install-mcp-data install-mcp-quality install-mcp-office install-mcp-python install-mcp-frontend install-mcp-observability install-mcp-cloud install-mcp-podman install-mcp-ai install-mcp-release install-mcp-deps

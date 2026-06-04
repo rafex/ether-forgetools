@@ -1,0 +1,164 @@
+{
+  "binary": "forge-mcp-specnative",
+  "counts": {
+    "prompts": 3,
+    "resources": 5,
+    "tools": 7
+  },
+  "domain": "specnative",
+  "prompts": [
+    {
+      "arguments": [
+        {
+          "name": "repo_dir",
+          "required": false
+        }
+      ],
+      "description": "Full health dashboard for a repository.",
+      "name": "repo_health_check"
+    },
+    {
+      "arguments": [
+        {
+          "name": "initiative",
+          "required": true
+        },
+        {
+          "name": "action",
+          "required": false
+        }
+      ],
+      "description": "Full SpecNative spec-first development workflow guide.",
+      "name": "specnative_workflow"
+    },
+    {
+      "arguments": [
+        {
+          "name": "initiative",
+          "required": true
+        },
+        {
+          "name": "problem",
+          "required": true
+        }
+      ],
+      "description": "Start a new feature using git worktree isolation + SpecNative spec scaffold.\n\nFollows the official SpecNative 9-step agent workflow sequence.",
+      "name": "start_feature"
+    }
+  ],
+  "resources": [
+    {
+      "description": "Machine-readable capabilities manifest for this domain server.",
+      "name": "resource_capabilities",
+      "uri": "forge://capabilities"
+    },
+    {
+      "description": "List tools available in this domain server.",
+      "name": "resource_catalog",
+      "uri": "forge://catalog"
+    },
+    {
+      "description": "Repository size, language breakdown, and git metadata for cwd.",
+      "name": "resource_context_repo",
+      "uri": "forge://context/repo"
+    },
+    {
+      "description": "AI-readable codebase summary: structure, languages, and key patterns.",
+      "name": "resource_context_summary",
+      "uri": "forge://context/summary"
+    },
+    {
+      "description": "All SpecNative specs with their states and task counts for the current repo.",
+      "name": "resource_specnative_status",
+      "uri": "forge://specnative/status"
+    }
+  ],
+  "schema_version": "1.0",
+  "tools": [
+    {
+      "description": "forgetools.context.diff_summary \u2014 Summarize git diff between two refs",
+      "name": "context_diff_summary",
+      "properties": [
+        "cwd",
+        "since",
+        "until"
+      ],
+      "required": []
+    },
+    {
+      "description": "Measure repository size, language distribution, and git metadata for context planning",
+      "name": "context_repo_size",
+      "properties": [
+        "cwd",
+        "path",
+        "show_steps"
+      ],
+      "required": []
+    },
+    {
+      "description": "block project summary for code agents",
+      "name": "context_summarize",
+      "properties": [
+        "cwd",
+        "path"
+      ],
+      "required": []
+    },
+    {
+      "description": "List Ether ecosystem repositories and their local/remote availability",
+      "name": "ether_catalog",
+      "properties": [
+        "action",
+        "cwd",
+        "deployed_only",
+        "module",
+        "query",
+        "refresh"
+      ],
+      "required": []
+    },
+    {
+      "description": "Read, write, or list SpecNative context documents for the current repository",
+      "name": "specnative_context",
+      "properties": [
+        "action",
+        "cwd",
+        "document",
+        "initiative",
+        "repo"
+      ],
+      "required": []
+    },
+    {
+      "description": "Create or update SpecNative initiatives from repository context",
+      "name": "specnative_initiative",
+      "properties": [
+        "action",
+        "consequences",
+        "context",
+        "cwd",
+        "decision",
+        "decision_state",
+        "initiative",
+        "owner",
+        "problem",
+        "repo",
+        "state",
+        "task_id",
+        "title",
+        "write"
+      ],
+      "required": []
+    },
+    {
+      "description": "Report SpecNative specs, initiatives, states, and task progress",
+      "name": "specnative_status",
+      "properties": [
+        "action",
+        "cwd",
+        "repo"
+      ],
+      "required": []
+    }
+  ]
+}

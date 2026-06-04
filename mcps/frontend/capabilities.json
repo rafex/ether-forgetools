@@ -1,0 +1,106 @@
+{
+  "binary": "forge-mcp-frontend",
+  "categories": [
+    "frontend",
+    "npm"
+  ],
+  "counts": {
+    "prompts": 2,
+    "resources": 2,
+    "tools": 5
+  },
+  "domain": "frontend",
+  "prompts": [
+    {
+      "arguments": [
+        {
+          "name": "symptom",
+          "required": true
+        },
+        {
+          "name": "component",
+          "required": false
+        }
+      ],
+      "description": "Structured bug hunt: logs + git blame + stacktrace + grep.",
+      "name": "bug_investigation"
+    },
+    {
+      "arguments": [
+        {
+          "name": "target",
+          "required": true
+        }
+      ],
+      "description": "Analyse performance: process top + ports + resource usage + profiling guide.",
+      "name": "performance_analysis"
+    }
+  ],
+  "pyproject": "mcps/frontend/pyproject.toml",
+  "resources": [
+    {
+      "description": "Machine-readable capabilities manifest for this domain server.",
+      "name": "resource_capabilities",
+      "uri": "forge://capabilities"
+    },
+    {
+      "description": "List tools available in this domain server.",
+      "name": "resource_catalog",
+      "uri": "forge://catalog"
+    }
+  ],
+  "schema_version": "1.0",
+  "server_file": "forgetools/mcp_frontend_server.py",
+  "server_module": "forgetools.mcp_frontend_server",
+  "server_name": "forgetools-frontend",
+  "tools": [
+    {
+      "description": "Check referenced local assets in HTML/Markdown files",
+      "name": "frontend_assets",
+      "properties": [
+        "cwd",
+        "path"
+      ],
+      "required": []
+    },
+    {
+      "description": "Detect common frontend stacks",
+      "name": "frontend_detect",
+      "properties": [
+        "cwd"
+      ],
+      "required": []
+    },
+    {
+      "description": "forgetools.npm.audit \u2014 Run npm audit and parse JSON output",
+      "name": "npm_audit",
+      "properties": [
+        "cwd",
+        "level"
+      ],
+      "required": []
+    },
+    {
+      "description": "forgetools.npm.install \u2014 Run npm install",
+      "name": "npm_install",
+      "properties": [
+        "cwd",
+        "frozen"
+      ],
+      "required": []
+    },
+    {
+      "description": "forgetools.npm.run \u2014 Run an npm script",
+      "name": "npm_run",
+      "properties": [
+        "args",
+        "cwd",
+        "script"
+      ],
+      "required": [
+        "script"
+      ]
+    }
+  ],
+  "version": "0.1.0"
+}

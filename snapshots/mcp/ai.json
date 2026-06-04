@@ -1,0 +1,47 @@
+{
+  "binary": "forge-mcp-ai",
+  "counts": {
+    "prompts": 1,
+    "resources": 2,
+    "tools": 1
+  },
+  "domain": "ai",
+  "prompts": [
+    {
+      "arguments": [
+        {
+          "name": "target",
+          "required": true
+        }
+      ],
+      "description": "Analyse performance: process top + ports + resource usage + profiling guide.",
+      "name": "performance_analysis"
+    }
+  ],
+  "resources": [
+    {
+      "description": "Machine-readable capabilities manifest for this domain server.",
+      "name": "resource_capabilities",
+      "uri": "forge://capabilities"
+    },
+    {
+      "description": "List tools available in this domain server.",
+      "name": "resource_catalog",
+      "uri": "forge://catalog"
+    }
+  ],
+  "schema_version": "1.0",
+  "tools": [
+    {
+      "description": "Inspect or run Ollama models",
+      "name": "ai_ollama",
+      "properties": [
+        "action",
+        "cwd",
+        "model",
+        "prompt"
+      ],
+      "required": []
+    }
+  ]
+}

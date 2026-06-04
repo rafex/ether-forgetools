@@ -1,0 +1,201 @@
+{
+  "binary": "forge-mcp-deps",
+  "counts": {
+    "prompts": 2,
+    "resources": 2,
+    "tools": 13
+  },
+  "domain": "deps",
+  "prompts": [
+    {
+      "arguments": [
+        {
+          "name": "ecosystem",
+          "required": false
+        },
+        {
+          "name": "scope",
+          "required": false
+        }
+      ],
+      "description": "Safely upgrade dependencies: audit \u2192 upgrade \u2192 test \u2192 verify.",
+      "name": "dependency_upgrade"
+    },
+    {
+      "arguments": [
+        {
+          "name": "query",
+          "required": true
+        },
+        {
+          "name": "project_dir",
+          "required": false
+        }
+      ],
+      "description": "Research Maven Central for a dependency: find, compare, get checksums, and add to POM.",
+      "name": "maven_dependency_research"
+    }
+  ],
+  "resources": [
+    {
+      "description": "Machine-readable capabilities manifest for this domain server.",
+      "name": "resource_capabilities",
+      "uri": "forge://capabilities"
+    },
+    {
+      "description": "List tools available in this domain server.",
+      "name": "resource_catalog",
+      "uri": "forge://catalog"
+    }
+  ],
+  "schema_version": "1.0",
+  "tools": [
+    {
+      "description": "Fetch npm package metadata",
+      "name": "deps_npm",
+      "properties": [
+        "cwd",
+        "package"
+      ],
+      "required": [
+        "package"
+      ]
+    },
+    {
+      "description": "Fetch PyPI package metadata",
+      "name": "deps_pypi",
+      "properties": [
+        "cwd",
+        "package"
+      ],
+      "required": [
+        "package"
+      ]
+    },
+    {
+      "description": "Format Java source files with google-java-format when available",
+      "name": "java_format",
+      "properties": [
+        "action",
+        "binary",
+        "cwd",
+        "files",
+        "lines",
+        "pattern",
+        "style"
+      ],
+      "required": []
+    },
+    {
+      "description": "forgetools.java.gradle \u2014 Run Gradle tasks with structured output",
+      "name": "java_gradle",
+      "properties": [
+        "cwd",
+        "module",
+        "skip_tests",
+        "task"
+      ],
+      "required": []
+    },
+    {
+      "description": "Inspect Java projects using JDT-style source and symbol analysis helpers",
+      "name": "java_jdt",
+      "properties": [
+        "action",
+        "binary",
+        "cwd",
+        "data_dir"
+      ],
+      "required": []
+    },
+    {
+      "description": "forgetools.java.maven \u2014 Run Maven goals with structured output",
+      "name": "java_maven",
+      "properties": [
+        "cwd",
+        "goal",
+        "module",
+        "profiles",
+        "skip_tests"
+      ],
+      "required": []
+    },
+    {
+      "description": "Query Maven Central for artifact versions, metadata, and checksums",
+      "name": "java_maven_central",
+      "properties": [
+        "action",
+        "artifact_id",
+        "classifier",
+        "coords",
+        "cwd",
+        "group_id",
+        "packaging",
+        "query",
+        "rows",
+        "version"
+      ],
+      "required": []
+    },
+    {
+      "description": "Inspect Maven multi-module project structure and module metadata",
+      "name": "java_maven_modules",
+      "properties": [
+        "action",
+        "cwd",
+        "dir",
+        "path",
+        "pattern"
+      ],
+      "required": []
+    },
+    {
+      "description": "forgetools.java.parse_stacktrace \u2014 Parse Java stack traces into structured data",
+      "name": "java_stacktrace",
+      "properties": [
+        "cwd",
+        "file"
+      ],
+      "required": []
+    },
+    {
+      "description": "forgetools.java.test_report \u2014 Parse JUnit/Surefire XML test reports",
+      "name": "java_test_report",
+      "properties": [
+        "cwd",
+        "path"
+      ],
+      "required": []
+    },
+    {
+      "description": "forgetools.npm.audit \u2014 Run npm audit and parse JSON output",
+      "name": "npm_audit",
+      "properties": [
+        "cwd",
+        "level"
+      ],
+      "required": []
+    },
+    {
+      "description": "forgetools.npm.install \u2014 Run npm install",
+      "name": "npm_install",
+      "properties": [
+        "cwd",
+        "frozen"
+      ],
+      "required": []
+    },
+    {
+      "description": "forgetools.npm.run \u2014 Run an npm script",
+      "name": "npm_run",
+      "properties": [
+        "args",
+        "cwd",
+        "script"
+      ],
+      "required": [
+        "script"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,259 @@
+{
+  "binary": "forge-mcp-containers",
+  "categories": [
+    "docker",
+    "k8s",
+    "helm"
+  ],
+  "counts": {
+    "prompts": 2,
+    "resources": 5,
+    "tools": 14
+  },
+  "domain": "containers",
+  "prompts": [
+    {
+      "arguments": [
+        {
+          "name": "container_name",
+          "required": true
+        }
+      ],
+      "description": "Debug a failing Docker container: logs \u2192 inspect \u2192 exec \u2192 fix.",
+      "name": "docker_debug"
+    },
+    {
+      "arguments": [
+        {
+          "name": "app",
+          "required": true
+        },
+        {
+          "name": "image",
+          "required": true
+        },
+        {
+          "name": "namespace",
+          "required": false
+        }
+      ],
+      "description": "Deploy an app to Kubernetes: deploy \u2192 rollout \u2192 verify \u2192 health check.",
+      "name": "k8s_deploy"
+    }
+  ],
+  "pyproject": "mcps/containers/pyproject.toml",
+  "resources": [
+    {
+      "description": "Machine-readable capabilities manifest for this domain server.",
+      "name": "resource_capabilities",
+      "uri": "forge://capabilities"
+    },
+    {
+      "description": "List tools available in this domain server.",
+      "name": "resource_catalog",
+      "uri": "forge://catalog"
+    },
+    {
+      "description": "Running Docker containers snapshot.",
+      "name": "resource_docker_containers",
+      "uri": "forge://docker/containers"
+    },
+    {
+      "description": "Current Kubernetes pod status across all namespaces.",
+      "name": "resource_k8s_pods",
+      "uri": "forge://k8s/pods"
+    },
+    {
+      "description": "Mandatory Podman port allocation policy for the bastion host.",
+      "name": "resource_policy_podman_ports_bastion",
+      "uri": "forge://policy/podman-ports-bastion"
+    }
+  ],
+  "schema_version": "1.0",
+  "server_file": "forgetools/mcp_containers_server.py",
+  "server_module": "forgetools.mcp_containers_server",
+  "server_name": "forgetools-containers",
+  "tools": [
+    {
+      "description": "forgetools.docker.build \u2014 Build a Docker image",
+      "name": "docker_build",
+      "properties": [
+        "context",
+        "cwd",
+        "dockerfile",
+        "no_cache",
+        "tag"
+      ],
+      "required": [
+        "tag"
+      ]
+    },
+    {
+      "description": "forgetools.docker.compose \u2014 Docker Compose operations",
+      "name": "docker_compose",
+      "properties": [
+        "action",
+        "cwd",
+        "detach",
+        "service",
+        "tail"
+      ],
+      "required": [
+        "action"
+      ]
+    },
+    {
+      "description": "forgetools.docker.exec \u2014 Execute a command in a Docker container",
+      "name": "docker_exec",
+      "properties": [
+        "cmd",
+        "container",
+        "cwd"
+      ],
+      "required": [
+        "container",
+        "cmd"
+      ]
+    },
+    {
+      "description": "forgetools.docker.inspect \u2014 Inspect a Docker container",
+      "name": "docker_inspect",
+      "properties": [
+        "container",
+        "cwd"
+      ],
+      "required": [
+        "container"
+      ]
+    },
+    {
+      "description": "forgetools.docker.logs \u2014 Fetch Docker container logs",
+      "name": "docker_logs",
+      "properties": [
+        "container",
+        "cwd",
+        "tail"
+      ],
+      "required": [
+        "container"
+      ]
+    },
+    {
+      "description": "forgetools.docker.ps \u2014 List Docker containers",
+      "name": "docker_ps",
+      "properties": [
+        "all",
+        "cwd"
+      ],
+      "required": []
+    },
+    {
+      "description": "Compare Helm release changes before install or upgrade",
+      "name": "helm_diff",
+      "properties": [
+        "chart",
+        "cwd",
+        "namespace",
+        "release",
+        "values"
+      ],
+      "required": [
+        "release",
+        "chart"
+      ]
+    },
+    {
+      "description": "forgetools.helm.install \u2014 Install a Helm chart",
+      "name": "helm_install",
+      "properties": [
+        "chart",
+        "cwd",
+        "namespace",
+        "release",
+        "set_values",
+        "values"
+      ],
+      "required": [
+        "release",
+        "chart"
+      ]
+    },
+    {
+      "description": "forgetools.helm.status \u2014 Helm release status",
+      "name": "helm_status",
+      "properties": [
+        "cwd",
+        "namespace",
+        "release"
+      ],
+      "required": [
+        "release"
+      ]
+    },
+    {
+      "description": "forgetools.helm.upgrade \u2014 Upgrade (or install) a Helm release",
+      "name": "helm_upgrade",
+      "properties": [
+        "chart",
+        "cwd",
+        "install",
+        "namespace",
+        "release",
+        "set_values",
+        "values"
+      ],
+      "required": [
+        "release",
+        "chart"
+      ]
+    },
+    {
+      "description": "forgetools.k8s.contexts \u2014 List and switch kubectl contexts",
+      "name": "k8s_contexts",
+      "properties": [
+        "cwd",
+        "switch_to"
+      ],
+      "required": []
+    },
+    {
+      "description": "forgetools.k8s.logs \u2014 Fetch Kubernetes pod logs with filters",
+      "name": "k8s_logs",
+      "properties": [
+        "container",
+        "cwd",
+        "deployment",
+        "grep",
+        "lines",
+        "namespace",
+        "pod"
+      ],
+      "required": []
+    },
+    {
+      "description": "forgetools.k8s.pods \u2014 List Kubernetes pods with status",
+      "name": "k8s_pods",
+      "properties": [
+        "all_namespaces",
+        "cwd",
+        "namespace",
+        "status_filter"
+      ],
+      "required": []
+    },
+    {
+      "description": "forgetools.k8s.rollout \u2014 Manage Kubernetes rollouts",
+      "name": "k8s_rollout",
+      "properties": [
+        "action",
+        "cwd",
+        "deployment",
+        "namespace"
+      ],
+      "required": [
+        "deployment"
+      ]
+    }
+  ],
+  "version": "0.1.0"
+}

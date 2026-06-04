@@ -1,0 +1,223 @@
+{
+  "binary": "forge-mcp-office",
+  "counts": {
+    "prompts": 3,
+    "resources": 4,
+    "tools": 10
+  },
+  "domain": "office",
+  "prompts": [
+    {
+      "arguments": [
+        {
+          "name": "api_name",
+          "required": true
+        },
+        {
+          "name": "description",
+          "required": true
+        }
+      ],
+      "description": "Spec-first API design: OpenAPI spec \u2192 stub \u2192 implement \u2192 test.",
+      "name": "api_design"
+    },
+    {
+      "arguments": [
+        {
+          "name": "report_name",
+          "required": true
+        },
+        {
+          "name": "table_sources",
+          "required": true
+        }
+      ],
+      "description": "Create a PDF report bundle with tabular appendices.",
+      "name": "office_appendix_bundle"
+    },
+    {
+      "arguments": [
+        {
+          "name": "topic",
+          "required": true
+        },
+        {
+          "name": "audience",
+          "required": false
+        }
+      ],
+      "description": "Plan and generate an executive report with PDF/DOCX outputs.",
+      "name": "office_executive_report"
+    }
+  ],
+  "resources": [
+    {
+      "description": "Machine-readable capabilities manifest for this domain server.",
+      "name": "resource_capabilities",
+      "uri": "forge://capabilities"
+    },
+    {
+      "description": "List tools available in this domain server.",
+      "name": "resource_catalog",
+      "uri": "forge://catalog"
+    },
+    {
+      "description": "Office MCP dependency policy and optional local tool expectations.",
+      "name": "resource_office_dependency_policy",
+      "uri": "forge://office/dependency-policy"
+    },
+    {
+      "description": "Recommended workflow for generating business reports with mcp-office.",
+      "name": "resource_office_report_workflow",
+      "uri": "forge://office/report-workflow"
+    }
+  ],
+  "schema_version": "1.0",
+  "tools": [
+    {
+      "description": "Create a DOCX from Markdown, HTML, or plain text",
+      "name": "office_docx_create",
+      "properties": [
+        "cwd",
+        "input",
+        "output",
+        "source_format",
+        "title"
+      ],
+      "required": [
+        "input",
+        "output"
+      ]
+    },
+    {
+      "description": "Convert Markdown to a standalone HTML document",
+      "name": "office_markdown_html",
+      "properties": [
+        "cwd",
+        "input",
+        "output",
+        "title"
+      ],
+      "required": [
+        "input"
+      ]
+    },
+    {
+      "description": "Append CSV/XLSX table pages to a PDF",
+      "name": "office_pdf_append_tables",
+      "properties": [
+        "cwd",
+        "max_rows",
+        "output",
+        "pdf",
+        "sheet",
+        "table",
+        "title"
+      ],
+      "required": [
+        "pdf",
+        "table",
+        "output"
+      ]
+    },
+    {
+      "description": "Create a PDF from Markdown, HTML, or plain text",
+      "name": "office_pdf_create",
+      "properties": [
+        "cwd",
+        "input",
+        "output",
+        "source_format",
+        "title"
+      ],
+      "required": [
+        "input",
+        "output"
+      ]
+    },
+    {
+      "description": "Extract embedded PDF page images when available",
+      "name": "office_pdf_images",
+      "properties": [
+        "cwd",
+        "input",
+        "output_dir"
+      ],
+      "required": [
+        "input",
+        "output_dir"
+      ]
+    },
+    {
+      "description": "Merge PDFs using pypdf, pdfunite, or qpdf",
+      "name": "office_pdf_merge",
+      "properties": [
+        "cwd",
+        "inputs",
+        "output"
+      ],
+      "required": [
+        "inputs",
+        "output"
+      ]
+    },
+    {
+      "description": "Extract PDF metadata, page count, and document flags",
+      "name": "office_pdf_metadata",
+      "properties": [
+        "cwd",
+        "input"
+      ],
+      "required": [
+        "input"
+      ]
+    },
+    {
+      "description": "Stamp text on each page of a PDF",
+      "name": "office_pdf_stamp",
+      "properties": [
+        "cwd",
+        "font_size",
+        "input",
+        "output",
+        "text",
+        "x",
+        "y"
+      ],
+      "required": [
+        "input",
+        "output",
+        "text"
+      ]
+    },
+    {
+      "description": "Extract text from a PDF using pdftotext or pypdf",
+      "name": "office_pdf_text",
+      "properties": [
+        "cwd",
+        "input",
+        "output"
+      ],
+      "required": [
+        "input"
+      ]
+    },
+    {
+      "description": "Convert CSV/XLSX tables into Markdown, HTML, PDF, or DOCX reports",
+      "name": "office_table_report",
+      "properties": [
+        "cwd",
+        "input",
+        "max_rows",
+        "output",
+        "output_format",
+        "sheet",
+        "title"
+      ],
+      "required": [
+        "input",
+        "output"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,187 @@
+{
+  "binary": "forge-mcp-quality",
+  "counts": {
+    "prompts": 3,
+    "resources": 3,
+    "tools": 11
+  },
+  "domain": "quality",
+  "prompts": [
+    {
+      "arguments": [
+        {
+          "name": "pr_number",
+          "required": true
+        },
+        {
+          "name": "depth",
+          "required": false
+        }
+      ],
+      "description": "Review a pull request: diff, context, checks, and review comments.",
+      "name": "code_review"
+    },
+    {
+      "arguments": [
+        {
+          "name": "repo_dir",
+          "required": false
+        }
+      ],
+      "description": "Full health dashboard for a repository.",
+      "name": "repo_health_check"
+    },
+    {
+      "arguments": [
+        {
+          "name": "target_dir",
+          "required": false
+        },
+        {
+          "name": "scope",
+          "required": false
+        }
+      ],
+      "description": "Run a comprehensive security audit on the codebase.",
+      "name": "security_audit"
+    }
+  ],
+  "resources": [
+    {
+      "description": "Machine-readable capabilities manifest for this domain server.",
+      "name": "resource_capabilities",
+      "uri": "forge://capabilities"
+    },
+    {
+      "description": "List tools available in this domain server.",
+      "name": "resource_catalog",
+      "uri": "forge://catalog"
+    },
+    {
+      "description": "Recommended quality gates before commit or release.",
+      "name": "resource_quality_gates",
+      "uri": "forge://quality/gates"
+    }
+  ],
+  "schema_version": "1.0",
+  "tools": [
+    {
+      "description": "forgetools.lint.checkstyle \u2014 Parse Checkstyle XML result files",
+      "name": "lint_checkstyle",
+      "properties": [
+        "cwd",
+        "path"
+      ],
+      "required": []
+    },
+    {
+      "description": "forgetools.lint.eslint \u2014 Run ESLint and parse JSON output",
+      "name": "lint_eslint",
+      "properties": [
+        "config",
+        "cwd",
+        "path"
+      ],
+      "required": []
+    },
+    {
+      "description": "lint and parse JSON output",
+      "name": "lint_golangci",
+      "properties": [
+        "cwd",
+        "path"
+      ],
+      "required": []
+    },
+    {
+      "description": "forgetools.lint.pylint \u2014 Run Pylint and parse JSON output",
+      "name": "lint_pylint",
+      "properties": [
+        "cwd",
+        "path"
+      ],
+      "required": []
+    },
+    {
+      "description": "forgetools.secrets.scan \u2014 Scan for secrets in files",
+      "name": "secrets_scan",
+      "properties": [
+        "cwd",
+        "path"
+      ],
+      "required": []
+    },
+    {
+      "description": "Run ESLint-oriented security checks and return structured findings",
+      "name": "security_eslint",
+      "properties": [
+        "action",
+        "binary",
+        "cwd",
+        "ext",
+        "path",
+        "security_only"
+      ],
+      "required": []
+    },
+    {
+      "description": "Run OWASP dependency checks and parse security findings",
+      "name": "security_owasp",
+      "properties": [
+        "action",
+        "binary",
+        "cwd",
+        "format",
+        "out_dir",
+        "report",
+        "scan_path",
+        "severity"
+      ],
+      "required": []
+    },
+    {
+      "description": "Run SpotBugs security analysis and parse structured findings",
+      "name": "security_spotbugs",
+      "properties": [
+        "action",
+        "binary",
+        "cwd",
+        "report",
+        "security_only"
+      ],
+      "required": []
+    },
+    {
+      "description": "forgetools.test.coverage \u2014 Parse Cobertura coverage.xml reports",
+      "name": "test_coverage",
+      "properties": [
+        "cwd",
+        "path"
+      ],
+      "required": []
+    },
+    {
+      "description": "Parse coverage reports and return summary metrics and uncovered files",
+      "name": "test_coverage_report",
+      "properties": [
+        "action",
+        "cwd",
+        "min_pct",
+        "path",
+        "worst"
+      ],
+      "required": []
+    },
+    {
+      "description": "forgetools.test.junit_report \u2014 Parse JUnit XML test reports",
+      "name": "test_junit_report",
+      "properties": [
+        "cwd",
+        "path"
+      ],
+      "required": [
+        "path"
+      ]
+    }
+  ]
+}

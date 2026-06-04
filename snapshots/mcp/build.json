@@ -1,0 +1,149 @@
+{
+  "binary": "forge-mcp-build",
+  "counts": {
+    "prompts": 2,
+    "resources": 2,
+    "tools": 10
+  },
+  "domain": "build",
+  "prompts": [
+    {
+      "arguments": [
+        {
+          "name": "ecosystem",
+          "required": false
+        },
+        {
+          "name": "scope",
+          "required": false
+        }
+      ],
+      "description": "Safely upgrade dependencies: audit \u2192 upgrade \u2192 test \u2192 verify.",
+      "name": "dependency_upgrade"
+    },
+    {
+      "arguments": [
+        {
+          "name": "project_dir",
+          "required": false
+        }
+      ],
+      "description": "Comprehensive analysis of a Go project: build, test, lint, mod, and security.",
+      "name": "go_project_analysis"
+    }
+  ],
+  "resources": [
+    {
+      "description": "Machine-readable capabilities manifest for this domain server.",
+      "name": "resource_capabilities",
+      "uri": "forge://capabilities"
+    },
+    {
+      "description": "List tools available in this domain server.",
+      "name": "resource_catalog",
+      "uri": "forge://catalog"
+    }
+  ],
+  "schema_version": "1.0",
+  "tools": [
+    {
+      "description": "forgetools.cargo.build \u2014 Run cargo build and parse JSON output",
+      "name": "cargo_build",
+      "properties": [
+        "cwd",
+        "package",
+        "release"
+      ],
+      "required": []
+    },
+    {
+      "description": "forgetools.cargo.check \u2014 Run cargo check and parse JSON output",
+      "name": "cargo_check",
+      "properties": [
+        "cwd",
+        "package"
+      ],
+      "required": []
+    },
+    {
+      "description": "forgetools.cargo.test \u2014 Run cargo test and parse output",
+      "name": "cargo_test",
+      "properties": [
+        "cwd",
+        "package",
+        "test_filter"
+      ],
+      "required": []
+    },
+    {
+      "description": "forgetools.go.build \u2014 Run go build",
+      "name": "go_build",
+      "properties": [
+        "cwd",
+        "output",
+        "path"
+      ],
+      "required": []
+    },
+    {
+      "description": "forgetools.go.mod \u2014 Run go mod commands",
+      "name": "go_mod",
+      "properties": [
+        "action",
+        "cwd"
+      ],
+      "required": []
+    },
+    {
+      "description": "forgetools.go.test \u2014 Run go test with JSON output parsing",
+      "name": "go_test",
+      "properties": [
+        "cwd",
+        "path",
+        "run",
+        "verbose"
+      ],
+      "required": []
+    },
+    {
+      "description": "forgetools.make.run \u2014 Run make targets or list available targets",
+      "name": "make_run",
+      "properties": [
+        "cwd",
+        "list_targets",
+        "target"
+      ],
+      "required": []
+    },
+    {
+      "description": "forgetools.npm.audit \u2014 Run npm audit and parse JSON output",
+      "name": "npm_audit",
+      "properties": [
+        "cwd",
+        "level"
+      ],
+      "required": []
+    },
+    {
+      "description": "forgetools.npm.install \u2014 Run npm install",
+      "name": "npm_install",
+      "properties": [
+        "cwd",
+        "frozen"
+      ],
+      "required": []
+    },
+    {
+      "description": "forgetools.npm.run \u2014 Run an npm script",
+      "name": "npm_run",
+      "properties": [
+        "args",
+        "cwd",
+        "script"
+      ],
+      "required": [
+        "script"
+      ]
+    }
+  ]
+}

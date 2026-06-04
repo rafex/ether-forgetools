@@ -1,0 +1,786 @@
+{
+  "binary": "forge-mcp-git",
+  "categories": [
+    "git",
+    "gh"
+  ],
+  "counts": {
+    "prompts": 13,
+    "resources": 10,
+    "tools": 33
+  },
+  "domain": "git",
+  "prompts": [
+    {
+      "arguments": [
+        {
+          "name": "cwd",
+          "required": false
+        },
+        {
+          "name": "remote",
+          "required": false
+        },
+        {
+          "name": "branch",
+          "required": false
+        },
+        {
+          "name": "include_untracked",
+          "required": false
+        }
+      ],
+      "description": "Analiza todos los cambios del repo, propone el plan de commits siguiendo\nConventional Commits y espera confirmaci\u00f3n del usuario antes de ejecutar.",
+      "name": "best_practice_commits"
+    },
+    {
+      "arguments": [
+        {
+          "name": "pr_number",
+          "required": true
+        },
+        {
+          "name": "depth",
+          "required": false
+        }
+      ],
+      "description": "Review a pull request: diff, context, checks, and review comments.",
+      "name": "code_review"
+    },
+    {
+      "arguments": [
+        {
+          "name": "new_type",
+          "required": false
+        },
+        {
+          "name": "new_scope",
+          "required": false
+        },
+        {
+          "name": "new_description",
+          "required": false
+        },
+        {
+          "name": "add_staged",
+          "required": false
+        },
+        {
+          "name": "cwd",
+          "required": false
+        }
+      ],
+      "description": "Amend the last commit: fix the message and/or add forgotten staged files.\n\nUse this when you just committed and realized the message is wrong or you\nforgot to stage a file. Do NOT use on commits already pushed to a shared branch.",
+      "name": "commit_amend"
+    },
+    {
+      "arguments": [
+        {
+          "name": "base_branch",
+          "required": false
+        },
+        {
+          "name": "strategy",
+          "required": false
+        },
+        {
+          "name": "cwd",
+          "required": false
+        }
+      ],
+      "description": "Clean up commit history before opening a PR: squash WIP commits, fix messages.",
+      "name": "commit_history_cleanup"
+    },
+    {
+      "arguments": [
+        {
+          "name": "type",
+          "required": true
+        },
+        {
+          "name": "description",
+          "required": true
+        },
+        {
+          "name": "scope",
+          "required": false
+        },
+        {
+          "name": "body",
+          "required": false
+        },
+        {
+          "name": "breaking_change",
+          "required": false
+        },
+        {
+          "name": "issue",
+          "required": false
+        },
+        {
+          "name": "cwd",
+          "required": false
+        }
+      ],
+      "description": "Craft and apply a Conventional Commit following the CC spec (conventionalcommits.org).\n\nInspects staged changes, validates the commit message, and calls git_commit.",
+      "name": "conventional_commit"
+    },
+    {
+      "arguments": [
+        {
+          "name": "run_id",
+          "required": true
+        }
+      ],
+      "description": "Diagnose and fix a failing GitHub Actions workflow run.",
+      "name": "debug_ci_failure"
+    },
+    {
+      "arguments": [
+        {
+          "name": "base_dir",
+          "required": true
+        },
+        {
+          "name": "pattern",
+          "required": false
+        }
+      ],
+      "description": "Health check for multiple side-by-side git repositories.",
+      "name": "multi_repo_health"
+    },
+    {
+      "arguments": [
+        {
+          "name": "session",
+          "required": true
+        },
+        {
+          "name": "tasks",
+          "required": true
+        },
+        {
+          "name": "base_branch",
+          "required": false
+        },
+        {
+          "name": "merge_method",
+          "required": false
+        }
+      ],
+      "description": "AI-agent guide for parallel git worktree development and integration.",
+      "name": "parallel_worktree_workflow"
+    },
+    {
+      "arguments": [
+        {
+          "name": "title",
+          "required": true
+        },
+        {
+          "name": "base_branch",
+          "required": false
+        },
+        {
+          "name": "draft",
+          "required": false
+        },
+        {
+          "name": "type",
+          "required": false
+        },
+        {
+          "name": "scope",
+          "required": false
+        },
+        {
+          "name": "issue",
+          "required": false
+        },
+        {
+          "name": "cwd",
+          "required": false
+        }
+      ],
+      "description": "Complete flow to create a well-structured GitHub Pull Request.\n\nChecks branch state, cleans commit history, writes the PR body from the\ndiff, and calls gh_pr_create with a conventional title.",
+      "name": "pr_create_flow"
+    },
+    {
+      "arguments": [
+        {
+          "name": "stack",
+          "required": true
+        },
+        {
+          "name": "base_branch",
+          "required": false
+        },
+        {
+          "name": "cwd",
+          "required": false
+        }
+      ],
+      "description": "Manage a stack of dependent Pull Requests (stacked PRs / PR chains).",
+      "name": "pr_stack"
+    },
+    {
+      "arguments": [
+        {
+          "name": "version",
+          "required": true
+        },
+        {
+          "name": "repo",
+          "required": false
+        },
+        {
+          "name": "branch",
+          "required": false
+        }
+      ],
+      "description": "Prepare and publish a new release.",
+      "name": "release_workflow"
+    },
+    {
+      "arguments": [
+        {
+          "name": "feature",
+          "required": true
+        },
+        {
+          "name": "base_branch",
+          "required": false
+        },
+        {
+          "name": "worktree_base",
+          "required": false
+        },
+        {
+          "name": "cwd",
+          "required": false
+        }
+      ],
+      "description": "Isolate a single feature in its own git worktree (simpler than parallel workflow).\n\nCreates one worktree for focused work, then integrates via a PR.\nUse this for a single self-contained feature. For N parallel tasks use\nthe `parallel_worktree_workflow` prompt instead.",
+      "name": "worktree_feature"
+    },
+    {
+      "arguments": [
+        {
+          "name": "hotfix",
+          "required": true
+        },
+        {
+          "name": "affected_version",
+          "required": false
+        },
+        {
+          "name": "base_branch",
+          "required": false
+        },
+        {
+          "name": "worktree_base",
+          "required": false
+        },
+        {
+          "name": "cwd",
+          "required": false
+        }
+      ],
+      "description": "Emergency hotfix in an isolated worktree \u2014 minimal blast radius, fast turnaround.\n\nCreates a `hotfix/<name>` branch from `base_branch`, applies the fix in an\nisolated worktree, and opens a PR. Does NOT touch the main checkout.",
+      "name": "worktree_hotfix"
+    }
+  ],
+  "pyproject": "mcps/git/pyproject.toml",
+  "resources": [
+    {
+      "description": "Machine-readable capabilities manifest for this domain server.",
+      "name": "resource_capabilities",
+      "uri": "forge://capabilities"
+    },
+    {
+      "description": "List tools available in this domain server.",
+      "name": "resource_catalog",
+      "uri": "forge://catalog"
+    },
+    {
+      "description": "Latest GitHub Actions workflow runs for the current repository.",
+      "name": "resource_gh_ci_status",
+      "uri": "forge://gh/ci-status"
+    },
+    {
+      "description": "Open pull requests for the current repository.",
+      "name": "resource_gh_open_prs",
+      "uri": "forge://gh/open-prs"
+    },
+    {
+      "description": "All branches with ahead/behind tracking information for the cwd repository.",
+      "name": "resource_git_branches",
+      "uri": "forge://git/branches"
+    },
+    {
+      "description": "Last 20 commits of the cwd repository.",
+      "name": "resource_git_log",
+      "uri": "forge://git/log"
+    },
+    {
+      "description": "Status of active parallel worktree workflow sessions in the cwd repo.",
+      "name": "resource_git_parallel_workflow",
+      "uri": "forge://git/parallel-workflow"
+    },
+    {
+      "description": "Current git working-tree status of the cwd repository.",
+      "name": "resource_git_status",
+      "uri": "forge://git/status"
+    },
+    {
+      "description": "Reference guide for git worktree concepts and the parallel workflow engine.",
+      "name": "resource_git_worktree_guide",
+      "uri": "forge://git/worktree-guide"
+    },
+    {
+      "description": "Active git worktrees for the cwd repository.",
+      "name": "resource_git_worktrees",
+      "uri": "forge://git/worktrees"
+    }
+  ],
+  "schema_version": "1.0",
+  "server_file": "forgetools/mcp_git_server.py",
+  "server_module": "forgetools.mcp_git_server",
+  "server_name": "forgetools-git",
+  "tools": [
+    {
+      "description": "forgetools.gh.actions \u2014 GitHub Actions workflow status",
+      "name": "gh_actions",
+      "properties": [
+        "branch",
+        "cwd",
+        "limit"
+      ],
+      "required": []
+    },
+    {
+      "description": "Fetch and summarize logs for GitHub Actions workflow runs or jobs",
+      "name": "gh_actions_logs",
+      "properties": [
+        "action",
+        "cwd",
+        "job_id",
+        "lines",
+        "run_id"
+      ],
+      "required": []
+    },
+    {
+      "description": "Trigger a GitHub Actions workflow dispatch with structured inputs",
+      "name": "gh_actions_trigger",
+      "properties": [
+        "action",
+        "cwd",
+        "failed_only",
+        "inputs",
+        "ref",
+        "run_id",
+        "timeout",
+        "workflow"
+      ],
+      "required": []
+    },
+    {
+      "description": "Validate GitHub Actions workflow files and CI configuration",
+      "name": "gh_actions_validate",
+      "properties": [
+        "cwd",
+        "file",
+        "path"
+      ],
+      "required": []
+    },
+    {
+      "description": "Query GitHub release metadata through the GitHub API",
+      "name": "gh_api_releases",
+      "properties": [
+        "action",
+        "asset",
+        "cwd",
+        "dest",
+        "include_drafts",
+        "limit",
+        "owner",
+        "repo",
+        "slug",
+        "tag"
+      ],
+      "required": []
+    },
+    {
+      "description": "Query GitHub repository metadata through the GitHub API",
+      "name": "gh_api_repo",
+      "properties": [
+        "action",
+        "cwd",
+        "limit",
+        "owner",
+        "repo",
+        "slug"
+      ],
+      "required": []
+    },
+    {
+      "description": "Search GitHub repositories, issues, pull requests, or code through the GitHub API",
+      "name": "gh_api_search",
+      "properties": [
+        "action",
+        "author",
+        "cwd",
+        "issue_type",
+        "label",
+        "language",
+        "limit",
+        "min_stars",
+        "order",
+        "org",
+        "query",
+        "repo",
+        "sort",
+        "state",
+        "topic",
+        "user"
+      ],
+      "required": []
+    },
+    {
+      "description": "Inspect, create, delete, or protect GitHub branches with structured output",
+      "name": "gh_branch",
+      "properties": [
+        "action",
+        "base",
+        "branch",
+        "cwd",
+        "days_stale",
+        "force",
+        "local",
+        "new_name",
+        "remote",
+        "set_default"
+      ],
+      "required": []
+    },
+    {
+      "description": "Create a GitHub issue with title, body, labels, and assignees",
+      "name": "gh_issue_create",
+      "properties": [
+        "action",
+        "assignees",
+        "body",
+        "body_file",
+        "comment",
+        "cwd",
+        "labels",
+        "milestone",
+        "number",
+        "project",
+        "title",
+        "web"
+      ],
+      "required": []
+    },
+    {
+      "description": "forgetools.gh.issue_list \u2014 List GitHub issues",
+      "name": "gh_issue_list",
+      "properties": [
+        "cwd",
+        "label",
+        "limit",
+        "state"
+      ],
+      "required": []
+    },
+    {
+      "description": "View a GitHub issue with comments, labels, assignees, and state",
+      "name": "gh_issue_view",
+      "properties": [
+        "action",
+        "cwd",
+        "limit",
+        "number",
+        "repo"
+      ],
+      "required": []
+    },
+    {
+      "description": "forgetools.gh.pr_create \u2014 Create a GitHub pull request",
+      "name": "gh_pr_create",
+      "properties": [
+        "base",
+        "body",
+        "cwd",
+        "draft",
+        "reviewer",
+        "title"
+      ],
+      "required": [
+        "title"
+      ]
+    },
+    {
+      "description": "Fetch and summarize the diff for a GitHub pull request",
+      "name": "gh_pr_diff",
+      "properties": [
+        "action",
+        "cwd",
+        "number",
+        "patch"
+      ],
+      "required": []
+    },
+    {
+      "description": "forgetools.gh.pr_list \u2014 List GitHub pull requests",
+      "name": "gh_pr_list",
+      "properties": [
+        "cwd",
+        "limit",
+        "state"
+      ],
+      "required": []
+    },
+    {
+      "description": "Merge a GitHub pull request using the selected merge strategy",
+      "name": "gh_pr_merge",
+      "properties": [
+        "action",
+        "admin",
+        "auto",
+        "body",
+        "cwd",
+        "delete_branch",
+        "method",
+        "number",
+        "title"
+      ],
+      "required": []
+    },
+    {
+      "description": "forgetools.gh.pr_review \u2014 View PR review comments and status",
+      "name": "gh_pr_review",
+      "properties": [
+        "cwd",
+        "number"
+      ],
+      "required": [
+        "number"
+      ]
+    },
+    {
+      "description": "forgetools.gh.release \u2014 Create a GitHub release",
+      "name": "gh_release",
+      "properties": [
+        "cwd",
+        "draft",
+        "notes",
+        "prerelease",
+        "tag",
+        "title"
+      ],
+      "required": [
+        "tag"
+      ]
+    },
+    {
+      "description": "forgetools.git.blame \u2014 Git blame with structured output",
+      "name": "git_blame",
+      "properties": [
+        "cwd",
+        "file",
+        "lines"
+      ],
+      "required": [
+        "file"
+      ]
+    },
+    {
+      "description": "forgetools.git.branch \u2014 List and manage git branches",
+      "name": "git_branch",
+      "properties": [
+        "all",
+        "cwd"
+      ],
+      "required": []
+    },
+    {
+      "description": "pick commits onto the current branch",
+      "name": "git_cherry_pick",
+      "properties": [
+        "commits",
+        "cwd",
+        "no_commit"
+      ],
+      "required": [
+        "commits"
+      ]
+    },
+    {
+      "description": "Create structured git commits with validation and optional dry-run planning",
+      "name": "git_commit",
+      "properties": [
+        "action",
+        "body",
+        "cwd",
+        "emoji",
+        "lang",
+        "message",
+        "stage_all"
+      ],
+      "required": []
+    },
+    {
+      "description": "forgetools.git.conflicts \u2014 List conflicted files",
+      "name": "git_conflicts",
+      "properties": [
+        "cwd"
+      ],
+      "required": []
+    },
+    {
+      "description": "forgetools.git.diff \u2014 Git diff with structured output",
+      "name": "git_diff",
+      "properties": [
+        "commit",
+        "cwd",
+        "path",
+        "staged"
+      ],
+      "required": []
+    },
+    {
+      "description": "forgetools.git.log \u2014 Git commit history",
+      "name": "git_log",
+      "properties": [
+        "author",
+        "cwd",
+        "max_count",
+        "path",
+        "since"
+      ],
+      "required": []
+    },
+    {
+      "description": "Inspect and coordinate git status across multiple repositories",
+      "name": "git_multi_repo",
+      "properties": [
+        "action",
+        "branch",
+        "cwd",
+        "dir",
+        "license_header",
+        "modules",
+        "no_fetch",
+        "no_license",
+        "pattern",
+        "remote",
+        "source_ext"
+      ],
+      "required": []
+    },
+    {
+      "description": "forgetools.git.pr_workflow \u2014 Create a GitHub PR via branch + push + gh pr create",
+      "name": "git_pr_workflow",
+      "properties": [
+        "base",
+        "body",
+        "branch",
+        "cwd",
+        "draft",
+        "title"
+      ],
+      "required": [
+        "branch",
+        "title"
+      ]
+    },
+    {
+      "description": "forgetools.git.stash \u2014 List and manage git stashes",
+      "name": "git_stash",
+      "properties": [
+        "action",
+        "cwd",
+        "message"
+      ],
+      "required": []
+    },
+    {
+      "description": "forgetools.git.status \u2014 Git repository status",
+      "name": "git_status",
+      "properties": [
+        "cwd"
+      ],
+      "required": []
+    },
+    {
+      "description": "forgetools.git.submodule_status \u2014 Git submodule status",
+      "name": "git_submodule_status",
+      "properties": [
+        "cwd"
+      ],
+      "required": []
+    },
+    {
+      "description": "forgetools.git.submodule_sync \u2014 Sync and update git submodules",
+      "name": "git_submodule_sync",
+      "properties": [
+        "cwd",
+        "init",
+        "recursive"
+      ],
+      "required": []
+    },
+    {
+      "description": "forgetools.git.tag \u2014 List, create, or delete git tags",
+      "name": "git_tag",
+      "properties": [
+        "action",
+        "cwd",
+        "message",
+        "name",
+        "push",
+        "ref"
+      ],
+      "required": []
+    },
+    {
+      "description": "Manage git worktrees: list, add, remove, move, prune, lock/unlock, status",
+      "name": "git_worktree",
+      "properties": [
+        "action",
+        "branch",
+        "commit",
+        "cwd",
+        "dry_run",
+        "force",
+        "new_branch",
+        "new_path",
+        "path",
+        "reason"
+      ],
+      "required": []
+    },
+    {
+      "description": "Manage parallel git worktree workflows from plan through integration",
+      "name": "git_worktree_workflow",
+      "properties": [
+        "action",
+        "base_branch",
+        "branch_prefix",
+        "cleanup",
+        "cwd",
+        "merge_method",
+        "session",
+        "target_branch",
+        "task",
+        "tasks",
+        "worktree_base"
+      ],
+      "required": []
+    }
+  ],
+  "version": "0.1.0"
+}

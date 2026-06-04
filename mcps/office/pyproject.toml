@@ -6,7 +6,7 @@ build-backend = "hatchling.build"
 name = "forgetools-mcp-office"
 version = "0.1.0"
 requires-python = ">=3.11"
-dependencies = ["forgetools"]
+dependencies = ["forgetools", "reportlab>=4.2.0", "python-docx>=1.1.0", "pypdf>=5.0.0", "openpyxl>=3.1.0"]
 
 [project.scripts]
 forge-mcp-office = "forgetools.mcp_office_server:main"

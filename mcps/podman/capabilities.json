@@ -1,0 +1,105 @@
+{
+  "binary": "forge-mcp-podman",
+  "categories": [
+    "podman"
+  ],
+  "counts": {
+    "prompts": 1,
+    "resources": 4,
+    "tools": 5
+  },
+  "domain": "podman",
+  "prompts": [
+    {
+      "arguments": [
+        {
+          "name": "container_name",
+          "required": true
+        }
+      ],
+      "description": "Debug a failing Docker container: logs \u2192 inspect \u2192 exec \u2192 fix.",
+      "name": "docker_debug"
+    }
+  ],
+  "pyproject": "mcps/podman/pyproject.toml",
+  "resources": [
+    {
+      "description": "Machine-readable capabilities manifest for this domain server.",
+      "name": "resource_capabilities",
+      "uri": "forge://capabilities"
+    },
+    {
+      "description": "List tools available in this domain server.",
+      "name": "resource_catalog",
+      "uri": "forge://catalog"
+    },
+    {
+      "description": "Bastion Podman port allocation policy.",
+      "name": "resource_podman_policy",
+      "uri": "forge://podman/policy/bastion-ports"
+    },
+    {
+      "description": "Occupied and available Podman published ports grouped by policy range.",
+      "name": "resource_podman_ports",
+      "uri": "forge://podman/ports"
+    }
+  ],
+  "schema_version": "1.0",
+  "server_file": "forgetools/mcp_podman_server.py",
+  "server_module": "forgetools.mcp_podman_server",
+  "server_name": "forgetools-podman",
+  "tools": [
+    {
+      "description": "Read Podman container logs",
+      "name": "podman_logs",
+      "properties": [
+        "container",
+        "cwd",
+        "lines"
+      ],
+      "required": [
+        "container"
+      ]
+    },
+    {
+      "description": "Inspect occupied Podman published ports",
+      "name": "podman_ports",
+      "properties": [
+        "cwd"
+      ],
+      "required": []
+    },
+    {
+      "description": "List Podman containers",
+      "name": "podman_ps",
+      "properties": [
+        "all",
+        "cwd"
+      ],
+      "required": []
+    },
+    {
+      "description": "Select the first free port in the approved bastion range",
+      "name": "podman_select_port",
+      "properties": [
+        "category",
+        "cwd"
+      ],
+      "required": [
+        "category"
+      ]
+    },
+    {
+      "description": "Validate Podman port publications against bastion policy",
+      "name": "podman_validate_ports",
+      "properties": [
+        "cwd",
+        "file"
+      ],
+      "required": [
+        "file"
+      ]
+    }
+  ],
+  "version": "0.1.0"
+}

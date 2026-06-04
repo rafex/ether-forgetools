@@ -1,0 +1,211 @@
+{
+  "binary": "forge-mcp-java",
+  "categories": [
+    "java"
+  ],
+  "counts": {
+    "prompts": 5,
+    "resources": 6,
+    "tools": 8
+  },
+  "domain": "java",
+  "prompts": [
+    {
+      "arguments": [
+        {
+          "name": "scope",
+          "required": true
+        }
+      ],
+      "description": "Run a strict Java code review workflow for a target scope.",
+      "name": "java_code_review_strict"
+    },
+    {
+      "arguments": [
+        {
+          "name": "service_name",
+          "required": true
+        },
+        {
+          "name": "package_base",
+          "required": true
+        }
+      ],
+      "description": "Scaffold a new Java service following local standards.",
+      "name": "java_new_service_scaffold"
+    },
+    {
+      "arguments": [
+        {
+          "name": "project_dir",
+          "required": false
+        }
+      ],
+      "description": "Comprehensive analysis of a Java/Maven project.",
+      "name": "java_project_analysis"
+    },
+    {
+      "arguments": [
+        {
+          "name": "query",
+          "required": true
+        },
+        {
+          "name": "project_dir",
+          "required": false
+        }
+      ],
+      "description": "Research Maven Central for a dependency: find, compare, get checksums, and add to POM.",
+      "name": "maven_dependency_research"
+    },
+    {
+      "arguments": [
+        {
+          "name": "target_dir",
+          "required": false
+        },
+        {
+          "name": "scope",
+          "required": false
+        }
+      ],
+      "description": "Run a comprehensive security audit on the codebase.",
+      "name": "security_audit"
+    }
+  ],
+  "pyproject": "mcps/java/pyproject.toml",
+  "resources": [
+    {
+      "description": "Machine-readable capabilities manifest for this domain server.",
+      "name": "resource_capabilities",
+      "uri": "forge://capabilities"
+    },
+    {
+      "description": "List tools available in this domain server.",
+      "name": "resource_catalog",
+      "uri": "forge://catalog"
+    },
+    {
+      "description": "Java dependency and version upgrade policy.",
+      "name": "java_dependency_policy",
+      "uri": "forge://java/standards/dependency-policy"
+    },
+    {
+      "description": "Java project layout and module structure standards.",
+      "name": "java_project_structure",
+      "uri": "forge://java/standards/project-structure"
+    },
+    {
+      "description": "Java testing strategy, levels, and quality gates.",
+      "name": "java_testing_strategy",
+      "uri": "forge://java/standards/testing-strategy"
+    },
+    {
+      "description": "Latest test coverage summary for the cwd project.",
+      "name": "resource_test_coverage",
+      "uri": "forge://test/coverage"
+    }
+  ],
+  "schema_version": "1.0",
+  "server_file": "forgetools/mcp_java_server.py",
+  "server_module": "forgetools.mcp_java_server",
+  "server_name": "forgetools-java",
+  "tools": [
+    {
+      "description": "Format Java source files with google-java-format when available",
+      "name": "java_format",
+      "properties": [
+        "action",
+        "binary",
+        "cwd",
+        "files",
+        "lines",
+        "pattern",
+        "style"
+      ],
+      "required": []
+    },
+    {
+      "description": "forgetools.java.gradle \u2014 Run Gradle tasks with structured output",
+      "name": "java_gradle",
+      "properties": [
+        "cwd",
+        "module",
+        "skip_tests",
+        "task"
+      ],
+      "required": []
+    },
+    {
+      "description": "Inspect Java projects using JDT-style source and symbol analysis helpers",
+      "name": "java_jdt",
+      "properties": [
+        "action",
+        "binary",
+        "cwd",
+        "data_dir"
+      ],
+      "required": []
+    },
+    {
+      "description": "forgetools.java.maven \u2014 Run Maven goals with structured output",
+      "name": "java_maven",
+      "properties": [
+        "cwd",
+        "goal",
+        "module",
+        "profiles",
+        "skip_tests"
+      ],
+      "required": []
+    },
+    {
+      "description": "Query Maven Central for artifact versions, metadata, and checksums",
+      "name": "java_maven_central",
+      "properties": [
+        "action",
+        "artifact_id",
+        "classifier",
+        "coords",
+        "cwd",
+        "group_id",
+        "packaging",
+        "query",
+        "rows",
+        "version"
+      ],
+      "required": []
+    },
+    {
+      "description": "Inspect Maven multi-module project structure and module metadata",
+      "name": "java_maven_modules",
+      "properties": [
+        "action",
+        "cwd",
+        "dir",
+        "path",
+        "pattern"
+      ],
+      "required": []
+    },
+    {
+      "description": "forgetools.java.parse_stacktrace \u2014 Parse Java stack traces into structured data",
+      "name": "java_stacktrace",
+      "properties": [
+        "cwd",
+        "file"
+      ],
+      "required": []
+    },
+    {
+      "description": "forgetools.java.test_report \u2014 Parse JUnit/Surefire XML test reports",
+      "name": "java_test_report",
+      "properties": [
+        "cwd",
+        "path"
+      ],
+      "required": []
+    }
+  ],
+  "version": "0.1.0"
+}

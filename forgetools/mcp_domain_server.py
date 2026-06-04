@@ -12,6 +12,47 @@ from fastmcp import FastMCP
 from forgetools._forge_cli import REGISTRY
 
 
+DESCRIPTION_OVERRIDES = {
+    "context repo-size": "Measure repository size, language distribution, and git metadata for context planning",
+    "ether catalog": "List Ether ecosystem repositories and their local/remote availability",
+    "fs find-by-type": "Find files by semantic type such as code, docs, config, images, or archives",
+    "fs head": "Read the first lines of a file or matching files with structured metadata",
+    "fs tail": "Read the last lines of a file or matching files with structured metadata",
+    "gh actions-logs": "Fetch and summarize logs for GitHub Actions workflow runs or jobs",
+    "gh actions-trigger": "Trigger a GitHub Actions workflow dispatch with structured inputs",
+    "gh actions-validate": "Validate GitHub Actions workflow files and CI configuration",
+    "gh api-releases": "Query GitHub release metadata through the GitHub API",
+    "gh api-repo": "Query GitHub repository metadata through the GitHub API",
+    "gh api-search": "Search GitHub repositories, issues, pull requests, or code through the GitHub API",
+    "gh branch": "Inspect, create, delete, or protect GitHub branches with structured output",
+    "gh issue-create": "Create a GitHub issue with title, body, labels, and assignees",
+    "gh issue-view": "View a GitHub issue with comments, labels, assignees, and state",
+    "gh pr-diff": "Fetch and summarize the diff for a GitHub pull request",
+    "gh pr-merge": "Merge a GitHub pull request using the selected merge strategy",
+    "git commit": "Create structured git commits with validation and optional dry-run planning",
+    "git multi-repo": "Inspect and coordinate git status across multiple repositories",
+    "git worktree-workflow": "Manage parallel git worktree workflows from plan through integration",
+    "helm diff": "Compare Helm release changes before install or upgrade",
+    "java format": "Format Java source files with google-java-format when available",
+    "java jdt": "Inspect Java projects using JDT-style source and symbol analysis helpers",
+    "java maven-central": "Query Maven Central for artifact versions, metadata, and checksums",
+    "java maven-modules": "Inspect Maven multi-module project structure and module metadata",
+    "json query": "Query JSON documents using dotted paths and array indexes",
+    "net http": "Execute HTTP requests with structured status, headers, body, and timing data",
+    "process inspect": "Inspect a process by PID with command, resource usage, and open-file details",
+    "process ports": "List listening or connected network ports with owning process information",
+    "process top": "Show top local processes by CPU or memory usage",
+    "security eslint": "Run ESLint-oriented security checks and return structured findings",
+    "security owasp": "Run OWASP dependency checks and parse security findings",
+    "security spotbugs": "Run SpotBugs security analysis and parse structured findings",
+    "specnative context": "Read, write, or list SpecNative context documents for the current repository",
+    "specnative initiative": "Create or update SpecNative initiatives from repository context",
+    "specnative status": "Report SpecNative specs, initiatives, states, and task progress",
+    "template scaffold": "Generate files from a named template and variable map",
+    "test coverage-report": "Parse coverage reports and return summary metrics and uncovered files",
+}
+
+
 def _wrap(fn):
     """Return dict instead of ForgeResult, preserve signature for schema gen."""
     @functools.wraps(fn)
@@ -24,6 +65,9 @@ def _wrap(fn):
 
 def _tool_description(key: str, module_path: str) -> str:
     """Build a stable MCP description for a forgetools tool."""
+    if key in DESCRIPTION_OVERRIDES:
+        return DESCRIPTION_OVERRIDES[key]
+
     try:
         mod = importlib.import_module(module_path)
     except Exception:

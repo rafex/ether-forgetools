@@ -1,0 +1,86 @@
+{
+  "binary": "forge-mcp-websearch",
+  "categories": [
+    "websearch",
+    "web"
+  ],
+  "counts": {
+    "prompts": 0,
+    "resources": 2,
+    "tools": 3
+  },
+  "domain": "websearch",
+  "prompts": [],
+  "pyproject": "mcps/websearch/pyproject.toml",
+  "resources": [
+    {
+      "description": "Machine-readable capabilities manifest for this domain server.",
+      "name": "resource_capabilities",
+      "uri": "forge://capabilities"
+    },
+    {
+      "description": "List tools available in this domain server.",
+      "name": "resource_catalog",
+      "uri": "forge://catalog"
+    }
+  ],
+  "schema_version": "1.0",
+  "server_file": "forgetools/mcp_websearch_server.py",
+  "server_module": "forgetools.mcp_websearch_server",
+  "server_name": "forgetools-websearch",
+  "tools": [
+    {
+      "description": "Fetch a webpage and extract clean readable text using XPath.",
+      "name": "web_fetch",
+      "properties": [
+        "cwd",
+        "include_headings",
+        "include_links",
+        "insecure",
+        "max_chars",
+        "timeout",
+        "url",
+        "user_agent",
+        "xpath"
+      ],
+      "required": [
+        "url"
+      ]
+    },
+    {
+      "description": "Search DuckDuckGo using DDGS and return normalized JSON results.",
+      "name": "websearch_ddg_search",
+      "properties": [
+        "cwd",
+        "max_results",
+        "query",
+        "region",
+        "safesearch",
+        "source",
+        "timelimit"
+      ],
+      "required": [
+        "query"
+      ]
+    },
+    {
+      "description": "Visit a URL and return parsed text/metadata for browsing workflows.",
+      "name": "websearch_visit",
+      "properties": [
+        "cwd",
+        "include_headings",
+        "include_links",
+        "insecure",
+        "max_chars",
+        "timeout",
+        "url",
+        "user_agent",
+        "xpath"
+      ],
+      "required": [
+        "url"
+      ]
+    }
+  ],
+  "version": "0.1.0"
+}

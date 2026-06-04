@@ -1,0 +1,371 @@
+{
+  "binary": "forge-mcp-file",
+  "categories": [
+    "fs",
+    "search",
+    "edit",
+    "diff",
+    "text",
+    "template",
+    "json",
+    "config"
+  ],
+  "counts": {
+    "prompts": 2,
+    "resources": 3,
+    "tools": 22
+  },
+  "domain": "file",
+  "prompts": [
+    {
+      "arguments": [
+        {
+          "name": "preset",
+          "required": false
+        },
+        {
+          "name": "cwd",
+          "required": false
+        }
+      ],
+      "description": "Audit and patch .gitignore for macOS metadata and Claude Code files.\n\nReads the current .gitignore, identifies missing patterns, and applies\nthe selected preset without duplicating existing entries.",
+      "name": "gitignore_setup"
+    },
+    {
+      "arguments": [
+        {
+          "name": "tool_name",
+          "required": true
+        },
+        {
+          "name": "category",
+          "required": true
+        },
+        {
+          "name": "description",
+          "required": true
+        }
+      ],
+      "description": "Scaffold a new forgetools module following the ForgeResult pattern.",
+      "name": "new_tool_scaffold"
+    }
+  ],
+  "pyproject": "mcps/file/pyproject.toml",
+  "resources": [
+    {
+      "description": "Machine-readable capabilities manifest for this domain server.",
+      "name": "resource_capabilities",
+      "uri": "forge://capabilities"
+    },
+    {
+      "description": "List tools available in this domain server.",
+      "name": "resource_catalog",
+      "uri": "forge://catalog"
+    },
+    {
+      "description": "Current .gitignore content and missing preset analysis.",
+      "name": "resource_config_gitignore",
+      "uri": "forge://config/gitignore"
+    }
+  ],
+  "schema_version": "1.0",
+  "server_file": "forgetools/mcp_file_server.py",
+  "server_module": "forgetools.mcp_file_server",
+  "server_name": "forgetools-file",
+  "tools": [
+    {
+      "description": "Add common .gitignore patterns for macOS and/or Claude Code.",
+      "name": "config_gitignore",
+      "properties": [
+        "cwd",
+        "dry_run",
+        "preset"
+      ],
+      "required": []
+    },
+    {
+      "description": "Validate config files: JSON, YAML, TOML, XML, Properties, .env, INI",
+      "name": "config_validate",
+      "properties": [
+        "cwd",
+        "file",
+        "fmt"
+      ],
+      "required": [
+        "file"
+      ]
+    },
+    {
+      "description": "Compare two directory trees. Returns added, removed, and modified file lists.",
+      "name": "diff_dirs",
+      "properties": [
+        "a",
+        "b",
+        "cwd",
+        "ignore"
+      ],
+      "required": [
+        "a",
+        "b"
+      ]
+    },
+    {
+      "description": "Semantic diff of two JSON documents.",
+      "name": "diff_json",
+      "properties": [
+        "a",
+        "b",
+        "cwd",
+        "ignore_order"
+      ],
+      "required": [
+        "a",
+        "b"
+      ]
+    },
+    {
+      "description": "Semantic diff of two YAML documents.",
+      "name": "diff_yaml",
+      "properties": [
+        "a",
+        "b",
+        "cwd",
+        "ignore_order"
+      ],
+      "required": [
+        "a",
+        "b"
+      ]
+    },
+    {
+      "description": "forgetools.edit.bulk_rename \u2014 Rename files matching a pattern",
+      "name": "edit_bulk_rename",
+      "properties": [
+        "cwd",
+        "dry_run",
+        "path",
+        "pattern",
+        "replacement"
+      ],
+      "required": [
+        "pattern",
+        "replacement"
+      ]
+    },
+    {
+      "description": "forgetools.edit.insert \u2014 Insert lines into a file at a specific position",
+      "name": "edit_insert",
+      "properties": [
+        "after_line",
+        "content",
+        "cwd",
+        "file"
+      ],
+      "required": [
+        "file",
+        "after_line",
+        "content"
+      ]
+    },
+    {
+      "description": "forgetools.edit.replace_lines \u2014 Replace a range of lines in a file",
+      "name": "edit_replace_lines",
+      "properties": [
+        "content",
+        "content_file",
+        "cwd",
+        "end",
+        "file",
+        "start"
+      ],
+      "required": [
+        "file",
+        "start",
+        "end"
+      ]
+    },
+    {
+      "description": "forgetools.fs.checksum \u2014 Compute file checksums using stdlib hashlib",
+      "name": "fs_checksum",
+      "properties": [
+        "algorithm",
+        "cwd",
+        "path",
+        "recursive"
+      ],
+      "required": [
+        "path"
+      ]
+    },
+    {
+      "description": "forgetools.fs.diff \u2014 Diff two files or git refs",
+      "name": "fs_diff",
+      "properties": [
+        "a",
+        "b",
+        "context",
+        "cwd"
+      ],
+      "required": [
+        "a",
+        "b"
+      ]
+    },
+    {
+      "description": "Find files by semantic type such as code, docs, config, images, or archives",
+      "name": "fs_find_by_type",
+      "properties": [
+        "cwd",
+        "max",
+        "path",
+        "recursive",
+        "type"
+      ],
+      "required": [
+        "type"
+      ]
+    },
+    {
+      "description": "Read the first lines of a file or matching files with structured metadata",
+      "name": "fs_head",
+      "properties": [
+        "cwd",
+        "file",
+        "lines",
+        "path",
+        "pattern"
+      ],
+      "required": []
+    },
+    {
+      "description": "forgetools.fs.read \u2014 Read a file with metadata",
+      "name": "fs_read",
+      "properties": [
+        "cwd",
+        "file",
+        "lines"
+      ],
+      "required": [
+        "file"
+      ]
+    },
+    {
+      "description": "Read the last lines of a file or matching files with structured metadata",
+      "name": "fs_tail",
+      "properties": [
+        "cwd",
+        "file",
+        "lines",
+        "path",
+        "pattern"
+      ],
+      "required": []
+    },
+    {
+      "description": "forgetools.fs.tree \u2014 Directory tree with smart filters",
+      "name": "fs_tree",
+      "properties": [
+        "cwd",
+        "exclude",
+        "max_depth",
+        "path"
+      ],
+      "required": []
+    },
+    {
+      "description": "Query JSON documents using dotted paths and array indexes",
+      "name": "json_query",
+      "properties": [
+        "cwd",
+        "data_str",
+        "file",
+        "path"
+      ],
+      "required": []
+    },
+    {
+      "description": "forgetools.search.find_files \u2014 Find files by name/extension",
+      "name": "search_find_files",
+      "properties": [
+        "cwd",
+        "exclude",
+        "ext",
+        "max_results",
+        "name",
+        "path"
+      ],
+      "required": []
+    },
+    {
+      "description": "forgetools.search.grep \u2014 Structured grep over project files",
+      "name": "search_grep",
+      "properties": [
+        "context",
+        "cwd",
+        "file_ext",
+        "ignore_case",
+        "max_results",
+        "path",
+        "pattern"
+      ],
+      "required": [
+        "pattern"
+      ]
+    },
+    {
+      "description": "forgetools.search.search_replace \u2014 Bulk find and replace in files",
+      "name": "search_replace",
+      "properties": [
+        "cwd",
+        "dry_run",
+        "ext",
+        "path",
+        "pattern",
+        "replacement"
+      ],
+      "required": [
+        "pattern",
+        "replacement"
+      ]
+    },
+    {
+      "description": "forgetools.search.todo \u2014 Find TODOs, FIXMEs, HACKs in code",
+      "name": "search_todo",
+      "properties": [
+        "cwd",
+        "ext",
+        "path"
+      ],
+      "required": []
+    },
+    {
+      "description": "Generate files from a named template and variable map",
+      "name": "template_scaffold",
+      "properties": [
+        "cwd",
+        "output",
+        "template",
+        "vars"
+      ],
+      "required": [
+        "template",
+        "output"
+      ]
+    },
+    {
+      "description": "Audit and optionally fix invisible/problematic characters in text files",
+      "name": "text_audit_chars",
+      "properties": [
+        "cwd",
+        "exclude",
+        "extensions",
+        "fix",
+        "report_tabs",
+        "root",
+        "staged"
+      ],
+      "required": []
+    }
+  ],
+  "version": "0.1.0"
+}

@@ -1,0 +1,207 @@
+{
+  "binary": "forge-mcp-linux",
+  "counts": {
+    "prompts": 2,
+    "resources": 5,
+    "tools": 12
+  },
+  "domain": "linux",
+  "prompts": [
+    {
+      "arguments": [
+        {
+          "name": "symptom",
+          "required": true
+        },
+        {
+          "name": "component",
+          "required": false
+        }
+      ],
+      "description": "Structured bug hunt: logs + git blame + stacktrace + grep.",
+      "name": "bug_investigation"
+    },
+    {
+      "arguments": [
+        {
+          "name": "target",
+          "required": true
+        }
+      ],
+      "description": "Analyse performance: process top + ports + resource usage + profiling guide.",
+      "name": "performance_analysis"
+    }
+  ],
+  "resources": [
+    {
+      "description": "Machine-readable capabilities manifest for this domain server.",
+      "name": "resource_capabilities",
+      "uri": "forge://capabilities"
+    },
+    {
+      "description": "List tools available in this domain server.",
+      "name": "resource_catalog",
+      "uri": "forge://catalog"
+    },
+    {
+      "description": "Environment variables relevant to development tools.",
+      "name": "resource_diag_env",
+      "uri": "forge://diag/env"
+    },
+    {
+      "description": "System health: availability of required development tools.",
+      "name": "resource_diag_health",
+      "uri": "forge://diag/health"
+    },
+    {
+      "description": "Snapshot of all listening ports on the local machine.",
+      "name": "resource_process_listening",
+      "uri": "forge://process/listening"
+    }
+  ],
+  "schema_version": "1.0",
+  "tools": [
+    {
+      "description": "forgetools.diag.env_validate \u2014 Validate required environment variables",
+      "name": "diag_env",
+      "properties": [
+        "cwd",
+        "required"
+      ],
+      "required": [
+        "required"
+      ]
+    },
+    {
+      "description": "forgetools.diag.health \u2014 Check availability of required tools",
+      "name": "diag_health",
+      "properties": [
+        "cwd"
+      ],
+      "required": []
+    },
+    {
+      "description": "forgetools.diag.port_check \u2014 Check if a port is in use",
+      "name": "diag_port",
+      "properties": [
+        "cwd",
+        "host",
+        "port"
+      ],
+      "required": [
+        "port"
+      ]
+    },
+    {
+      "description": "forgetools.net.health_check \u2014 Check if a service endpoint is healthy",
+      "name": "net_health",
+      "properties": [
+        "cwd",
+        "expected_status",
+        "timeout",
+        "url"
+      ],
+      "required": [
+        "url"
+      ]
+    },
+    {
+      "description": "Execute HTTP requests with structured status, headers, body, and timing data",
+      "name": "net_http",
+      "properties": [
+        "auth",
+        "backend",
+        "bearer",
+        "body",
+        "cwd",
+        "follow",
+        "form",
+        "header",
+        "insecure",
+        "method",
+        "output",
+        "timeout",
+        "url"
+      ],
+      "required": [
+        "url"
+      ]
+    },
+    {
+      "description": "Inspect a process by PID with command, resource usage, and open-file details",
+      "name": "process_inspect",
+      "properties": [
+        "action",
+        "cwd",
+        "filter_key",
+        "pid"
+      ],
+      "required": []
+    },
+    {
+      "description": "forgetools.process.kill \u2014 Kill a process by PID or name",
+      "name": "process_kill",
+      "properties": [
+        "cwd",
+        "name",
+        "pid",
+        "signal"
+      ],
+      "required": []
+    },
+    {
+      "description": "forgetools.process.port \u2014 Check what process is using a port",
+      "name": "process_port",
+      "properties": [
+        "cwd",
+        "port"
+      ],
+      "required": [
+        "port"
+      ]
+    },
+    {
+      "description": "List listening or connected network ports with owning process information",
+      "name": "process_ports",
+      "properties": [
+        "action",
+        "cwd",
+        "pid",
+        "port"
+      ],
+      "required": []
+    },
+    {
+      "description": "forgetools.process.ps \u2014 List running processes",
+      "name": "process_ps",
+      "properties": [
+        "cwd",
+        "name"
+      ],
+      "required": []
+    },
+    {
+      "description": "Show top local processes by CPU or memory usage",
+      "name": "process_top",
+      "properties": [
+        "action",
+        "cwd",
+        "n"
+      ],
+      "required": []
+    },
+    {
+      "description": "forgetools.shell.run \u2014 Execute arbitrary shell commands",
+      "name": "shell_run",
+      "properties": [
+        "cmd",
+        "cwd",
+        "max_bytes",
+        "timeout"
+      ],
+      "required": [
+        "cmd"
+      ]
+    }
+  ]
+}

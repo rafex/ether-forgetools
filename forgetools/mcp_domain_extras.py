@@ -91,6 +91,8 @@ def register_domain_resources(server: FastMCP, domain: str) -> None:
         _register_python_resources(server)
     elif domain == "quality":
         _register_quality_resources(server)
+    elif domain == "office":
+        _register_office_resources(server)
 
 
 def _register_git_resources(server: FastMCP) -> None:
@@ -222,6 +224,36 @@ def _register_quality_resources(server: FastMCP) -> None:
 - Secret scan must be clean before pushing.
 """
 
+
+def _register_office_resources(server: FastMCP) -> None:
+    @server.resource("forge://office/report-workflow")
+    def resource_office_report_workflow() -> str:
+        """Recommended workflow for generating business reports with mcp-office."""
+        return """# Office Report Workflow
+
+1. Generate source content in Markdown or HTML.
+2. Use `office_docx_create` when reviewers need editable documents.
+3. Use `office_pdf_create` when the artifact must be immutable.
+4. Use `office_table_report` for CSV/XLSX appendices.
+5. Use `office_pdf_append_tables` to attach tabular appendices to a PDF.
+6. Use `office_pdf_metadata`, `office_pdf_text`, and `office_pdf_images` for validation/extraction.
+7. Use `office_pdf_stamp` for visible draft/confidential/review stamps.
+"""
+
+    @server.resource("forge://office/dependency-policy")
+    def resource_office_dependency_policy() -> str:
+        """Office MCP dependency policy and optional local tool expectations."""
+        return """# Office Dependency Policy
+
+Python dependencies are scoped to `mcps/office/pyproject.toml`:
+
+- `reportlab` for PDF generation and stamping overlays.
+- `python-docx` for DOCX generation.
+- `pypdf` for PDF merge/metadata/text/images/stamping composition.
+- `openpyxl` for XLSX table ingestion.
+
+External CLIs such as `pdfunite` or `qpdf` may still be used by `office_pdf_merge` when available.
+"""
 
 def _register_specnative_resources(server: FastMCP) -> None:
     specnative_docs = (

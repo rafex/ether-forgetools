@@ -15,7 +15,7 @@ dependencies = []
 forge     = "forgetools._forge_cli:main"
 
 [project.optional-dependencies]
-mcp = ["fastmcp>=3.2.3", "ddgs>=9.0.0"]
+mcp = ["fastmcp>=3.2.3"]
 dev = ["pytest", "pytest-cov"]
 
 [tool.hatch.build.targets.wheel]

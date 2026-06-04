@@ -1,0 +1,83 @@
+{
+  "binary": "forge-mcp-data",
+  "categories": [
+    "db"
+  ],
+  "counts": {
+    "prompts": 1,
+    "resources": 2,
+    "tools": 3
+  },
+  "domain": "data",
+  "prompts": [
+    {
+      "arguments": [
+        {
+          "name": "migration_name",
+          "required": true
+        },
+        {
+          "name": "db_type",
+          "required": false
+        }
+      ],
+      "description": "Plan, create, test, and prepare rollback for a database migration.",
+      "name": "database_migration"
+    }
+  ],
+  "pyproject": "mcps/data/pyproject.toml",
+  "resources": [
+    {
+      "description": "Machine-readable capabilities manifest for this domain server.",
+      "name": "resource_capabilities",
+      "uri": "forge://capabilities"
+    },
+    {
+      "description": "List tools available in this domain server.",
+      "name": "resource_catalog",
+      "uri": "forge://catalog"
+    }
+  ],
+  "schema_version": "1.0",
+  "server_file": "forgetools/mcp_data_server.py",
+  "server_module": "forgetools.mcp_data_server",
+  "server_name": "forgetools-data",
+  "tools": [
+    {
+      "description": "forgetools.db.migrations \u2014 Check database migration status",
+      "name": "db_migrations",
+      "properties": [
+        "connection",
+        "cwd",
+        "tool"
+      ],
+      "required": []
+    },
+    {
+      "description": "forgetools.db.query \u2014 Run a SQL query against sqlite, postgres, or mysql",
+      "name": "db_query",
+      "properties": [
+        "connection",
+        "cwd",
+        "db",
+        "limit",
+        "sql"
+      ],
+      "required": [
+        "sql"
+      ]
+    },
+    {
+      "description": "forgetools.db.schema \u2014 Inspect database schema",
+      "name": "db_schema",
+      "properties": [
+        "connection",
+        "cwd",
+        "db",
+        "table"
+      ],
+      "required": []
+    }
+  ],
+  "version": "0.1.0"
+}

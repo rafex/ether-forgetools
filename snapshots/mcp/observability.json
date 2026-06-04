@@ -1,0 +1,74 @@
+{
+  "binary": "forge-mcp-observability",
+  "counts": {
+    "prompts": 2,
+    "resources": 2,
+    "tools": 2
+  },
+  "domain": "observability",
+  "prompts": [
+    {
+      "arguments": [
+        {
+          "name": "symptom",
+          "required": true
+        },
+        {
+          "name": "component",
+          "required": false
+        }
+      ],
+      "description": "Structured bug hunt: logs + git blame + stacktrace + grep.",
+      "name": "bug_investigation"
+    },
+    {
+      "arguments": [
+        {
+          "name": "target",
+          "required": true
+        }
+      ],
+      "description": "Analyse performance: process top + ports + resource usage + profiling guide.",
+      "name": "performance_analysis"
+    }
+  ],
+  "resources": [
+    {
+      "description": "Machine-readable capabilities manifest for this domain server.",
+      "name": "resource_capabilities",
+      "uri": "forge://capabilities"
+    },
+    {
+      "description": "List tools available in this domain server.",
+      "name": "resource_catalog",
+      "uri": "forge://catalog"
+    }
+  ],
+  "schema_version": "1.0",
+  "tools": [
+    {
+      "description": "Parse JSON lines logs and summarize levels",
+      "name": "observability_log_parse",
+      "properties": [
+        "cwd",
+        "file"
+      ],
+      "required": [
+        "file"
+      ]
+    },
+    {
+      "description": "Tail logs with optional filtering",
+      "name": "observability_log_tail",
+      "properties": [
+        "cwd",
+        "file",
+        "grep",
+        "lines"
+      ],
+      "required": [
+        "file"
+      ]
+    }
+  ]
+}

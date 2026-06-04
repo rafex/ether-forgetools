@@ -22,11 +22,17 @@ jobs:
       - name: Install all MCP domains
         run: make install-mcp
 
+      - name: Install test dependencies
+        run: uv pip install --python .venv/bin/python -e ".[dev]"
+
       - name: Compile Python sources
         run: .venv/bin/python -m py_compile $(find forgetools -name '*.py')
 
       - name: Generate OpenAPI
         run: .venv/bin/python scripts/gen_openapi.py
+
+      - name: Generate MCP metadata
+        run: .venv/bin/python scripts/gen_mcp_metadata.py
 
       - name: Validate OpenAPI tool count
         run: |
@@ -35,6 +41,9 @@ jobs:
           from pathlib import Path
           spec = json.loads(Path("openapi/forgetools.json").read_text())
           count = len(spec["paths"])
-          assert count >= 146, f"Expected at least 146 tools, got {count}"
+          assert count >= 153, f"Expected at least 153 tools, got {count}"
           print(f"OpenAPI tools: {count}")
           PY
+
+      - name: Run MCP tests
+        run: .venv/bin/python -m pytest

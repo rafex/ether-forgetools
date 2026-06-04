@@ -186,8 +186,15 @@ REGISTRY: dict[str, str] = {
     "frontend assets":       "forgetools.frontend.assets",
     # office — document conversion/extraction
     "office markdown-html":  "forgetools.office.markdown_html",
+    "office pdf-create":     "forgetools.office.pdf_create",
+    "office docx-create":    "forgetools.office.docx_create",
+    "office table-report":   "forgetools.office.table_report",
+    "office pdf-append-tables": "forgetools.office.pdf_append_tables",
     "office pdf-merge":      "forgetools.office.pdf_merge",
     "office pdf-text":       "forgetools.office.pdf_text",
+    "office pdf-metadata":   "forgetools.office.pdf_metadata",
+    "office pdf-images":     "forgetools.office.pdf_images",
+    "office pdf-stamp":      "forgetools.office.pdf_stamp",
     # observability — logs and runtime diagnosis
     "observability log-tail":  "forgetools.observability.log_tail",
     "observability log-parse": "forgetools.observability.log_parse",

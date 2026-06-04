@@ -960,7 +960,7 @@
     "/tools/fs_find_by_type": {
       "post": {
         "operationId": "fs_find_by_type",
-        "summary": "Run the fs find by type forgetools command",
+        "summary": "Find files by semantic type such as code, docs, config, images, or archives",
         "tags": [
           "fs"
         ],
@@ -1059,7 +1059,7 @@
     "/tools/fs_head": {
       "post": {
         "operationId": "fs_head",
-        "summary": "Run the fs head forgetools command",
+        "summary": "Read the first lines of a file or matching files with structured metadata",
         "tags": [
           "fs"
         ],
@@ -1170,7 +1170,7 @@
     "/tools/fs_tail": {
       "post": {
         "operationId": "fs_tail",
-        "summary": "Run the fs tail forgetools command",
+        "summary": "Read the last lines of a file or matching files with structured metadata",
         "tags": [
           "fs"
         ],
@@ -1376,7 +1376,7 @@
     "/tools/template_scaffold": {
       "post": {
         "operationId": "template_scaffold",
-        "summary": "in templates",
+        "summary": "Generate files from a named template and variable map",
         "tags": [
           "template"
         ],
@@ -1471,7 +1471,7 @@
     "/tools/json_query": {
       "post": {
         "operationId": "json_query",
-        "summary": "notation paths",
+        "summary": "Query JSON documents using dotted paths and array indexes",
         "tags": [
           "json"
         ],
@@ -2923,7 +2923,7 @@
     "/tools/gh_api_repo": {
       "post": {
         "operationId": "gh_api_repo",
-        "summary": "Run the gh api repo forgetools command",
+        "summary": "Query GitHub repository metadata through the GitHub API",
         "tags": [
           "gh"
         ],
@@ -3045,7 +3045,7 @@
     "/tools/gh_api_releases": {
       "post": {
         "operationId": "gh_api_releases",
-        "summary": "Run the gh api releases forgetools command",
+        "summary": "Query GitHub release metadata through the GitHub API",
         "tags": [
           "gh"
         ],
@@ -3197,7 +3197,7 @@
     "/tools/gh_api_search": {
       "post": {
         "operationId": "gh_api_search",
-        "summary": "Run the gh api search forgetools command",
+        "summary": "Search GitHub repositories, issues, pull requests, or code through the GitHub API",
         "tags": [
           "gh"
         ],
@@ -3694,7 +3694,7 @@
     "/tools/gh_pr_merge": {
       "post": {
         "operationId": "gh_pr_merge",
-        "summary": "Run the gh pr merge forgetools command",
+        "summary": "Merge a GitHub pull request using the selected merge strategy",
         "tags": [
           "gh"
         ],
@@ -3828,7 +3828,7 @@
     "/tools/gh_pr_diff": {
       "post": {
         "operationId": "gh_pr_diff",
-        "summary": "Run the gh pr diff forgetools command",
+        "summary": "Fetch and summarize the diff for a GitHub pull request",
         "tags": [
           "gh"
         ],
@@ -4028,7 +4028,7 @@
     "/tools/gh_issue_create": {
       "post": {
         "operationId": "gh_issue_create",
-        "summary": "Run the gh issue create forgetools command",
+        "summary": "Create a GitHub issue with title, body, labels, and assignees",
         "tags": [
           "gh"
         ],
@@ -4216,7 +4216,7 @@
     "/tools/gh_issue_view": {
       "post": {
         "operationId": "gh_issue_view",
-        "summary": "Run the gh issue view forgetools command",
+        "summary": "View a GitHub issue with comments, labels, assignees, and state",
         "tags": [
           "gh"
         ],
@@ -4423,7 +4423,7 @@
     "/tools/gh_actions_validate": {
       "post": {
         "operationId": "gh_actions_validate",
-        "summary": "Run the gh actions validate forgetools command",
+        "summary": "Validate GitHub Actions workflow files and CI configuration",
         "tags": [
           "gh"
         ],
@@ -4519,7 +4519,7 @@
     "/tools/gh_actions_trigger": {
       "post": {
         "operationId": "gh_actions_trigger",
-        "summary": "Run the gh actions trigger forgetools command",
+        "summary": "Trigger a GitHub Actions workflow dispatch with structured inputs",
         "tags": [
           "gh"
         ],
@@ -4656,7 +4656,7 @@
     "/tools/gh_actions_logs": {
       "post": {
         "operationId": "gh_actions_logs",
-        "summary": "Run the gh actions logs forgetools command",
+        "summary": "Fetch and summarize logs for GitHub Actions workflow runs or jobs",
         "tags": [
           "gh"
         ],
@@ -4767,7 +4767,7 @@
     "/tools/gh_branch": {
       "post": {
         "operationId": "gh_branch",
-        "summary": "Run the gh branch forgetools command",
+        "summary": "Inspect, create, delete, or protect GitHub branches with structured output",
         "tags": [
           "gh"
         ],
@@ -5008,7 +5008,7 @@
     "/tools/git_multi_repo": {
       "post": {
         "operationId": "git_multi_repo",
-        "summary": "Run the git multi repo forgetools command",
+        "summary": "Inspect and coordinate git status across multiple repositories",
         "tags": [
           "git"
         ],
@@ -5788,7 +5788,7 @@
     "/tools/git_worktree_workflow": {
       "post": {
         "operationId": "git_worktree_workflow",
-        "summary": "Run the git worktree workflow forgetools command",
+        "summary": "Manage parallel git worktree workflows from plan through integration",
         "tags": [
           "git"
         ],
@@ -5933,7 +5933,7 @@
     "/tools/git_commit": {
       "post": {
         "operationId": "git_commit",
-        "summary": "Run the git commit forgetools command",
+        "summary": "Create structured git commits with validation and optional dry-run planning",
         "tags": [
           "git"
         ],
@@ -6547,7 +6547,7 @@
     "/tools/context_repo_size": {
       "post": {
         "operationId": "context_repo_size",
-        "summary": "Run the context repo size forgetools command",
+        "summary": "Measure repository size, language distribution, and git metadata for context planning",
         "tags": [
           "context"
         ],
@@ -6636,7 +6636,7 @@
     "/tools/ether_catalog": {
       "post": {
         "operationId": "ether_catalog",
-        "summary": "Run the ether catalog forgetools command",
+        "summary": "List Ether ecosystem repositories and their local/remote availability",
         "tags": [
           "ether"
         ],
@@ -6751,7 +6751,7 @@
     "/tools/specnative_status": {
       "post": {
         "operationId": "specnative_status",
-        "summary": "Run the specnative status forgetools command",
+        "summary": "Report SpecNative specs, initiatives, states, and task progress",
         "tags": [
           "specnative"
         ],
@@ -6847,7 +6847,7 @@
     "/tools/specnative_context": {
       "post": {
         "operationId": "specnative_context",
-        "summary": "Run the specnative context forgetools command",
+        "summary": "Read, write, or list SpecNative context documents for the current repository",
         "tags": [
           "specnative"
         ],
@@ -6965,7 +6965,7 @@
     "/tools/specnative_initiative": {
       "post": {
         "operationId": "specnative_initiative",
-        "summary": "Run the specnative initiative forgetools command",
+        "summary": "Create or update SpecNative initiatives from repository context",
         "tags": [
           "specnative"
         ],
@@ -7420,7 +7420,7 @@
     "/tools/net_http": {
       "post": {
         "operationId": "net_http",
-        "summary": "Run the net http forgetools command",
+        "summary": "Execute HTTP requests with structured status, headers, body, and timing data",
         "tags": [
           "net"
         ],
@@ -8072,7 +8072,7 @@
     "/tools/process_inspect": {
       "post": {
         "operationId": "process_inspect",
-        "summary": "Run the process inspect forgetools command",
+        "summary": "Inspect a process by PID with command, resource usage, and open-file details",
         "tags": [
           "process"
         ],
@@ -8179,7 +8179,7 @@
     "/tools/process_ports": {
       "post": {
         "operationId": "process_ports",
-        "summary": "Run the process ports forgetools command",
+        "summary": "List listening or connected network ports with owning process information",
         "tags": [
           "process"
         ],
@@ -8286,7 +8286,7 @@
     "/tools/process_top": {
       "post": {
         "operationId": "process_top",
-        "summary": "Run the process top forgetools command",
+        "summary": "Show top local processes by CPU or memory usage",
         "tags": [
           "process"
         ],
@@ -8486,7 +8486,7 @@
     "/tools/java_maven_modules": {
       "post": {
         "operationId": "java_maven_modules",
-        "summary": "Run the java maven modules forgetools command",
+        "summary": "Inspect Maven multi-module project structure and module metadata",
         "tags": [
           "java"
         ],
@@ -8597,7 +8597,7 @@
     "/tools/java_maven_central": {
       "post": {
         "operationId": "java_maven_central",
-        "summary": "Run the java maven central forgetools command",
+        "summary": "Query Maven Central for artifact versions, metadata, and checksums",
         "tags": [
           "java"
         ],
@@ -8991,7 +8991,7 @@
     "/tools/java_format": {
       "post": {
         "operationId": "java_format",
-        "summary": "Run the java format forgetools command",
+        "summary": "Format Java source files with google-java-format when available",
         "tags": [
           "java"
         ],
@@ -9124,7 +9124,7 @@
     "/tools/java_jdt": {
       "post": {
         "operationId": "java_jdt",
-        "summary": "Run the java jdt forgetools command",
+        "summary": "Inspect Java projects using JDT-style source and symbol analysis helpers",
         "tags": [
           "java"
         ],
@@ -10775,7 +10775,7 @@
     "/tools/helm_diff": {
       "post": {
         "operationId": "helm_diff",
-        "summary": "diff plugin)",
+        "summary": "Compare Helm release changes before install or upgrade",
         "tags": [
           "helm"
         ],
@@ -12277,7 +12277,7 @@
     "/tools/test_coverage_report": {
       "post": {
         "operationId": "test_coverage_report",
-        "summary": "Run the test coverage report forgetools command",
+        "summary": "Parse coverage reports and return summary metrics and uncovered files",
         "tags": [
           "test"
         ],
@@ -12381,7 +12381,7 @@
     "/tools/security_owasp": {
       "post": {
         "operationId": "security_owasp",
-        "summary": "Run the security owasp forgetools command",
+        "summary": "Run OWASP dependency checks and parse security findings",
         "tags": [
           "security"
         ],
@@ -12511,7 +12511,7 @@
     "/tools/security_spotbugs": {
       "post": {
         "operationId": "security_spotbugs",
-        "summary": "Run the security spotbugs forgetools command",
+        "summary": "Run SpotBugs security analysis and parse structured findings",
         "tags": [
           "security"
         ],
@@ -12622,7 +12622,7 @@
     "/tools/security_eslint": {
       "post": {
         "operationId": "security_eslint",
-        "summary": "Run the security eslint forgetools command",
+        "summary": "Run ESLint-oriented security checks and return structured findings",
         "tags": [
           "security"
         ],
@@ -13258,10 +13258,436 @@
         }
       }
     },
+    "/tools/office_pdf_create": {
+      "post": {
+        "operationId": "office_pdf_create",
+        "summary": "Create a PDF from Markdown, HTML, or plain text",
+        "tags": [
+          "office"
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "input": {
+                    "type": "string"
+                  },
+                  "output": {
+                    "type": "string"
+                  },
+                  "source_format": {
+                    "default": "markdown",
+                    "type": "string"
+                  },
+                  "title": {
+                    "default": "Document",
+                    "type": "string"
+                  },
+                  "cwd": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null
+                  }
+                },
+                "required": [
+                  "input",
+                  "output"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "ForgeResult",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "ok": {
+                      "type": "boolean"
+                    },
+                    "tool": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "default": null,
+                      "title": "Data"
+                    },
+                    "errors": {
+                      "items": {
+                        "type": "string"
+                      },
+                      "type": "array"
+                    },
+                    "duration_ms": {
+                      "default": 0,
+                      "type": "integer"
+                    },
+                    "suggestion": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null
+                    }
+                  },
+                  "required": [
+                    "ok",
+                    "tool"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tools/office_docx_create": {
+      "post": {
+        "operationId": "office_docx_create",
+        "summary": "Create a DOCX from Markdown, HTML, or plain text",
+        "tags": [
+          "office"
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "input": {
+                    "type": "string"
+                  },
+                  "output": {
+                    "type": "string"
+                  },
+                  "source_format": {
+                    "default": "markdown",
+                    "type": "string"
+                  },
+                  "title": {
+                    "default": "Document",
+                    "type": "string"
+                  },
+                  "cwd": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null
+                  }
+                },
+                "required": [
+                  "input",
+                  "output"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "ForgeResult",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "ok": {
+                      "type": "boolean"
+                    },
+                    "tool": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "default": null,
+                      "title": "Data"
+                    },
+                    "errors": {
+                      "items": {
+                        "type": "string"
+                      },
+                      "type": "array"
+                    },
+                    "duration_ms": {
+                      "default": 0,
+                      "type": "integer"
+                    },
+                    "suggestion": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null
+                    }
+                  },
+                  "required": [
+                    "ok",
+                    "tool"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tools/office_table_report": {
+      "post": {
+        "operationId": "office_table_report",
+        "summary": "Convert CSV/XLSX tables into Markdown, HTML, PDF, or DOCX reports",
+        "tags": [
+          "office"
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "input": {
+                    "type": "string"
+                  },
+                  "output": {
+                    "type": "string"
+                  },
+                  "output_format": {
+                    "default": "markdown",
+                    "type": "string"
+                  },
+                  "title": {
+                    "default": "Table Report",
+                    "type": "string"
+                  },
+                  "sheet": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null
+                  },
+                  "max_rows": {
+                    "default": 500,
+                    "type": "integer"
+                  },
+                  "cwd": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null
+                  }
+                },
+                "required": [
+                  "input",
+                  "output"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "ForgeResult",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "ok": {
+                      "type": "boolean"
+                    },
+                    "tool": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "default": null,
+                      "title": "Data"
+                    },
+                    "errors": {
+                      "items": {
+                        "type": "string"
+                      },
+                      "type": "array"
+                    },
+                    "duration_ms": {
+                      "default": 0,
+                      "type": "integer"
+                    },
+                    "suggestion": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null
+                    }
+                  },
+                  "required": [
+                    "ok",
+                    "tool"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tools/office_pdf_append_tables": {
+      "post": {
+        "operationId": "office_pdf_append_tables",
+        "summary": "Append CSV/XLSX table pages to a PDF",
+        "tags": [
+          "office"
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "pdf": {
+                    "type": "string"
+                  },
+                  "table": {
+                    "type": "string"
+                  },
+                  "output": {
+                    "type": "string"
+                  },
+                  "title": {
+                    "default": "Table Appendix",
+                    "type": "string"
+                  },
+                  "sheet": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null
+                  },
+                  "max_rows": {
+                    "default": 500,
+                    "type": "integer"
+                  },
+                  "cwd": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null
+                  }
+                },
+                "required": [
+                  "pdf",
+                  "table",
+                  "output"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "ForgeResult",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "ok": {
+                      "type": "boolean"
+                    },
+                    "tool": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "default": null,
+                      "title": "Data"
+                    },
+                    "errors": {
+                      "items": {
+                        "type": "string"
+                      },
+                      "type": "array"
+                    },
+                    "duration_ms": {
+                      "default": 0,
+                      "type": "integer"
+                    },
+                    "suggestion": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null
+                    }
+                  },
+                  "required": [
+                    "ok",
+                    "tool"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/tools/office_pdf_merge": {
       "post": {
         "operationId": "office_pdf_merge",
-        "summary": "Merge PDFs using pdfunite or qpdf when available",
+        "summary": "Merge PDFs using pypdf, pdfunite, or qpdf",
         "tags": [
           "office"
         ],
@@ -13352,7 +13778,7 @@
     "/tools/office_pdf_text": {
       "post": {
         "operationId": "office_pdf_text",
-        "summary": "Extract text from a PDF using pdftotext",
+        "summary": "Extract text from a PDF using pdftotext or pypdf",
         "tags": [
           "office"
         ],
@@ -13383,6 +13809,291 @@
                 },
                 "required": [
                   "input"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "ForgeResult",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "ok": {
+                      "type": "boolean"
+                    },
+                    "tool": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "default": null,
+                      "title": "Data"
+                    },
+                    "errors": {
+                      "items": {
+                        "type": "string"
+                      },
+                      "type": "array"
+                    },
+                    "duration_ms": {
+                      "default": 0,
+                      "type": "integer"
+                    },
+                    "suggestion": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null
+                    }
+                  },
+                  "required": [
+                    "ok",
+                    "tool"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tools/office_pdf_metadata": {
+      "post": {
+        "operationId": "office_pdf_metadata",
+        "summary": "Extract PDF metadata, page count, and document flags",
+        "tags": [
+          "office"
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "input": {
+                    "type": "string"
+                  },
+                  "cwd": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null
+                  }
+                },
+                "required": [
+                  "input"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "ForgeResult",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "ok": {
+                      "type": "boolean"
+                    },
+                    "tool": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "default": null,
+                      "title": "Data"
+                    },
+                    "errors": {
+                      "items": {
+                        "type": "string"
+                      },
+                      "type": "array"
+                    },
+                    "duration_ms": {
+                      "default": 0,
+                      "type": "integer"
+                    },
+                    "suggestion": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null
+                    }
+                  },
+                  "required": [
+                    "ok",
+                    "tool"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tools/office_pdf_images": {
+      "post": {
+        "operationId": "office_pdf_images",
+        "summary": "Extract embedded PDF page images when available",
+        "tags": [
+          "office"
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "input": {
+                    "type": "string"
+                  },
+                  "output_dir": {
+                    "type": "string"
+                  },
+                  "cwd": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null
+                  }
+                },
+                "required": [
+                  "input",
+                  "output_dir"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "ForgeResult",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "ok": {
+                      "type": "boolean"
+                    },
+                    "tool": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "default": null,
+                      "title": "Data"
+                    },
+                    "errors": {
+                      "items": {
+                        "type": "string"
+                      },
+                      "type": "array"
+                    },
+                    "duration_ms": {
+                      "default": 0,
+                      "type": "integer"
+                    },
+                    "suggestion": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null
+                    }
+                  },
+                  "required": [
+                    "ok",
+                    "tool"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tools/office_pdf_stamp": {
+      "post": {
+        "operationId": "office_pdf_stamp",
+        "summary": "Stamp text on each page of a PDF",
+        "tags": [
+          "office"
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "input": {
+                    "type": "string"
+                  },
+                  "output": {
+                    "type": "string"
+                  },
+                  "text": {
+                    "type": "string"
+                  },
+                  "x": {
+                    "default": 36,
+                    "type": "number"
+                  },
+                  "y": {
+                    "default": 36,
+                    "type": "number"
+                  },
+                  "font_size": {
+                    "default": 10,
+                    "type": "integer"
+                  },
+                  "cwd": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null
+                  }
+                },
+                "required": [
+                  "input",
+                  "output",
+                  "text"
                 ],
                 "type": "object"
               }

@@ -1,0 +1,309 @@
+{
+  "binary": "forge-mcp-release",
+  "categories": [
+    "release",
+    "gh",
+    "docs"
+  ],
+  "counts": {
+    "prompts": 1,
+    "resources": 2,
+    "tools": 19
+  },
+  "domain": "release",
+  "prompts": [
+    {
+      "arguments": [
+        {
+          "name": "version",
+          "required": true
+        },
+        {
+          "name": "repo",
+          "required": false
+        },
+        {
+          "name": "branch",
+          "required": false
+        }
+      ],
+      "description": "Prepare and publish a new release.",
+      "name": "release_workflow"
+    }
+  ],
+  "pyproject": "mcps/release/pyproject.toml",
+  "resources": [
+    {
+      "description": "Machine-readable capabilities manifest for this domain server.",
+      "name": "resource_capabilities",
+      "uri": "forge://capabilities"
+    },
+    {
+      "description": "List tools available in this domain server.",
+      "name": "resource_catalog",
+      "uri": "forge://catalog"
+    }
+  ],
+  "schema_version": "1.0",
+  "server_file": "forgetools/mcp_release_server.py",
+  "server_module": "forgetools.mcp_release_server",
+  "server_name": "forgetools-release",
+  "tools": [
+    {
+      "description": "forgetools.docs.changelog \u2014 Generate changelog from git commits",
+      "name": "docs_changelog",
+      "properties": [
+        "cwd",
+        "max_count",
+        "since"
+      ],
+      "required": []
+    },
+    {
+      "description": "forgetools.gh.actions \u2014 GitHub Actions workflow status",
+      "name": "gh_actions",
+      "properties": [
+        "branch",
+        "cwd",
+        "limit"
+      ],
+      "required": []
+    },
+    {
+      "description": "Fetch and summarize logs for GitHub Actions workflow runs or jobs",
+      "name": "gh_actions_logs",
+      "properties": [
+        "action",
+        "cwd",
+        "job_id",
+        "lines",
+        "run_id"
+      ],
+      "required": []
+    },
+    {
+      "description": "Trigger a GitHub Actions workflow dispatch with structured inputs",
+      "name": "gh_actions_trigger",
+      "properties": [
+        "action",
+        "cwd",
+        "failed_only",
+        "inputs",
+        "ref",
+        "run_id",
+        "timeout",
+        "workflow"
+      ],
+      "required": []
+    },
+    {
+      "description": "Validate GitHub Actions workflow files and CI configuration",
+      "name": "gh_actions_validate",
+      "properties": [
+        "cwd",
+        "file",
+        "path"
+      ],
+      "required": []
+    },
+    {
+      "description": "Query GitHub release metadata through the GitHub API",
+      "name": "gh_api_releases",
+      "properties": [
+        "action",
+        "asset",
+        "cwd",
+        "dest",
+        "include_drafts",
+        "limit",
+        "owner",
+        "repo",
+        "slug",
+        "tag"
+      ],
+      "required": []
+    },
+    {
+      "description": "Query GitHub repository metadata through the GitHub API",
+      "name": "gh_api_repo",
+      "properties": [
+        "action",
+        "cwd",
+        "limit",
+        "owner",
+        "repo",
+        "slug"
+      ],
+      "required": []
+    },
+    {
+      "description": "Search GitHub repositories, issues, pull requests, or code through the GitHub API",
+      "name": "gh_api_search",
+      "properties": [
+        "action",
+        "author",
+        "cwd",
+        "issue_type",
+        "label",
+        "language",
+        "limit",
+        "min_stars",
+        "order",
+        "org",
+        "query",
+        "repo",
+        "sort",
+        "state",
+        "topic",
+        "user"
+      ],
+      "required": []
+    },
+    {
+      "description": "Inspect, create, delete, or protect GitHub branches with structured output",
+      "name": "gh_branch",
+      "properties": [
+        "action",
+        "base",
+        "branch",
+        "cwd",
+        "days_stale",
+        "force",
+        "local",
+        "new_name",
+        "remote",
+        "set_default"
+      ],
+      "required": []
+    },
+    {
+      "description": "Create a GitHub issue with title, body, labels, and assignees",
+      "name": "gh_issue_create",
+      "properties": [
+        "action",
+        "assignees",
+        "body",
+        "body_file",
+        "comment",
+        "cwd",
+        "labels",
+        "milestone",
+        "number",
+        "project",
+        "title",
+        "web"
+      ],
+      "required": []
+    },
+    {
+      "description": "forgetools.gh.issue_list \u2014 List GitHub issues",
+      "name": "gh_issue_list",
+      "properties": [
+        "cwd",
+        "label",
+        "limit",
+        "state"
+      ],
+      "required": []
+    },
+    {
+      "description": "View a GitHub issue with comments, labels, assignees, and state",
+      "name": "gh_issue_view",
+      "properties": [
+        "action",
+        "cwd",
+        "limit",
+        "number",
+        "repo"
+      ],
+      "required": []
+    },
+    {
+      "description": "forgetools.gh.pr_create \u2014 Create a GitHub pull request",
+      "name": "gh_pr_create",
+      "properties": [
+        "base",
+        "body",
+        "cwd",
+        "draft",
+        "reviewer",
+        "title"
+      ],
+      "required": [
+        "title"
+      ]
+    },
+    {
+      "description": "Fetch and summarize the diff for a GitHub pull request",
+      "name": "gh_pr_diff",
+      "properties": [
+        "action",
+        "cwd",
+        "number",
+        "patch"
+      ],
+      "required": []
+    },
+    {
+      "description": "forgetools.gh.pr_list \u2014 List GitHub pull requests",
+      "name": "gh_pr_list",
+      "properties": [
+        "cwd",
+        "limit",
+        "state"
+      ],
+      "required": []
+    },
+    {
+      "description": "Merge a GitHub pull request using the selected merge strategy",
+      "name": "gh_pr_merge",
+      "properties": [
+        "action",
+        "admin",
+        "auto",
+        "body",
+        "cwd",
+        "delete_branch",
+        "method",
+        "number",
+        "title"
+      ],
+      "required": []
+    },
+    {
+      "description": "forgetools.gh.pr_review \u2014 View PR review comments and status",
+      "name": "gh_pr_review",
+      "properties": [
+        "cwd",
+        "number"
+      ],
+      "required": [
+        "number"
+      ]
+    },
+    {
+      "description": "forgetools.gh.release \u2014 Create a GitHub release",
+      "name": "gh_release",
+      "properties": [
+        "cwd",
+        "draft",
+        "notes",
+        "prerelease",
+        "tag",
+        "title"
+      ],
+      "required": [
+        "tag"
+      ]
+    },
+    {
+      "description": "Run basic pre-release checks",
+      "name": "release_precheck",
+      "properties": [
+        "cwd"
+      ],
+      "required": []
+    }
+  ],
+  "version": "0.1.0"
+}

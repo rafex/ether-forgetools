@@ -28,11 +28,12 @@ install-mcp:
     @make install-mcp
 
 # Arrancar servidor MCP localmente (stdio)
-serve: install-mcp
-    {{ BIN }}/{{ MCP }}
+serve mcp=MCP: install-mcp
+    {{ BIN }}/{{ mcp }}
 
 # Instalar + arrancar (modo desarrollo)
-dev: install-mcp serve
+dev mcp=MCP: install-mcp
+    {{ BIN }}/{{ mcp }}
 
 # Limpiar entorno virtual
 clean-venv:
@@ -60,6 +61,10 @@ docker-serve: docker-build docker-run
 # Regenerar OpenAPI desde el servidor en vivo
 openapi: install-mcp
     {{ BIN }}/python3.13 scripts/gen_openapi.py
+
+# Regenerar capabilities, snapshots y docs derivadas de MCP
+mcp-metadata: install-mcp
+    {{ BIN }}/python3.13 scripts/gen_mcp_metadata.py
 
 # ─────────────────────────────────────────────────────────────────────────────
 # 🔧 Utilidades

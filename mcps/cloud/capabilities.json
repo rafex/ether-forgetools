@@ -1,0 +1,53 @@
+{
+  "binary": "forge-mcp-cloud",
+  "categories": [
+    "cloud"
+  ],
+  "counts": {
+    "prompts": 1,
+    "resources": 2,
+    "tools": 1
+  },
+  "domain": "cloud",
+  "prompts": [
+    {
+      "arguments": [
+        {
+          "name": "repo_dir",
+          "required": false
+        }
+      ],
+      "description": "Full health dashboard for a repository.",
+      "name": "repo_health_check"
+    }
+  ],
+  "pyproject": "mcps/cloud/pyproject.toml",
+  "resources": [
+    {
+      "description": "Machine-readable capabilities manifest for this domain server.",
+      "name": "resource_capabilities",
+      "uri": "forge://capabilities"
+    },
+    {
+      "description": "List tools available in this domain server.",
+      "name": "resource_catalog",
+      "uri": "forge://catalog"
+    }
+  ],
+  "schema_version": "1.0",
+  "server_file": "forgetools/mcp_cloud_server.py",
+  "server_module": "forgetools.mcp_cloud_server",
+  "server_name": "forgetools-cloud",
+  "tools": [
+    {
+      "description": "Show active identity for AWS, GCP, or Azure",
+      "name": "cloud_whoami",
+      "properties": [
+        "cwd",
+        "provider"
+      ],
+      "required": []
+    }
+  ],
+  "version": "0.1.0"
+}

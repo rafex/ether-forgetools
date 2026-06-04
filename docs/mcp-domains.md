@@ -136,13 +136,12 @@ forge-mcp-specnative
 
 - Binario: `forge-mcp-linux`
 - Server name: `forgetools-linux`
-- Categorias: `process`, `diag`, `net`, `shell`, `secrets`
+- Categorias: `process`, `diag`, `net`, `shell`
 - Casos de uso:
   - procesos/puertos
   - salud de entorno
   - requests HTTP de verificacion
   - comandos shell controlados
-  - escaneo de secretos
 
 Uso:
 
@@ -246,8 +245,10 @@ forge-mcp-data
 - Server name: `forgetools-office`
 - Categorias: `office`
 - Casos de uso:
-  - Markdown a HTML
-  - merge/extraccion de PDFs usando herramientas locales cuando existan
+  - Markdown/HTML/texto a PDF o DOCX
+  - reportes tabulares desde CSV/XLSX
+  - anexar tablas a PDFs
+  - merge, texto, metadatos, imagenes y sellado de PDFs
 
 ### 13) Dominio Python
 
@@ -371,6 +372,24 @@ Todos los MCP por dominio exponen:
 - `forge://capabilities`
 
 Este resource lista tools disponibles en ese servidor de dominio.
+
+## Capacidades generadas
+
+La metadata versionada por dominio vive en:
+
+- `mcps/<dominio>/capabilities.json`
+- `snapshots/mcp/<dominio>.json`
+- `docs/generated/mcp-capabilities.md`
+
+Regenerar metadata:
+
+```bash
+just mcp-metadata
+```
+
+La politica de dependencias opcionales por dominio esta en:
+
+- `docs/policies/mcp-dependencies.md`
 
 ## Configuracion de clientes
 

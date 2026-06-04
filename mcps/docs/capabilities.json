@@ -1,0 +1,88 @@
+{
+  "binary": "forge-mcp-docs",
+  "categories": [
+    "docs",
+    "openapi",
+    "web"
+  ],
+  "counts": {
+    "prompts": 1,
+    "resources": 2,
+    "tools": 3
+  },
+  "domain": "docs",
+  "prompts": [
+    {
+      "arguments": [
+        {
+          "name": "api_name",
+          "required": true
+        },
+        {
+          "name": "description",
+          "required": true
+        }
+      ],
+      "description": "Spec-first API design: OpenAPI spec \u2192 stub \u2192 implement \u2192 test.",
+      "name": "api_design"
+    }
+  ],
+  "pyproject": "mcps/docs/pyproject.toml",
+  "resources": [
+    {
+      "description": "Machine-readable capabilities manifest for this domain server.",
+      "name": "resource_capabilities",
+      "uri": "forge://capabilities"
+    },
+    {
+      "description": "List tools available in this domain server.",
+      "name": "resource_catalog",
+      "uri": "forge://catalog"
+    }
+  ],
+  "schema_version": "1.0",
+  "server_file": "forgetools/mcp_docs_server.py",
+  "server_module": "forgetools.mcp_docs_server",
+  "server_name": "forgetools-docs",
+  "tools": [
+    {
+      "description": "forgetools.docs.changelog \u2014 Generate changelog from git commits",
+      "name": "docs_changelog",
+      "properties": [
+        "cwd",
+        "max_count",
+        "since"
+      ],
+      "required": []
+    },
+    {
+      "description": "forgetools.openapi.parse \u2014 Parse OpenAPI 2/3 YAML or JSON spec files",
+      "name": "openapi_parse",
+      "properties": [
+        "cwd",
+        "endpoint",
+        "path"
+      ],
+      "required": []
+    },
+    {
+      "description": "Fetch a webpage and extract clean readable text using XPath.",
+      "name": "web_fetch",
+      "properties": [
+        "cwd",
+        "include_headings",
+        "include_links",
+        "insecure",
+        "max_chars",
+        "timeout",
+        "url",
+        "user_agent",
+        "xpath"
+      ],
+      "required": [
+        "url"
+      ]
+    }
+  ],
+  "version": "0.1.0"
+}
