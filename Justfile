@@ -66,6 +66,14 @@ openapi: install-mcp
 mcp-metadata: install-mcp
     {{ BIN }}/python3.13 scripts/gen_mcp_metadata.py
 
+# Listar MCP instalados y rutas absolutas para configurar clientes
+mcp-list:
+    {{ BIN }}/python3.13 scripts/list_installed_mcps.py
+
+# Listar MCP instalados en JSON
+mcp-list-json:
+    {{ BIN }}/python3.13 scripts/list_installed_mcps.py --json
+
 # ─────────────────────────────────────────────────────────────────────────────
 # 🔧 Utilidades
 # ─────────────────────────────────────────────────────────────────────────────
