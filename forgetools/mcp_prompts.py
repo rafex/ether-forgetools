@@ -100,6 +100,59 @@ def specnative_workflow(initiative: str, action: str='status') -> str:
         return f'# SpecNative Close: `{initiative}`\n\n## 1. Revisión final\n```\nspecnative_initiative(action="review", initiative="{initiative}")\n# ready_to_close debe ser true\n```\n\n## 2. Registrar decisiones finales que sobrevivan (si aplica)\n```\n# Usa el placement_test para confirmar que va en DECISIONS.md:\n# "¿Debe respetarse en la próxima iniciativa?" → sí → DECISIONS.md\nspecnative_initiative(\n    action="decision",\n    title="<título>",\n    context="<por qué>",\n    decision="<qué se decidió>",\n    consequences="<impactos>",\n    decision_state="proposed",\n    write=True\n)\n```\n\n## 3. Cerrar el spec (estado → `done`, actualiza TRACEABILITY.md)\n\n```\nspecnative_initiative(action="close", initiative="{initiative}")\n# Preview looks good? Write it:\nspecnative_initiative(action="close", initiative="{initiative}", write=True)\n```\n\n## 4. Commit and create PR\n```\ngit_commit(action="commit")\ngh_pr_create(title="feat({initiative}): ...", body="Closes spec SPEC-...")\n```\n'
     return f"Unknown action '{action}'. Use: status | start | implement | review | close"
 
+def specnative_init_project(
+    name: str,
+    problem: str,
+    users: str,
+    goals: str,
+    stack: str = "",
+) -> str:
+    """Initialize SpecNative project context with guided document updates.
+
+    Args:
+        name:    Project name
+        problem: Product/problem statement
+        users:   Target users
+        goals:   Observable goals
+        stack:   Known technology stack
+    """
+    return f'# SpecNative Init Project: `{name}`\n\n## 1. Check gaps\n```\nspecnative_project(action="health-check")\nspecnative_project(action="suggest-next")\n```\n\n## 2. Fill PRODUCT.md\n```\nspecnative_project(\n  action="refine-document", document="product", write=True,\n  what_changed="Initial guided SpecNative setup",\n  content="""# PRODUCT.md\n\n## Problema\n{problem}\n\n## Usuarios\n{users}\n\n## Objetivos\n{goals}\n\n## No objetivos\n\n## Valor diferencial\n"""\n)\n```\n\n## 3. Fill STACK.md if known\n```\nspecnative_project(action="update-section", document="stack", section="Lenguajes y runtimes", content="{stack}", write=True)\n```\n\n## 4. Continue interviewing\nUse `specnative_project(action="read-template", document="<doc>")` before writing architecture, conventions and commands.\n'
+
+def specnative_handoff(summary: str, next_steps: str, decisions_made: str = "") -> str:
+    """Generate a SpecNative multi-agent handoff.
+
+    Args:
+        summary:        What was accomplished
+        next_steps:     Ordered next actions
+        decisions_made: Optional decisions not yet recorded
+    """
+    return f'# SpecNative Handoff\n\n## Summary\n{summary}\n\n## Next steps\n{next_steps}\n\n## Actions\n```\nspecnative_session(\n  action="checkpoint",\n  initiative="<current-initiative>",\n  task_id="<current-task>",\n  intent="{summary}",\n  next_steps="""{next_steps}""",\n  context_notes="""{decisions_made or "none"}""",\n  write=True,\n)\n```\n\nIf persistent decisions were made:\n```\nspecnative_initiative(action="decision", title="<title>", context="<context>", decision="<decision>", consequences="<consequences>", write=True)\n```\n\nThe next agent should begin with:\n```\nspecnative_session(action="resume")\n```\n'
+
+def specnative_plan_tasks(initiative: str) -> str:
+    """Derive tasks from an existing SpecNative spec.
+
+    Args:
+        initiative: Initiative name
+    """
+    return f'# SpecNative Plan Tasks: `{initiative}`\n\n## Steps\n```\nspecnative_context(action="read-spec", initiative="{initiative}")\nspecnative_context(action="read", document="planning")\nspecnative_context(action="read", document="architecture")\nspecnative_context(action="read", document="decisions")\n```\n\nCreate task preview:\n```\nspecnative_initiative(action="plan", initiative="{initiative}")\n```\n\nIf the plan is correct:\n```\nspecnative_initiative(action="plan", initiative="{initiative}", write=True)\n```\n'
+
+def specnative_implement_task(initiative: str, task_id: str) -> str:
+    """Implement a specific SpecNative task.
+
+    Args:
+        initiative: Initiative name
+        task_id: Task ID
+    """
+    return f'# SpecNative Implement Task: `{initiative}` / `{task_id}`\n\n## Steps\n```\nspecnative_session(action="resume")\nspecnative_initiative(action="implement", initiative="{initiative}", task_id="{task_id}")\nspecnative_initiative(action="state", initiative="{initiative}", task_id="{task_id}", state="in_progress", write=True)\n```\n\nAfter implementation and validation:\n```\nspecnative_initiative(action="state", initiative="{initiative}", task_id="{task_id}", state="done", write=True)\nspecnative_session(action="checkpoint", initiative="{initiative}", task_id="{task_id}", intent="Completed task", next_steps="Review and continue", write=True)\n```\n'
+
+def specnative_close_initiative(initiative: str) -> str:
+    """Close a SpecNative initiative and update traceability.
+
+    Args:
+        initiative: Initiative name
+    """
+    return f'# SpecNative Close Initiative: `{initiative}`\n\n## Verify\n```\nspecnative_initiative(action="review", initiative="{initiative}")\nspecnative_context(action="read", document="traceability")\n```\n\n## Close\n```\nspecnative_initiative(action="close", initiative="{initiative}")\n# If preview is correct:\nspecnative_initiative(action="close", initiative="{initiative}", write=True)\nspecnative_session(action="clear", write=True)\n```\n'
+
 def multi_repo_health(base_dir: str, pattern: str='*') -> str:
     """Health check for multiple side-by-side git repositories.
 
@@ -435,6 +488,11 @@ PROMPTS = {
     "java_project_analysis": java_project_analysis,
     "repo_health_check": repo_health_check,
     "specnative_workflow": specnative_workflow,
+    "specnative_init_project": specnative_init_project,
+    "specnative_handoff": specnative_handoff,
+    "specnative_plan_tasks": specnative_plan_tasks,
+    "specnative_implement_task": specnative_implement_task,
+    "specnative_close_initiative": specnative_close_initiative,
     "multi_repo_health": multi_repo_health,
     "new_tool_scaffold": new_tool_scaffold,
     "maven_dependency_research": maven_dependency_research,

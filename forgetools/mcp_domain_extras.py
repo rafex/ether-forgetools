@@ -45,7 +45,16 @@ PROMPTS_BY_DOMAIN: dict[str, tuple[str, ...]] = {
         "pr_stack",
         "best_practice_commits",
     ),
-    "specnative": ("start_feature", "repo_health_check", "specnative_workflow"),
+    "specnative": (
+        "start_feature",
+        "repo_health_check",
+        "specnative_workflow",
+        "specnative_handoff",
+        "specnative_init_project",
+        "specnative_plan_tasks",
+        "specnative_implement_task",
+        "specnative_close_initiative",
+    ),
     "java": ("java_project_analysis", "maven_dependency_research", "security_audit"),
     "build": ("dependency_upgrade", "go_project_analysis"),
     "data": ("database_migration",),
@@ -336,6 +345,46 @@ def _register_specnative_resources(server: FastMCP) -> None:
         """All SpecNative specs with their states and task counts for the current repo."""
         try:
             return json.dumps(_run_tool("specnative status", action="status"), indent=2)
+        except Exception as exc:
+            return _json_error(exc)
+
+    @server.resource("forge://specnative/session")
+    def resource_specnative_session() -> str:
+        """Current SpecNative SESSION.md handoff state for multi-agent continuity."""
+        try:
+            return json.dumps(_run_tool("specnative session", action="resume"), indent=2)
+        except Exception as exc:
+            return _json_error(exc)
+
+    @server.resource("forge://specnative/health")
+    def resource_specnative_health() -> str:
+        """SpecNative project health check with missing, empty, or stale documents."""
+        try:
+            return json.dumps(_run_tool("specnative project", action="health-check"), indent=2)
+        except Exception as exc:
+            return _json_error(exc)
+
+    @server.resource("forge://specnative/suggest-next")
+    def resource_specnative_suggest_next() -> str:
+        """Top recommended next actions from SpecNative project state."""
+        try:
+            return json.dumps(_run_tool("specnative project", action="suggest-next"), indent=2)
+        except Exception as exc:
+            return _json_error(exc)
+
+    @server.resource("forge://specnative/templates")
+    def resource_specnative_templates() -> str:
+        """Available SpecNative spec templates and decision snippets."""
+        try:
+            return json.dumps(_run_tool("specnative templates", action="list-templates"), indent=2)
+        except Exception as exc:
+            return _json_error(exc)
+
+    @server.resource("forge://specnative/archetypes")
+    def resource_specnative_archetypes() -> str:
+        """Available SpecNative built-in and local archetypes."""
+        try:
+            return json.dumps(_run_tool("specnative templates", action="list-archetypes"), indent=2)
         except Exception as exc:
             return _json_error(exc)
 

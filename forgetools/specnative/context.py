@@ -23,9 +23,14 @@ from forgetools._cli import make_cli
 from forgetools._result import ForgeResult, Timer
 from forgetools.specnative._core import (
     CONTEXT_MAP,
+    context_map_for,
+    context_rel,
+    read_context_document,
     read_file,
     parse_all_toml_blocks,
     _toml_loads,
+    spec_path_for,
+    tasks_path_for,
 )
 
 TOOL = "specnative.context"
@@ -79,17 +84,16 @@ def run(
             if not document:
                 return ForgeResult.failure(
                     TOOL,
-                    ["--document is required. Options: " + " | ".join(CONTEXT_MAP)],
+                    ["--document is required. Options: " + " | ".join(context_map_for(root))],
                     t.elapsed_ms,
                 )
-            rel = CONTEXT_MAP.get(document)
+            rel, content = read_context_document(root, document)
             if rel is None:
                 return ForgeResult.failure(
                     TOOL,
-                    [f"Unknown document '{document}'. Valid: {', '.join(CONTEXT_MAP)}"],
+                    [f"Unknown document '{document}'. Valid: {', '.join(context_map_for(root))}"],
                     t.elapsed_ms,
                 )
-            content = read_file(root, rel)
             if content is None:
                 return ForgeResult.failure(
                     TOOL,
@@ -106,10 +110,8 @@ def run(
 
         # ── read-spec ─────────────────────────────────────────────────────
         if action == "read-spec":
-            if initiative:
-                rel = f"agents/specs/{initiative}/SPEC.md"
-            else:
-                rel = "agents/SPEC.md"
+            path = spec_path_for(root, initiative)
+            rel = str(path.relative_to(root))
             content = read_file(root, rel)
             if content is None:
                 return ForgeResult.failure(
@@ -130,11 +132,12 @@ def run(
         if action == "list-tasks":
             if not initiative:
                 return ForgeResult.failure(TOOL, ["--initiative is required for action=list-tasks"], t.elapsed_ms)
-            rel = f"tasks/{initiative}/TASKS.md"
+            rel = str(tasks_path_for(root, initiative).relative_to(root))
             content = read_file(root, rel)
             if content is None:
                 return ForgeResult.failure(TOOL, [f"Tasks file not found: {rel}"], t.elapsed_ms)
             tasks = parse_all_toml_blocks(content)
+            tasks = [task for task in tasks if task.get("id")]
             # Count states
             state_counts: dict[str, int] = {}
             for task in tasks:
@@ -152,7 +155,7 @@ def run(
         if action == "read-tasks":
             if not initiative:
                 return ForgeResult.failure(TOOL, ["--initiative is required for action=read-tasks"], t.elapsed_ms)
-            rel = f"tasks/{initiative}/TASKS.md"
+            rel = str(tasks_path_for(root, initiative).relative_to(root))
             content = read_file(root, rel)
             if content is None:
                 return ForgeResult.failure(TOOL, [f"Tasks file not found: {rel}"], t.elapsed_ms)
@@ -165,24 +168,26 @@ def run(
 
         # ── decisions ─────────────────────────────────────────────────────
         if action == "decisions":
-            content = read_file(root, "agents/DECISIONS.md")
+            rel = context_rel(root, "decisions") or "agents/DECISIONS.md"
+            content = read_file(root, rel)
             if content is None:
-                return ForgeResult.failure(TOOL, ["agents/DECISIONS.md not found"], t.elapsed_ms)
+                return ForgeResult.failure(TOOL, [f"{rel} not found"], t.elapsed_ms)
             entries = _parse_decisions(content)
             return ForgeResult.success(TOOL, {
-                "path":    "agents/DECISIONS.md",
+                "path":    rel,
                 "count":   len(entries),
                 "decisions": entries,
             }, t.elapsed_ms)
 
         # ── traceability ──────────────────────────────────────────────────
         if action == "traceability":
-            content = read_file(root, "agents/TRACEABILITY.md")
+            rel = context_rel(root, "traceability") or "agents/TRACEABILITY.md"
+            content = read_file(root, rel)
             if content is None:
-                return ForgeResult.failure(TOOL, ["agents/TRACEABILITY.md not found"], t.elapsed_ms)
+                return ForgeResult.failure(TOOL, [f"{rel} not found"], t.elapsed_ms)
             entries = _parse_traceability(content)
             return ForgeResult.success(TOOL, {
-                "path":    "agents/TRACEABILITY.md",
+                "path":    rel,
                 "count":   len(entries),
                 "entries": entries,
             }, t.elapsed_ms)
@@ -202,7 +207,6 @@ def _add_args(p: argparse.ArgumentParser) -> None:
     p.add_argument("--initiative", default=None,
                    help="Initiative folder name (e.g. authentication)")
     p.add_argument("--repo",       default=None)
-    p.add_argument("--cwd",        default=None)
 
 
 if __name__ == "__main__":

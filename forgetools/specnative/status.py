@@ -17,7 +17,7 @@ from pathlib import Path
 from forgetools._cli import make_cli
 from forgetools._result import ForgeResult, Timer
 from forgetools.specnative._core import (
-    REQUIRED_FILES,
+    required_files_for,
     find_specs,
     find_task_files,
     parse_spec,
@@ -42,8 +42,9 @@ def run(
 
         # ── validate ──────────────────────────────────────────────────────
         if action == "validate":
-            missing = [f for f in REQUIRED_FILES if not (root / f).is_file()]
-            present = [f for f in REQUIRED_FILES if (root / f).is_file()]
+            required = required_files_for(root)
+            missing = [f for f in required if not (root / f).is_file()]
+            present = [f for f in required if (root / f).is_file()]
 
             # Check TOML parseability for specs and task files
             toml_errors: list[str] = []
@@ -65,7 +66,7 @@ def run(
                     "toml_errors":   toml_errors,
                 },
                 errors=[] if ok else [f"{len(missing)} required file(s) missing"] + toml_errors[:5],
-                suggestion=None if ok else "Run `python3 install.py` to scaffold missing files",
+                suggestion=None if ok else "Run the SpecNative installer or use specnative project --action read-template to scaffold missing files",
                 duration_ms=t.elapsed_ms,
             )
 
@@ -165,7 +166,6 @@ def _add_args(p: argparse.ArgumentParser) -> None:
                    choices=["status", "validate", "list-specs", "export"])
     p.add_argument("--repo", default=None,
                    help="SpecNative repository root (default: cwd)")
-    p.add_argument("--cwd", default=None)
 
 
 if __name__ == "__main__":

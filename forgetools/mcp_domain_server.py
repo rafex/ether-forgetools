@@ -47,7 +47,10 @@ DESCRIPTION_OVERRIDES = {
     "security spotbugs": "Run SpotBugs security analysis and parse structured findings",
     "specnative context": "Read, write, or list SpecNative context documents for the current repository",
     "specnative initiative": "Create or update SpecNative initiatives from repository context",
+    "specnative project": "Health-check, suggest, snapshot, and safely refine SpecNative project documents",
+    "specnative session": "Resume, checkpoint, or clear SpecNative multi-agent session state",
     "specnative status": "Report SpecNative specs, initiatives, states, and task progress",
+    "specnative templates": "List or apply SpecNative archetypes, spec templates, and decision snippets",
     "template scaffold": "Generate files from a named template and variable map",
     "test coverage-report": "Parse coverage reports and return summary metrics and uncovered files",
 }

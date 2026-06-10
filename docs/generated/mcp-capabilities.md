@@ -22,7 +22,7 @@ Documento generado por `scripts/gen_mcp_metadata.py`.
 | `forge-mcp-python` | `python` | 4 | 3 | 2 | `mcps/python/capabilities.json` |
 | `forge-mcp-quality` | `lint`, `test`, `security`, `secrets` | 11 | 3 | 3 | `mcps/quality/capabilities.json` |
 | `forge-mcp-release` | `release`, `gh`, `docs` | 20 | 2 | 1 | `mcps/release/capabilities.json` |
-| `forge-mcp-specnative` | `specnative`, `context`, `ether` | 7 | 5 | 3 | `mcps/specnative/capabilities.json` |
+| `forge-mcp-specnative` | `specnative`, `context`, `ether` | 10 | 10 | 8 | `mcps/specnative/capabilities.json` |
 | `forge-mcp-websearch` | `websearch`, `web` | 3 | 2 | 0 | `mcps/websearch/capabilities.json` |
 
 ## Detalle por Dominio
@@ -633,9 +633,9 @@ Prompts:
 
 - Server: `forgetools-specnative`
 - Categorias: `specnative`, `context`, `ether`
-- Tools: 7
-- Resources: 5
-- Prompts: 3
+- Tools: 10
+- Resources: 10
+- Prompts: 8
 
 Tools:
 
@@ -645,7 +645,10 @@ Tools:
 - `ether_catalog`: List Ether ecosystem repositories and their local/remote availability
 - `specnative_context`: Read, write, or list SpecNative context documents for the current repository
 - `specnative_initiative`: Create or update SpecNative initiatives from repository context
+- `specnative_project`: Health-check, suggest, snapshot, and safely refine SpecNative project documents
+- `specnative_session`: Resume, checkpoint, or clear SpecNative multi-agent session state
 - `specnative_status`: Report SpecNative specs, initiatives, states, and task progress
+- `specnative_templates`: List or apply SpecNative archetypes, spec templates, and decision snippets
 
 Resources:
 
@@ -653,11 +656,21 @@ Resources:
 - `forge://catalog`: List tools available in this domain server.
 - `forge://context/repo`: Repository size, language breakdown, and git metadata for cwd.
 - `forge://context/summary`: AI-readable codebase summary: structure, languages, and key patterns.
+- `forge://specnative/archetypes`: Available SpecNative built-in and local archetypes.
+- `forge://specnative/health`: SpecNative project health check with missing, empty, or stale documents.
+- `forge://specnative/session`: Current SpecNative SESSION.md handoff state for multi-agent continuity.
 - `forge://specnative/status`: All SpecNative specs with their states and task counts for the current repo.
+- `forge://specnative/suggest-next`: Top recommended next actions from SpecNative project state.
+- `forge://specnative/templates`: Available SpecNative spec templates and decision snippets.
 
 Prompts:
 
 - `repo_health_check`: Full health dashboard for a repository.
+- `specnative_close_initiative`: Close a SpecNative initiative and update traceability.
+- `specnative_handoff`: Generate a SpecNative multi-agent handoff.
+- `specnative_implement_task`: Implement a specific SpecNative task.
+- `specnative_init_project`: Initialize SpecNative project context with guided document updates.
+- `specnative_plan_tasks`: Derive tasks from an existing SpecNative spec.
 - `specnative_workflow`: Full SpecNative spec-first development workflow guide.
 - `start_feature`: Start a new feature using git worktree isolation + SpecNative spec scaffold.
 

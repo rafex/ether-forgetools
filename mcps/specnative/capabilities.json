@@ -6,9 +6,9 @@
     "ether"
   ],
   "counts": {
-    "prompts": 3,
-    "resources": 5,
-    "tools": 7
+    "prompts": 8,
+    "resources": 10,
+    "tools": 10
   },
   "domain": "specnative",
   "prompts": [
@@ -21,6 +21,84 @@
       ],
       "description": "Full health dashboard for a repository.",
       "name": "repo_health_check"
+    },
+    {
+      "arguments": [
+        {
+          "name": "initiative",
+          "required": true
+        }
+      ],
+      "description": "Close a SpecNative initiative and update traceability.",
+      "name": "specnative_close_initiative"
+    },
+    {
+      "arguments": [
+        {
+          "name": "summary",
+          "required": true
+        },
+        {
+          "name": "next_steps",
+          "required": true
+        },
+        {
+          "name": "decisions_made",
+          "required": false
+        }
+      ],
+      "description": "Generate a SpecNative multi-agent handoff.",
+      "name": "specnative_handoff"
+    },
+    {
+      "arguments": [
+        {
+          "name": "initiative",
+          "required": true
+        },
+        {
+          "name": "task_id",
+          "required": true
+        }
+      ],
+      "description": "Implement a specific SpecNative task.",
+      "name": "specnative_implement_task"
+    },
+    {
+      "arguments": [
+        {
+          "name": "name",
+          "required": true
+        },
+        {
+          "name": "problem",
+          "required": true
+        },
+        {
+          "name": "users",
+          "required": true
+        },
+        {
+          "name": "goals",
+          "required": true
+        },
+        {
+          "name": "stack",
+          "required": false
+        }
+      ],
+      "description": "Initialize SpecNative project context with guided document updates.",
+      "name": "specnative_init_project"
+    },
+    {
+      "arguments": [
+        {
+          "name": "initiative",
+          "required": true
+        }
+      ],
+      "description": "Derive tasks from an existing SpecNative spec.",
+      "name": "specnative_plan_tasks"
     },
     {
       "arguments": [
@@ -74,9 +152,34 @@
       "uri": "forge://context/summary"
     },
     {
+      "description": "Available SpecNative built-in and local archetypes.",
+      "name": "resource_specnative_archetypes",
+      "uri": "forge://specnative/archetypes"
+    },
+    {
+      "description": "SpecNative project health check with missing, empty, or stale documents.",
+      "name": "resource_specnative_health",
+      "uri": "forge://specnative/health"
+    },
+    {
+      "description": "Current SpecNative SESSION.md handoff state for multi-agent continuity.",
+      "name": "resource_specnative_session",
+      "uri": "forge://specnative/session"
+    },
+    {
       "description": "All SpecNative specs with their states and task counts for the current repo.",
       "name": "resource_specnative_status",
       "uri": "forge://specnative/status"
+    },
+    {
+      "description": "Top recommended next actions from SpecNative project state.",
+      "name": "resource_specnative_suggest_next",
+      "uri": "forge://specnative/suggest-next"
+    },
+    {
+      "description": "Available SpecNative spec templates and decision snippets.",
+      "name": "resource_specnative_templates",
+      "uri": "forge://specnative/templates"
     }
   ],
   "schema_version": "1.0",
@@ -160,12 +263,62 @@
       "required": []
     },
     {
+      "description": "Health-check, suggest, snapshot, and safely refine SpecNative project documents",
+      "name": "specnative_project",
+      "properties": [
+        "action",
+        "content",
+        "cwd",
+        "document",
+        "initiative",
+        "repo",
+        "section",
+        "what_changed",
+        "write"
+      ],
+      "required": []
+    },
+    {
+      "description": "Resume, checkpoint, or clear SpecNative multi-agent session state",
+      "name": "specnative_session",
+      "properties": [
+        "action",
+        "agent_name",
+        "context_notes",
+        "cwd",
+        "initiative",
+        "intent",
+        "next_steps",
+        "repo",
+        "task_id",
+        "write"
+      ],
+      "required": []
+    },
+    {
       "description": "Report SpecNative specs, initiatives, states, and task progress",
       "name": "specnative_status",
       "properties": [
         "action",
         "cwd",
         "repo"
+      ],
+      "required": []
+    },
+    {
+      "description": "List or apply SpecNative archetypes, spec templates, and decision snippets",
+      "name": "specnative_templates",
+      "properties": [
+        "action",
+        "archetype_name",
+        "cwd",
+        "force",
+        "initiative",
+        "repo",
+        "snippet_name",
+        "template_name",
+        "template_type",
+        "write"
       ],
       "required": []
     }

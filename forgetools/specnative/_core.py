@@ -54,6 +54,27 @@ REQUIRED_FILES = [
     ".specnative/CLI.md",
 ]
 
+MODERN_REQUIRED_FILES = [
+    "AGENTS.md",
+    "spec-native/README.md",
+    "spec-native/PRODUCT.md",
+    "spec-native/ARCHITECTURE.md",
+    "spec-native/STACK.md",
+    "spec-native/CONVENTIONS.md",
+    "spec-native/COMMANDS.md",
+    "spec-native/DECISIONS.md",
+    "spec-native/ROADMAP.md",
+    "spec-native/TRACEABILITY.md",
+    "spec-native/SESSION.md",
+    "spec-native/specs/README.md",
+    "spec-native/tasks/README.md",
+    "spec-native/workflows/README.md",
+    "spec-native/pipelines/README.md",
+    ".specnative/SCHEMA.md",
+    ".specnative/CLI.md",
+    ".specnative/MCP.md",
+]
+
 # ── Context document map ──────────────────────────────────────────────────────
 
 CONTEXT_MAP: dict[str, str] = {
@@ -78,6 +99,28 @@ CONTEXT_MAP: dict[str, str] = {
     # framework meta
     "schema":           ".specnative/SCHEMA.md",
     "cli":              ".specnative/CLI.md",
+}
+
+MODERN_CONTEXT_MAP: dict[str, str] = {
+    "agents":           "AGENTS.md",
+    "product":          "spec-native/PRODUCT.md",
+    "architecture":     "spec-native/ARCHITECTURE.md",
+    "stack":            "spec-native/STACK.md",
+    "conventions":      "spec-native/CONVENTIONS.md",
+    "commands":         "spec-native/COMMANDS.md",
+    "decisions":        "spec-native/DECISIONS.md",
+    "roadmap":          "spec-native/ROADMAP.md",
+    "traceability":     "spec-native/TRACEABILITY.md",
+    "session":          "spec-native/SESSION.md",
+    "spec":             "spec-native/SPEC.md",
+    "planning":         "spec-native/workflows/PLANNING.md",
+    "implementation":   "spec-native/workflows/IMPLEMENTATION.md",
+    "review":           "spec-native/workflows/REVIEW.md",
+    "ci":               "spec-native/pipelines/CI.md",
+    "cd":               "spec-native/pipelines/CD.md",
+    "schema":           ".specnative/SCHEMA.md",
+    "cli":              ".specnative/CLI.md",
+    "mcp":              ".specnative/MCP.md",
 }
 
 # ── Valid states (official SpecNative schema) ─────────────────────────────────
@@ -182,6 +225,53 @@ def read_file(root: Path, rel: str) -> str | None:
         return f"[ERROR reading {rel}: {e}]"
 
 
+def uses_modern_layout(root: Path) -> bool:
+    """Return True for SpecNative v0.6+ repositories using spec-native/."""
+    return (root / "spec-native").is_dir()
+
+
+def context_map_for(root: Path) -> dict[str, str]:
+    return MODERN_CONTEXT_MAP if uses_modern_layout(root) else CONTEXT_MAP
+
+
+def required_files_for(root: Path) -> list[str]:
+    return MODERN_REQUIRED_FILES if uses_modern_layout(root) else REQUIRED_FILES
+
+
+def context_rel(root: Path, document: str) -> str | None:
+    mapping = context_map_for(root)
+    return mapping.get(document)
+
+
+def specs_dir(root: Path) -> Path:
+    return root / "spec-native" / "specs" if uses_modern_layout(root) else root / "agents" / "specs"
+
+
+def tasks_dir(root: Path) -> Path:
+    return root / "spec-native" / "tasks" if uses_modern_layout(root) else root / "tasks"
+
+
+def workflows_dir(root: Path) -> Path:
+    return root / "spec-native" / "workflows" if uses_modern_layout(root) else root / "workflows"
+
+
+def spec_path_for(root: Path, initiative: str | None = None) -> Path:
+    if initiative:
+        return specs_dir(root) / initiative / "SPEC.md"
+    return root / "spec-native" / "SPEC.md" if uses_modern_layout(root) else root / "agents" / "SPEC.md"
+
+
+def tasks_path_for(root: Path, initiative: str) -> Path:
+    return tasks_dir(root) / initiative / "TASKS.md"
+
+
+def read_context_document(root: Path, document: str) -> tuple[str | None, str | None]:
+    rel = context_rel(root, document)
+    if rel is None:
+        return None, None
+    return rel, read_file(root, rel)
+
+
 # ── TOML parsing ──────────────────────────────────────────────────────────────
 
 def _toml_loads(text: str) -> dict[str, Any]:
@@ -238,11 +328,11 @@ def find_specs(root: Path) -> list[Path]:
 
 
 def find_task_files(root: Path) -> list[Path]:
-    """Find all TASKS.md files under tasks/."""
-    tasks_dir = root / "tasks"
-    if not tasks_dir.is_dir():
+    """Find all TASKS.md files under the active SpecNative tasks directory."""
+    base = tasks_dir(root)
+    if not base.is_dir():
         return []
-    return sorted(tasks_dir.rglob("TASKS.md"))
+    return sorted(base.rglob("TASKS.md"))
 
 
 def parse_spec(path: Path, root: Path) -> dict[str, Any]:

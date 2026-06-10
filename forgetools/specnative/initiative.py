@@ -28,9 +28,12 @@ from forgetools.specnative._core import (
     read_file,
     _toml_loads,
     parse_all_toml_blocks,
-    find_specs,
     task_state_summary,
     CONTEXT_MAP,
+    context_rel,
+    spec_path_for,
+    tasks_path_for,
+    workflows_dir,
     SPEC_STATES,
     TASK_STATES,
     DECISION_STATES,
@@ -251,7 +254,7 @@ def run(
         if action == "start":
             if not initiative:
                 return ForgeResult.failure(TOOL, ["--initiative is required for action=start"], t.elapsed_ms)
-            spec_path = root / "agents" / "specs" / initiative / "SPEC.md"
+            spec_path = spec_path_for(root, initiative)
             if spec_path.exists() and not write:
                 return ForgeResult.failure(
                     TOOL, [f"Spec already exists: {spec_path.relative_to(root)}"],
@@ -270,9 +273,11 @@ def run(
         if action == "plan":
             if not initiative:
                 return ForgeResult.failure(TOOL, ["--initiative is required for action=plan"], t.elapsed_ms)
-            spec_rel = f"agents/specs/{initiative}/SPEC.md"
-            spec_content = read_file(root, spec_rel) or read_file(root, "agents/SPEC.md") or ""
-            tasks_path = root / "tasks" / initiative / "TASKS.md"
+            spec_path = spec_path_for(root, initiative)
+            spec_rel = str(spec_path.relative_to(root))
+            default_spec_rel = str(spec_path_for(root, None).relative_to(root))
+            spec_content = read_file(root, spec_rel) or read_file(root, default_spec_rel) or ""
+            tasks_path = tasks_path_for(root, initiative)
             content = _tasks_template(initiative, spec_content)
             result = _write_or_preview(tasks_path, content, write)
             return ForgeResult.success(TOOL, {
@@ -290,24 +295,25 @@ def run(
 
             # Official 9-step agent workflow — load minimum necessary context
             # Step 1-4: context loading
-            roadmap       = read_file(root, "agents/ROADMAP.md") or ""
-            product       = read_file(root, "agents/PRODUCT.md") or ""
-            decisions     = read_file(root, "agents/DECISIONS.md") or ""
-            architecture  = read_file(root, "agents/ARCHITECTURE.md") or ""
+            roadmap       = read_file(root, context_rel(root, "roadmap") or "agents/ROADMAP.md") or ""
+            product       = read_file(root, context_rel(root, "product") or "agents/PRODUCT.md") or ""
+            decisions     = read_file(root, context_rel(root, "decisions") or "agents/DECISIONS.md") or ""
+            architecture  = read_file(root, context_rel(root, "architecture") or "agents/ARCHITECTURE.md") or ""
             # Step 5: spec
-            spec_content  = (read_file(root, f"agents/specs/{initiative}/SPEC.md")
-                             or read_file(root, "agents/SPEC.md") or "")
+            spec_rel      = str(spec_path_for(root, initiative).relative_to(root))
+            default_spec  = str(spec_path_for(root, None).relative_to(root))
+            spec_content  = (read_file(root, spec_rel) or read_file(root, default_spec) or "")
             # Step 7: workflow guide
-            impl_workflow = read_file(root, "workflows/IMPLEMENTATION.md") or ""
+            impl_workflow = read_file(root, str((workflows_dir(root) / "IMPLEMENTATION.md").relative_to(root))) or ""
             # Supporting context
-            conventions   = read_file(root, "agents/CONVENTIONS.md") or ""
-            commands      = read_file(root, "agents/COMMANDS.md") or ""
-            stack         = read_file(root, "agents/STACK.md") or ""
+            conventions   = read_file(root, context_rel(root, "conventions") or "agents/CONVENTIONS.md") or ""
+            commands      = read_file(root, context_rel(root, "commands") or "agents/COMMANDS.md") or ""
+            stack         = read_file(root, context_rel(root, "stack") or "agents/STACK.md") or ""
 
             # Step 6: tasks
-            tasks_rel     = f"tasks/{initiative}/TASKS.md"
+            tasks_rel     = str(tasks_path_for(root, initiative).relative_to(root))
             tasks_content = read_file(root, tasks_rel) or ""
-            all_tasks     = parse_all_toml_blocks(tasks_content)
+            all_tasks     = [task for task in parse_all_toml_blocks(tasks_content) if task.get("id")]
 
             # Filter to specific task if provided; default to todo/in_progress
             if task_id:
@@ -344,9 +350,9 @@ def run(
             if not initiative:
                 return ForgeResult.failure(TOOL, ["--initiative is required"], t.elapsed_ms)
 
-            spec_content  = read_file(root, f"agents/specs/{initiative}/SPEC.md") or read_file(root, "agents/SPEC.md") or ""
-            tasks_content = read_file(root, f"tasks/{initiative}/TASKS.md") or ""
-            all_tasks     = parse_all_toml_blocks(tasks_content)
+            spec_content  = read_file(root, str(spec_path_for(root, initiative).relative_to(root))) or read_file(root, str(spec_path_for(root, None).relative_to(root))) or ""
+            tasks_content = read_file(root, str(tasks_path_for(root, initiative).relative_to(root))) or ""
+            all_tasks     = [task for task in parse_all_toml_blocks(tasks_content) if task.get("id")]
 
             spec_meta   = _toml_loads(spec_content)
             criteria    = re.findall(r"- \[ \] (.+)", spec_content)
@@ -382,8 +388,8 @@ def run(
             if not initiative:
                 return ForgeResult.failure(TOOL, ["--initiative is required"], t.elapsed_ms)
 
-            spec_rel     = f"agents/specs/{initiative}/SPEC.md"
-            spec_path    = root / spec_rel
+            spec_path    = spec_path_for(root, initiative)
+            spec_rel     = str(spec_path.relative_to(root))
             spec_content = read_file(root, spec_rel)
             if spec_content is None:
                 return ForgeResult.failure(TOOL, [f"Spec not found: {spec_rel}"], t.elapsed_ms)
@@ -394,8 +400,9 @@ def run(
             updated = re.sub(r'(updated_at\s*=\s*")[^"]*(")', rf'\1{today}\2', updated)
 
             # Append traceability entry
-            trace_path    = root / "agents" / "TRACEABILITY.md"
-            trace_content = read_file(root, "agents/TRACEABILITY.md") or "# Traceability\n\n"
+            trace_rel     = context_rel(root, "traceability") or "agents/TRACEABILITY.md"
+            trace_path    = root / trace_rel
+            trace_content = read_file(root, trace_rel) or "# Traceability\n\n"
             spec_meta     = _toml_loads(spec_content)
             trace_entry   = f"\n| {spec_meta.get('id', initiative)} | {spec_rel} | closed | {today} |\n"
             updated_trace = trace_content.rstrip() + trace_entry
@@ -427,8 +434,9 @@ def run(
                     [f"Invalid decision_state '{decision_state}'. Valid: {', '.join(_VALID_DECISION_STATES)}"],
                     t.elapsed_ms,
                 )
-            dec_path    = root / "agents" / "DECISIONS.md"
-            existing    = read_file(root, "agents/DECISIONS.md") or "# Decisions\n\n"
+            dec_rel     = context_rel(root, "decisions") or "agents/DECISIONS.md"
+            dec_path    = root / dec_rel
+            existing    = read_file(root, dec_rel) or "# Decisions\n\n"
             dec_id      = _next_decision_id(existing)
             new_block   = _decision_block(dec_id, title, context, decision, consequences,
                                           owner, state=decision_state)
@@ -451,8 +459,8 @@ def run(
 
             if task_id:
                 # Update task state in TASKS.md
-                tasks_rel  = f"tasks/{initiative}/TASKS.md"
-                tasks_path = root / tasks_rel
+                tasks_path = tasks_path_for(root, initiative)
+                tasks_rel  = str(tasks_path.relative_to(root))
                 content    = read_file(root, tasks_rel)
                 if content is None:
                     return ForgeResult.failure(TOOL, [f"Tasks file not found: {tasks_rel}"], t.elapsed_ms)
@@ -468,8 +476,8 @@ def run(
                 }, t.elapsed_ms)
             else:
                 # Update spec state
-                spec_rel  = f"agents/specs/{initiative}/SPEC.md"
-                spec_path = root / spec_rel
+                spec_path = spec_path_for(root, initiative)
+                spec_rel  = str(spec_path.relative_to(root))
                 content   = read_file(root, spec_rel)
                 if content is None:
                     return ForgeResult.failure(TOOL, [f"Spec not found: {spec_rel}"], t.elapsed_ms)
