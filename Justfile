@@ -86,6 +86,10 @@ help:
 test:
     {{ BIN }}/python3.13 -m pytest
 
+# Validar contrato vivo de todos los MCP por dominio
+test-mcps:
+    {{ BIN }}/python3.13 -m pytest tests/test_mcp_servers.py tests/test_mcp_metadata.py
+
 # Verificar formato (si aplica)
 lint:
     {{ BIN }}/python3.13 -m ruff check forgetools/

@@ -1,6 +1,50 @@
 """Prompt definitions shared by domain MCP servers."""
 from __future__ import annotations
 
+import json
+
+
+_CC_TYPES = {
+    "feat": "New user-visible functionality",
+    "fix": "Bug fix",
+    "docs": "Documentation-only change",
+    "style": "Formatting without behavior changes",
+    "refactor": "Code restructuring without feature or bug changes",
+    "perf": "Performance improvement",
+    "test": "Tests or test infrastructure",
+    "build": "Build system or dependency changes",
+    "ci": "Continuous integration configuration",
+    "chore": "Maintenance not covered by another type",
+    "revert": "Revert a previous commit",
+}
+
+_CC_FORMAT = "<type>[optional scope][!]: <description>\n\n[optional body]\n\n[optional footer(s)]"
+
+_CC_RULES = """\
+- Use an imperative, lower-case description without a trailing period.
+- Keep the complete subject at 72 characters or fewer.
+- Use a scope when it clarifies the affected module.
+- Add `!` and a `BREAKING CHANGE:` footer for incompatible changes.
+- Keep one logical concern per commit.
+"""
+
+_GROUPING_RULES = """\
+- Group files that implement one independently reviewable concern.
+- Keep tests with the production code they validate.
+- Separate documentation, CI, build, and dependency-only changes when independent.
+- Split unrelated modules or behavior changes into separate commits.
+- Preserve dependency order so each commit can build and be reviewed on its own.
+"""
+
+_GROUPING_FILE_SIGNALS = """\
+- `tests/`, `test_*`, `*_test.*`: usually accompany the related source change.
+- `.github/`, CI YAML: `ci`.
+- build files and lockfiles: `build` or `chore`.
+- Markdown and documentation trees: `docs`.
+- formatting-only diffs: `style`.
+"""
+
+
 def start_feature(initiative: str, problem: str) -> str:
     """Start a new feature using git worktree isolation + SpecNative spec scaffold.
 
