@@ -17,6 +17,7 @@ DESCRIPTION_OVERRIDES = {
     "ether catalog": "List Ether ecosystem repositories and their local/remote availability",
     "fs find-by-type": "Find files by semantic type such as code, docs, config, images, or archives",
     "fs head": "Read the first lines of a file or matching files with structured metadata",
+    "fs read": "Read a text file with metadata; accepts file, filePath, or path as the file location",
     "fs tail": "Read the last lines of a file or matching files with structured metadata",
     "gh actions-logs": "Fetch and summarize logs for GitHub Actions workflow runs or jobs",
     "gh actions-trigger": "Trigger a GitHub Actions workflow dispatch with structured inputs",

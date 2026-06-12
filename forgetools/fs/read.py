@@ -13,14 +13,26 @@ TOOL = "fs.read"
 def run(
     *,
     cwd: str | None = None,
-    file: str,
+    file: str | None = None,
+    filePath: str | None = None,
+    path: str | None = None,
     lines: str | None = None,
 ) -> ForgeResult:
+    """Read a text file using file, filePath, or path as compatible aliases."""
     with Timer() as t:
-        path = os.path.join(cwd or ".", file)
+        requested_file = file or filePath or path
+        if not requested_file:
+            return ForgeResult.failure(
+                TOOL,
+                ["One of 'file', 'filePath', or 'path' is required"],
+                duration_ms=t.elapsed_ms,
+                suggestion="Pass file='relative/or/absolute/path' to fs_read",
+            )
+
+        resolved_path = os.path.join(cwd or ".", requested_file)
         try:
-            stat = os.stat(path)
-            with open(path, encoding="utf-8", errors="replace") as f:
+            stat = os.stat(resolved_path)
+            with open(resolved_path, encoding="utf-8", errors="replace") as f:
                 all_lines = f.readlines()
 
             if lines:
@@ -32,7 +44,7 @@ def run(
             return ForgeResult.success(
                 TOOL,
                 {
-                    "file": file,
+                    "file": requested_file,
                     "total_lines": len(all_lines),
                     "size_bytes": stat.st_size,
                     "lines_returned": len(selected),
@@ -41,7 +53,11 @@ def run(
                 t.elapsed_ms,
             )
         except FileNotFoundError:
-            return ForgeResult.failure(TOOL, [f"File not found: {file}"], duration_ms=t.elapsed_ms)
+            return ForgeResult.failure(
+                TOOL,
+                [f"File not found: {requested_file}"],
+                duration_ms=t.elapsed_ms,
+            )
 
 
 def _parse_range(spec: str, total: int) -> tuple[int, int]:

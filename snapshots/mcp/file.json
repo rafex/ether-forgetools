@@ -224,16 +224,16 @@
       "required": []
     },
     {
-      "description": "forgetools.fs.read \u2014 Read a file with metadata",
+      "description": "Read a text file with metadata; accepts file, filePath, or path as the file location",
       "name": "fs_read",
       "properties": [
         "cwd",
         "file",
-        "lines"
+        "filePath",
+        "lines",
+        "path"
       ],
-      "required": [
-        "file"
-      ]
+      "required": []
     },
     {
       "description": "Read the last lines of a file or matching files with structured metadata",

@@ -240,7 +240,7 @@ Tools:
 - `fs_diff`: forgetools.fs.diff — Diff two files or git refs
 - `fs_find_by_type`: Find files by semantic type such as code, docs, config, images, or archives
 - `fs_head`: Read the first lines of a file or matching files with structured metadata
-- `fs_read`: forgetools.fs.read — Read a file with metadata
+- `fs_read`: Read a text file with metadata; accepts file, filePath, or path as the file location
 - `fs_tail`: Read the last lines of a file or matching files with structured metadata
 - `fs_tree`: forgetools.fs.tree — Directory tree with smart filters
 - `json_query`: Query JSON documents using dotted paths and array indexes

@@ -862,7 +862,7 @@
     "/tools/fs_read": {
       "post": {
         "operationId": "fs_read",
-        "summary": "forgetools.fs.read \u2014 Read a file with metadata",
+        "summary": "Read a text file with metadata; accepts file, filePath, or path as the file location",
         "tags": [
           "fs"
         ],
@@ -884,7 +884,37 @@
                     "default": null
                   },
                   "file": {
-                    "type": "string"
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null
+                  },
+                  "filePath": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null
+                  },
+                  "path": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null
                   },
                   "lines": {
                     "anyOf": [
@@ -898,9 +928,6 @@
                     "default": null
                   }
                 },
-                "required": [
-                  "file"
-                ],
                 "type": "object"
               }
             }
