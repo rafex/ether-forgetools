@@ -3,9 +3,11 @@ from __future__ import annotations
 
 import argparse
 import os
+import shutil
 
 from forgetools._cli import make_cli
 from forgetools._result import ForgeResult, Timer
+from forgetools._runner import run_command
 
 TOOL = "search.find_files"
 
@@ -26,6 +28,11 @@ def run(
         excluded = DEFAULT_EXCLUDE.copy()
         if exclude:
             excluded.update(x.strip() for x in exclude.split(","))
+
+        if shutil.which("fd"):
+            fast_result = _run_fd(base, name, ext, max_results, excluded, t)
+            if fast_result is not None:
+                return fast_result
 
         found = []
         try:
@@ -49,9 +56,71 @@ def run(
 
         return ForgeResult.success(
             TOOL,
-            {"count": len(found), "files": found, "truncated": len(found) >= max_results},
+            {
+                "count": len(found),
+                "files": found,
+                "truncated": len(found) >= max_results,
+                "backend": "python",
+            },
             t.elapsed_ms,
         )
+
+
+def _run_fd(
+    base: str,
+    name: str | None,
+    ext: str | None,
+    max_results: int,
+    excluded: set[str],
+    timer: Timer,
+) -> ForgeResult | None:
+    """Use fd for fast traversal while preserving the legacy result shape."""
+    cmd = ["fd", "--type", "file", "--hidden", "--no-ignore-vcs", "--print0"]
+    if name:
+        cmd += ["--fixed-strings", "--ignore-case", "--", name, base]
+    else:
+        cmd += ["", base]
+    if ext:
+        cmd += ["--extension", ext.removeprefix(".")]
+    if max_results > 0:
+        cmd += ["--max-results", str(max_results)]
+    for directory in sorted(excluded):
+        cmd += ["--exclude", directory]
+
+    try:
+        rc, stdout, stderr = run_command(cmd, timeout=60)
+    except (FileNotFoundError, OSError):
+        return None
+    if rc != 0:
+        return ForgeResult.failure(
+            TOOL,
+            [stderr.strip() or f"fd exited with code {rc}"],
+            duration_ms=timer.elapsed_ms,
+            suggestion="Install fd or retry with the Python fallback",
+        )
+
+    files = []
+    for raw_path in stdout.split("\0"):
+        if not raw_path:
+            continue
+        try:
+            stat = os.stat(raw_path)
+        except OSError:
+            continue
+        files.append({
+            "path": os.path.relpath(raw_path, base),
+            "size_bytes": stat.st_size,
+        })
+    return ForgeResult.success(
+        TOOL,
+        {
+            "count": len(files),
+            "files": files,
+            "truncated": max_results > 0 and len(files) >= max_results,
+            "backend": "fd",
+        },
+        timer.elapsed_ms,
+    )
 
 
 def _add_args(p: argparse.ArgumentParser) -> None:

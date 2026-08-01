@@ -130,6 +130,7 @@ Exposes all forgetools as MCP tools for use with [opencode](https://opencode.ai)
 
 Domain MCP guide (install, capabilities, config):
 - [docs/mcp-domains.md](docs/mcp-domains.md)
+- [docs/mcp-selection-guide.md](docs/mcp-selection-guide.md) — que MCP habilitar por caso de uso y como reducir contexto
 
 ### Install with MCP support
 

@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import argparse
-import importlib
 import json
 import sys
 
@@ -16,6 +15,7 @@ REGISTRY: dict[str, str] = {
     "git blame":           "forgetools.git.blame",
     "git stash":           "forgetools.git.stash",
     "git conflicts":       "forgetools.git.conflicts",
+    "git operations":      "forgetools.git.operations",
     # gh — no token required (public repos via GitHub REST API)
     "gh api-repo":         "forgetools.gh.api_repo",
     "gh api-releases":     "forgetools.gh.api_releases",
@@ -64,6 +64,8 @@ REGISTRY: dict[str, str] = {
     "fs find-by-type":     "forgetools.fs.find_by_type",
     "fs head":             "forgetools.fs.head",
     "fs tail":             "forgetools.fs.tail",
+    "fs disk-usage":       "forgetools.fs.disk_usage",
+    "fs operations":       "forgetools.fs.operations",
     # diag
     "diag health":         "forgetools.diag.health",
     "diag env":            "forgetools.diag.env_validate",
@@ -246,9 +248,6 @@ def main() -> None:
     sys.argv = [f"forge {key}"] + sys.argv[3:]
 
     try:
-        mod = importlib.import_module(module_path)
-        mod.run  # ensure it has run()
-        # Run the module as __main__ equivalent
         import runpy
         runpy.run_module(module_path, run_name="__main__", alter_sys=True)
     except SystemExit:

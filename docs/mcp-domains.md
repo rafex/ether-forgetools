@@ -76,7 +76,11 @@ make install-mcp-all
 - Categorias: `fs`, `search`, `edit`, `diff`, `text`, `template`, `json`, `config`
 - Casos de uso:
   - lectura/escritura estructurada
-  - busqueda/refactor
+  - busqueda/refactor usando `fd`/`rg --json` cuando estan disponibles, con fallback portable
+  - `git grep` para buscar unicamente archivos versionados
+  - lectura de archivos usando `bat` y analisis de uso de disco con `ncdu` cuando estan disponibles
+  - inspeccion y operaciones controladas de archivos: crear directorios, tocar, copiar, mover, eliminar, archivar y extraer
+  - previews obligatorios para operaciones mutantes y validacion de traversal al extraer archivos
   - validacion/configuracion de repos
 
 Uso:
@@ -92,6 +96,9 @@ forge-mcp-file
 - Categorias: `git`, `gh`
 - Casos de uso:
   - cambios locales, ramas, worktrees, tags, submodulos
+  - operaciones de sincronizacion y recuperacion: fetch, pull, push, switch, restore, revert, merge, rebase, reset, clean y bisect
+  - administracion de ramas y remotos: crear/eliminar ramas, agregar/quitar remotos, actualizar URLs y podar referencias
+  - mantenimiento y diagnostico del repositorio: count-objects, gc, fsck, reflog y previews antes de mutaciones
   - PRs/issues/actions/releases en GitHub
   - stacked PRs, backports y planes multi-commit
   - preflight antes de push/merge y estado agregado GitHub

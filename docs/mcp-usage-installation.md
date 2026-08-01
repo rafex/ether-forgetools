@@ -2,6 +2,8 @@
 
 Guia operativa de instalacion y uso de los MCP de `forgetools`.
 
+Antes de instalar o registrar servidores, consulta la [guia de seleccion de MCP](./mcp-selection-guide.md) para elegir un perfil y evitar cargar contexto innecesario.
+
 ## Layout de empaquetado
 
 - `pyproject.toml` (raiz): paquete base `forgetools` + CLI `forge`.
@@ -120,14 +122,58 @@ make install-mcp-all
 
 ### file
 - Lectura/arbol/diff/checksum de archivos.
-- Busqueda (`grep`, `find-files`, `todo`) y reemplazo.
+- Busqueda rapida con `fd`/`rg` (`grep`, `find-files`, `todo`) y reemplazo por candidatos.
+- `search_grep` usa `rg --json`; para repositorios Git puede usar `git grep` con `tracked_only=true`.
+- Lectura de contenido con `bat` en modo plano, con fallback Python.
+- Uso de disco con `fs_disk_usage`, preferentemente mediante export JSON de `ncdu`.
+- Operaciones de ciclo de vida con `fs_operations`: `info`, `mkdir`, `touch`, `copy`, `move`, `delete`, `archive` y `extract`.
+- Las operaciones que modifican archivos generan preview; requieren `--execute --confirm`. El borrado de directorios requiere además `--recursive`.
 - Edicion estructurada (`insert`, `replace-lines`, `bulk-rename`).
 - Utilidades `config`, `json`, `template`.
+
+Ejemplos de uso rapido:
+
+```bash
+forge search find-files --name "service" --ext .py --max-results 50
+forge search grep --pattern "TODO|FIXME" --path src --context 2
+forge search grep --pattern "Controller" --file-type java --pcre2
+forge search grep --pattern "TODO" --tracked-only
+forge fs read --file src/main.py --lines 1-80
+forge fs disk-usage --path . --max-entries 20
+forge fs operations info --path src/main.py
+forge fs operations copy --source src/config.example --destination /tmp/config.example
+forge fs operations archive --sources src,tests --destination /tmp/project.tar.gz --execute --confirm
+forge fs operations extract --source /tmp/project.tar.gz --destination /tmp/project-preview --execute --confirm
+```
+
+`copy`, `move`, `delete`, `archive` y `extract` no se ejecutan por accidente: primero muestran el plan. Usa `--overwrite` solo cuando reemplazar el destino sea intencional y `--allow-dangerous` únicamente para una ruta explícitamente autorizada.
 
 ### git
 - Estado, historial, diff, ramas, stash, conflicts, tags.
 - Worktrees, submodulos, commit, cherry-pick.
+- Operaciones `git_operations`: inspección (`remote`, `show`, `reflog`), sincronización (`fetch`, `pull`, `push`), ramas (`switch`, `branch-create`, `branch-delete`), recuperación (`restore`, `revert`, `reset`, `reflog`), integración (`merge`, `rebase`), diagnóstico (`bisect`) y mantenimiento (`remote-add`, `remote-remove`, `remote-set-url`, `remote-prune`, `maintenance`).
+- Las mutaciones se entregan en preview y requieren `execute=true` mas `confirm=true`.
 - PR/issues/actions/releases con `gh`.
+
+Ejemplos de operaciones:
+
+```bash
+# Solo lectura
+forge git operations remote
+forge git operations show --ref HEAD --max-lines 100
+forge git operations reflog --count 10
+
+# Primero preview, luego ejecucion explicita
+forge git operations push --branch feature/example
+forge git operations push --branch feature/example --execute --confirm
+forge git operations restore --path src/app.py --execute --confirm
+forge git operations branch-create --branch feature/new-api
+forge git operations revert --ref HEAD --execute --confirm
+forge git operations remote-prune --remote origin --execute --confirm
+forge git operations maintenance --maintenance-action count-objects
+```
+
+Para `bisect`, indica `--bisect-action start|good|bad|skip|reset`; `good`, `bad` y `skip` pueden recibir `--ref`. Las acciones `revert`, `reset`, `clean`, borrado de ramas y cambios de remotos requieren revisión del preview antes de confirmar.
 
 ### docs
 - Generacion de changelog.

@@ -3,7 +3,7 @@
   "counts": {
     "prompts": 2,
     "resources": 3,
-    "tools": 22
+    "tools": 24
   },
   "domain": "file",
   "prompts": [
@@ -198,6 +198,18 @@
       ]
     },
     {
+      "description": "Measure directory usage with ncdu JSON export or a portable Python fallback",
+      "name": "fs_disk_usage",
+      "properties": [
+        "apparent_size",
+        "cwd",
+        "exclude",
+        "max_entries",
+        "path"
+      ],
+      "required": []
+    },
+    {
       "description": "Find files by semantic type such as code, docs, config, images, or archives",
       "name": "fs_find_by_type",
       "properties": [
@@ -220,6 +232,25 @@
         "lines",
         "path",
         "pattern"
+      ],
+      "required": []
+    },
+    {
+      "description": "Inspect, create, copy, move, delete, archive, or extract filesystem paths safely",
+      "name": "fs_operations",
+      "properties": [
+        "action",
+        "allow_dangerous",
+        "archive_format",
+        "confirm",
+        "cwd",
+        "destination",
+        "execute",
+        "overwrite",
+        "path",
+        "recursive",
+        "source",
+        "sources"
       ],
       "required": []
     },
@@ -283,16 +314,21 @@
       "required": []
     },
     {
-      "description": "forgetools.search.grep \u2014 Structured grep over project files",
+      "description": "Search source files with structured match/context events and backend metadata.",
       "name": "search_grep",
       "properties": [
         "context",
         "cwd",
         "file_ext",
+        "file_type",
         "ignore_case",
+        "include_hidden",
         "max_results",
         "path",
-        "pattern"
+        "pattern",
+        "respect_ignore",
+        "tracked_only",
+        "use_pcre2"
       ],
       "required": [
         "pattern"

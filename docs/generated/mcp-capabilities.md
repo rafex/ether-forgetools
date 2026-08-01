@@ -11,9 +11,9 @@ Documento generado por `scripts/gen_mcp_metadata.py`.
 | `forge-mcp-data` | `db` | 3 | 2 | 1 | `mcps/data/capabilities.json` |
 | `forge-mcp-deps` | `deps`, `java`, `npm` | 13 | 2 | 2 | `mcps/deps/capabilities.json` |
 | `forge-mcp-docs` | `docs`, `openapi`, `web` | 3 | 2 | 1 | `mcps/docs/capabilities.json` |
-| `forge-mcp-file` | `fs`, `search`, `edit`, `diff`, `text`, `template`, `json`, `config` | 22 | 3 | 2 | `mcps/file/capabilities.json` |
+| `forge-mcp-file` | `fs`, `search`, `edit`, `diff`, `text`, `template`, `json`, `config` | 24 | 3 | 2 | `mcps/file/capabilities.json` |
 | `forge-mcp-frontend` | `frontend`, `npm` | 5 | 2 | 2 | `mcps/frontend/capabilities.json` |
-| `forge-mcp-git` | `git`, `gh` | 39 | 12 | 17 | `mcps/git/capabilities.json` |
+| `forge-mcp-git` | `git`, `gh` | 40 | 12 | 17 | `mcps/git/capabilities.json` |
 | `forge-mcp-java` | `java` | 8 | 6 | 5 | `mcps/java/capabilities.json` |
 | `forge-mcp-linux` | `process`, `diag`, `net`, `shell` | 12 | 5 | 2 | `mcps/linux/capabilities.json` |
 | `forge-mcp-observability` | `observability` | 2 | 2 | 2 | `mcps/observability/capabilities.json` |
@@ -222,7 +222,7 @@ Prompts:
 
 - Server: `forgetools-file`
 - Categorias: `fs`, `search`, `edit`, `diff`, `text`, `template`, `json`, `config`
-- Tools: 22
+- Tools: 24
 - Resources: 3
 - Prompts: 2
 
@@ -238,14 +238,16 @@ Tools:
 - `edit_replace_lines`: forgetools.edit.replace_lines — Replace a range of lines in a file
 - `fs_checksum`: forgetools.fs.checksum — Compute file checksums using stdlib hashlib
 - `fs_diff`: forgetools.fs.diff — Diff two files or git refs
+- `fs_disk_usage`: Measure directory usage with ncdu JSON export or a portable Python fallback
 - `fs_find_by_type`: Find files by semantic type such as code, docs, config, images, or archives
 - `fs_head`: Read the first lines of a file or matching files with structured metadata
+- `fs_operations`: Inspect, create, copy, move, delete, archive, or extract filesystem paths safely
 - `fs_read`: Read a text file with metadata; accepts file, filePath, or path as the file location
 - `fs_tail`: Read the last lines of a file or matching files with structured metadata
 - `fs_tree`: forgetools.fs.tree — Directory tree with smart filters
 - `json_query`: Query JSON documents using dotted paths and array indexes
 - `search_find_files`: forgetools.search.find_files — Find files by name/extension
-- `search_grep`: forgetools.search.grep — Structured grep over project files
+- `search_grep`: Search source files with structured match/context events and backend metadata.
 - `search_replace`: forgetools.search.search_replace — Bulk find and replace in files
 - `search_todo`: forgetools.search.todo — Find TODOs, FIXMEs, HACKs in code
 - `template_scaffold`: Generate files from a named template and variable map
@@ -292,7 +294,7 @@ Prompts:
 
 - Server: `forgetools-git`
 - Categorias: `git`, `gh`
-- Tools: 39
+- Tools: 40
 - Resources: 12
 - Prompts: 17
 
@@ -326,6 +328,7 @@ Tools:
 - `git_diff`: forgetools.git.diff — Git diff with structured output
 - `git_log`: forgetools.git.log — Git commit history
 - `git_multi_repo`: Inspect and coordinate git status across multiple repositories
+- `git_operations`: Preview or execute Git synchronization, recovery, branch, remote administration, bisect, and maintenance operations safely
 - `git_pr_workflow`: forgetools.git.pr_workflow — Create a GitHub PR via branch + push + gh pr create
 - `git_preflight`: Validate branch, remote, and protection status before push or merge
 - `git_stack_plan`: Plan stacked PR branches from ordered task names

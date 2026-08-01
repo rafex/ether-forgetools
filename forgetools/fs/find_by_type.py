@@ -14,10 +14,12 @@ Usage:
 
 import argparse
 import os
+import shutil
 from pathlib import Path
 
 from forgetools._cli import make_cli
 from forgetools._result import ForgeResult, Timer
+from forgetools._runner import run_command
 
 TOOL = "fs.find_by_type"
 
@@ -97,6 +99,11 @@ def run(
                 TOOL, [f"Path not found: {root}"], t.elapsed_ms,
             )
 
+        if shutil.which("fd"):
+            fast_result = _run_fd(root, base, ftype, extensions, recursive, max, t)
+            if fast_result is not None:
+                return fast_result
+
         found: list[dict] = []
 
         if recursive:
@@ -141,7 +148,67 @@ def run(
             "count":       len(found),
             "truncated":   len(found) >= max,
             "files":       found,
+            "backend":     "python",
         }, t.elapsed_ms)
+
+
+def _run_fd(
+    root: Path,
+    base: Path,
+    type_name: str,
+    extensions: set[str],
+    recursive: bool,
+    limit: int,
+    timer: Timer,
+) -> ForgeResult | None:
+    cmd = ["fd", "--type", "file", "--hidden", "--no-ignore-vcs", "--print0"]
+    if not recursive:
+        cmd += ["--max-depth", "1"]
+    for excluded in sorted(IGNORE_DIRS):
+        cmd += ["--exclude", excluded]
+    cmd += ["", str(root)]
+    try:
+        rc, stdout, stderr = run_command(cmd, timeout=60)
+    except (FileNotFoundError, OSError):
+        return None
+    if rc != 0:
+        return ForgeResult.failure(
+            TOOL,
+            [stderr.strip() or f"fd exited with code {rc}"],
+            timer.elapsed_ms,
+            suggestion="Install fd or retry with the Python fallback",
+        )
+
+    found: list[dict] = []
+    for raw in stdout.split("\0"):
+        if not raw:
+            continue
+        fp = Path(raw)
+        if fp.suffix.lower() not in extensions and fp.name not in extensions:
+            continue
+        try:
+            stat = fp.stat()
+            found.append({
+                "path": str(fp.relative_to(base)),
+                "size": stat.st_size,
+                "size_hr": _human_size(stat.st_size),
+                "modified": int(stat.st_mtime),
+            })
+        except OSError:
+            continue
+        if limit > 0 and len(found) >= limit:
+            break
+    found.sort(key=lambda item: item["path"])
+    return ForgeResult.success(TOOL, {
+        "type": type_name,
+        "extensions": sorted(extensions),
+        "root": str(root),
+        "recursive": recursive,
+        "count": len(found),
+        "truncated": limit > 0 and len(found) >= limit,
+        "files": found,
+        "backend": "fd",
+    }, timer.elapsed_ms)
 
 
 def _add_args(p: argparse.ArgumentParser) -> None:

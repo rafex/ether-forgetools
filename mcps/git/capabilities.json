@@ -7,7 +7,7 @@
   "counts": {
     "prompts": 17,
     "resources": 12,
-    "tools": 39
+    "tools": 40
   },
   "domain": "git",
   "prompts": [
@@ -773,6 +773,39 @@
         "pattern",
         "remote",
         "source_ext"
+      ],
+      "required": []
+    },
+    {
+      "description": "Preview or execute Git synchronization, recovery, branch, remote administration, bisect, and maintenance operations safely",
+      "name": "git_operations",
+      "properties": [
+        "action",
+        "bisect_action",
+        "branch",
+        "confirm",
+        "count",
+        "create",
+        "cwd",
+        "execute",
+        "ff_only",
+        "force",
+        "force_with_lease",
+        "include_dirs",
+        "maintenance_action",
+        "max_lines",
+        "patch",
+        "path",
+        "paths",
+        "prune",
+        "rebase",
+        "rebase_action",
+        "ref",
+        "remote",
+        "remote_url",
+        "reset_mode",
+        "source",
+        "staged"
       ],
       "required": []
     },

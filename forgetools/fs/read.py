@@ -3,9 +3,11 @@ from __future__ import annotations
 
 import argparse
 import os
+import shutil
 
 from forgetools._cli import make_cli
 from forgetools._result import ForgeResult, Timer
+from forgetools._runner import run_command
 
 TOOL = "fs.read"
 
@@ -32,14 +34,36 @@ def run(
         resolved_path = os.path.join(cwd or ".", requested_file)
         try:
             stat = os.stat(resolved_path)
-            with open(resolved_path, encoding="utf-8", errors="replace") as f:
-                all_lines = f.readlines()
-
-            if lines:
-                start, end = _parse_range(lines, len(all_lines))
-                selected = all_lines[start - 1 : end]
+            backend = "python"
+            if shutil.which("bat"):
+                backend = "bat"
+                cmd = [
+                    "bat", "--style=plain", "--paging=never", "--color=never",
+                    "--wrap=never",
+                ]
+                if lines:
+                    start, end = _parse_range(lines, 0)
+                    cmd += [f"--line-range={start}:{end}"]
+                cmd.append(resolved_path)
+                rc, content, stderr = run_command(cmd, timeout=30)
+                if rc != 0:
+                    return ForgeResult.failure(
+                        TOOL,
+                        [stderr.strip() or f"bat exited with code {rc}"],
+                        duration_ms=t.elapsed_ms,
+                        suggestion="Install bat or retry with the Python reader",
+                    )
+                selected = content.splitlines(keepends=True)
+                with open(resolved_path, encoding="utf-8", errors="replace") as f:
+                    all_lines = f.readlines()
             else:
-                selected = all_lines
+                with open(resolved_path, encoding="utf-8", errors="replace") as f:
+                    all_lines = f.readlines()
+                if lines:
+                    start, end = _parse_range(lines, len(all_lines))
+                    selected = all_lines[start - 1 : end]
+                else:
+                    selected = all_lines
 
             return ForgeResult.success(
                 TOOL,
@@ -49,6 +73,7 @@ def run(
                     "size_bytes": stat.st_size,
                     "lines_returned": len(selected),
                     "content": "".join(selected),
+                    "backend": backend,
                 },
                 t.elapsed_ms,
             )
@@ -63,7 +88,8 @@ def run(
 def _parse_range(spec: str, total: int) -> tuple[int, int]:
     if "-" in spec:
         parts = spec.split("-", 1)
-        return int(parts[0]), int(parts[1])
+        start, end = int(parts[0]), int(parts[1])
+        return start, end if end > 0 else total
     n = int(spec)
     return n, n
 

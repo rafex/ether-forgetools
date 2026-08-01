@@ -3,3 +3,4 @@
 - [Podman Port Allocation Policy (Bastion)](./policies/podman-port-allocation-bastion.md)
 - [MCP Domains Guide](./mcp-domains.md)
 - [MCP Usage & Installation](./mcp-usage-installation.md)
+- [MCP Selection Guide](./mcp-selection-guide.md)
