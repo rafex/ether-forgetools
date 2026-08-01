@@ -1,12 +1,138 @@
 {
   "binary": "forge-mcp-specnative",
   "counts": {
-    "prompts": 8,
-    "resources": 10,
-    "tools": 10
+    "prompts": 18,
+    "resources": 26,
+    "tools": 13
   },
   "domain": "specnative",
   "prompts": [
+    {
+      "arguments": [
+        {
+          "name": "title",
+          "required": true
+        },
+        {
+          "name": "description",
+          "required": true
+        },
+        {
+          "name": "initiative",
+          "required": false
+        },
+        {
+          "name": "priority",
+          "required": false
+        }
+      ],
+      "description": "Classify and capture a requested backlog item without creating parallel state.",
+      "name": "capture_backlog"
+    },
+    {
+      "arguments": [
+        {
+          "name": "initiative",
+          "required": true
+        }
+      ],
+      "description": "Official SpecNative v0.8 prompt to close an initiative.",
+      "name": "close_initiative"
+    },
+    {
+      "arguments": [
+        {
+          "name": "summary",
+          "required": true
+        },
+        {
+          "name": "next_steps",
+          "required": true
+        },
+        {
+          "name": "decisions_made",
+          "required": false
+        }
+      ],
+      "description": "Official SpecNative v0.8 alias for multi-agent handoff.",
+      "name": "handoff"
+    },
+    {
+      "arguments": [
+        {
+          "name": "initiative",
+          "required": true
+        },
+        {
+          "name": "task_id",
+          "required": true
+        }
+      ],
+      "description": "Official SpecNative v0.8 prompt to implement a single task.",
+      "name": "implement_task"
+    },
+    {
+      "arguments": [
+        {
+          "name": "name",
+          "required": true
+        },
+        {
+          "name": "problem",
+          "required": true
+        },
+        {
+          "name": "users",
+          "required": true
+        },
+        {
+          "name": "goals",
+          "required": true
+        },
+        {
+          "name": "stack",
+          "required": false
+        }
+      ],
+      "description": "Official SpecNative v0.8 alias for guided project initialization.",
+      "name": "init_project_guided"
+    },
+    {
+      "arguments": [
+        {
+          "name": "initiative",
+          "required": true
+        }
+      ],
+      "description": "Official SpecNative v0.8 prompt to derive tasks from a spec.",
+      "name": "plan_tasks"
+    },
+    {
+      "arguments": [
+        {
+          "name": "title",
+          "required": true
+        },
+        {
+          "name": "context",
+          "required": true
+        },
+        {
+          "name": "decision",
+          "required": true
+        },
+        {
+          "name": "consequences",
+          "required": true
+        },
+        {
+          "name": "owner",
+          "required": false
+        }
+      ],
+      "description": "Record a persistent SpecNative decision after applying the placement test.",
+      "name": "record_decision"
+    },
     {
       "arguments": [
         {
@@ -16,6 +142,26 @@
       ],
       "description": "Full health dashboard for a repository.",
       "name": "repo_health_check"
+    },
+    {
+      "arguments": [
+        {
+          "name": "initiative",
+          "required": true
+        }
+      ],
+      "description": "Review implementation state against a SpecNative spec before closing.",
+      "name": "review_against_spec"
+    },
+    {
+      "arguments": [
+        {
+          "name": "request",
+          "required": true
+        }
+      ],
+      "description": "Universal SpecNative entry point that routes one user request.",
+      "name": "specnative"
     },
     {
       "arguments": [
@@ -122,6 +268,20 @@
       ],
       "description": "Start a new feature using git worktree isolation + SpecNative spec scaffold.\n\nFollows the official SpecNative 9-step agent workflow sequence.",
       "name": "start_feature"
+    },
+    {
+      "arguments": [
+        {
+          "name": "initiative",
+          "required": true
+        },
+        {
+          "name": "problem",
+          "required": true
+        }
+      ],
+      "description": "Official SpecNative v0.8 prompt to start an initiative.",
+      "name": "start_initiative"
     }
   ],
   "resources": [
@@ -151,6 +311,11 @@
       "uri": "forge://specnative/archetypes"
     },
     {
+      "description": "SpecNative delivery board in markdown format.",
+      "name": "resource_specnative_board",
+      "uri": "forge://specnative/board"
+    },
+    {
       "description": "SpecNative project health check with missing, empty, or stale documents.",
       "name": "resource_specnative_health",
       "uri": "forge://specnative/health"
@@ -174,6 +339,81 @@
       "description": "Available SpecNative spec templates and decision snippets.",
       "name": "resource_specnative_templates",
       "uri": "forge://specnative/templates"
+    },
+    {
+      "description": "Read SpecNative resource agents.",
+      "name": "resource_agents",
+      "uri": "spec://agents"
+    },
+    {
+      "description": "Read SpecNative resource architecture.",
+      "name": "resource_architecture",
+      "uri": "spec://context/architecture"
+    },
+    {
+      "description": "Read SpecNative resource commands.",
+      "name": "resource_commands",
+      "uri": "spec://context/commands"
+    },
+    {
+      "description": "Read SpecNative resource conventions.",
+      "name": "resource_conventions",
+      "uri": "spec://context/conventions"
+    },
+    {
+      "description": "Read SpecNative resource decisions.",
+      "name": "resource_decisions",
+      "uri": "spec://context/decisions"
+    },
+    {
+      "description": "Read SpecNative resource product.",
+      "name": "resource_product",
+      "uri": "spec://context/product"
+    },
+    {
+      "description": "Read SpecNative resource roadmap.",
+      "name": "resource_roadmap",
+      "uri": "spec://context/roadmap"
+    },
+    {
+      "description": "Read SpecNative resource stack.",
+      "name": "resource_stack",
+      "uri": "spec://context/stack"
+    },
+    {
+      "description": "Read SpecNative resource traceability.",
+      "name": "resource_traceability",
+      "uri": "spec://context/traceability"
+    },
+    {
+      "description": "Read SpecNative resource cd.",
+      "name": "resource_cd",
+      "uri": "spec://pipelines/cd"
+    },
+    {
+      "description": "Read SpecNative resource ci.",
+      "name": "resource_ci",
+      "uri": "spec://pipelines/ci"
+    },
+    {
+      "description": "Read SpecNative resource schema.",
+      "name": "resource_schema",
+      "uri": "spec://schema"
+    },
+    {
+      "description": "Read SpecNative resource session.",
+      "name": "resource_session",
+      "uri": "spec://session"
+    },
+    {
+      "description": "Read SpecNative resource cd.",
+      "name": "resource_cd",
+      "uri": "spec://spec-native/pipelines/cd"
+    },
+    {
+      "description": "Read SpecNative resource ci.",
+      "name": "resource_ci",
+      "uri": "spec://spec-native/pipelines/ci"
     }
   ],
   "schema_version": "1.0",
@@ -217,6 +457,50 @@
         "module",
         "query",
         "refresh"
+      ],
+      "required": []
+    },
+    {
+      "description": "List or read SpecNative persistent context artifacts such as decisions, architecture records, and conventions",
+      "name": "specnative_artifacts",
+      "properties": [
+        "action",
+        "cwd",
+        "id",
+        "repo",
+        "tag"
+      ],
+      "required": []
+    },
+    {
+      "description": "Capture SpecNative backlog items as task previews or backlog notes without changing delivery boards",
+      "name": "specnative_backlog",
+      "properties": [
+        "close_criteria",
+        "cwd",
+        "dependencies",
+        "description",
+        "expected_files",
+        "initiative",
+        "kind",
+        "labels",
+        "owner",
+        "priority",
+        "repo",
+        "title",
+        "validation",
+        "write"
+      ],
+      "required": []
+    },
+    {
+      "description": "Build a SpecNative delivery board from task files in json, markdown, or mermaid format",
+      "name": "specnative_board",
+      "properties": [
+        "cwd",
+        "format",
+        "initiative",
+        "repo"
       ],
       "required": []
     },
@@ -270,17 +554,20 @@
       "required": []
     },
     {
-      "description": "Resume, checkpoint, or clear SpecNative multi-agent session state",
+      "description": "Resume, checkpoint, update tasks, or clear SpecNative multi-agent session state",
       "name": "specnative_session",
       "properties": [
         "action",
         "agent_name",
+        "completion_evidence",
         "context_notes",
         "cwd",
         "initiative",
         "intent",
         "next_steps",
+        "notes",
         "repo",
+        "state",
         "task_id",
         "write"
       ],

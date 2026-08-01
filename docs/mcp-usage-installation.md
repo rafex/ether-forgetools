@@ -137,6 +137,21 @@ make install-mcp-all
 ### specnative
 - Estado de iniciativas y flujo spec-first.
 - Lectura de contexto del repositorio.
+- Board de delivery desde `TASKS.md`: `specnative_board(format="json|markdown|mermaid")`, con columnas `ready`, `in_progress`, `blocked`, `waiting`, `done`.
+- Captura segura de backlog: `specnative_backlog(...)` en preview por defecto; si no hay spec ejecutable o faltan criterios/validacion, se registra intake en `spec-native/intake/IDEAS.md`.
+- Artefactos persistentes: `specnative_artifacts(action="list-decisions|list-architecture|list-conventions|read")`.
+- Continuidad multi-agente: `specnative_session(action="resume|checkpoint|update-task|clear")`.
+- Al marcar tareas como `done`, `completion_evidence` es obligatorio.
+- Resources oficiales:
+  - `spec://agents`, `spec://session`, `spec://schema`
+  - `spec://context/product`, `spec://context/architecture`, `spec://context/stack`
+  - `spec://context/conventions`, `spec://context/commands`, `spec://context/decisions`
+  - `spec://context/roadmap`, `spec://context/traceability`
+  - `spec://spec-native/pipelines/ci`, `spec://spec-native/pipelines/cd`
+  - `spec://pipelines/ci`, `spec://pipelines/cd`
+- Prompts oficiales:
+  - `specnative`, `capture_backlog`, `init_project_guided`, `start_initiative`, `plan_tasks`, `implement_task`
+  - `review_against_spec`, `handoff`, `record_decision`, `close_initiative`
 - Catalogo del ecosistema ether.
 
 ### linux

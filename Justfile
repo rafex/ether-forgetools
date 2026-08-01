@@ -10,7 +10,7 @@
 # Configuración
 VENV := ".venv"
 BIN  := VENV + "/bin"
-PYTHON := "python3.13"
+PYTHON := "python"
 IMAGE := "forgetools-mcp"
 DOCKERFILE := "container/Dockerfile"
 MCP := "forge-mcp-file"
@@ -60,19 +60,19 @@ docker-serve: docker-build docker-run
 
 # Regenerar OpenAPI desde el servidor en vivo
 openapi: install-mcp
-    {{ BIN }}/python3.13 scripts/gen_openapi.py
+    {{ BIN }}/{{ PYTHON }} scripts/gen_openapi.py
 
 # Regenerar capabilities, snapshots y docs derivadas de MCP
 mcp-metadata: install-mcp
-    {{ BIN }}/python3.13 scripts/gen_mcp_metadata.py
+    {{ BIN }}/{{ PYTHON }} scripts/gen_mcp_metadata.py
 
 # Listar MCP instalados y rutas absolutas para configurar clientes
 mcp-list:
-    {{ BIN }}/python3.13 scripts/list_installed_mcps.py
+    {{ BIN }}/{{ PYTHON }} scripts/list_installed_mcps.py
 
 # Listar MCP instalados en JSON
 mcp-list-json:
-    {{ BIN }}/python3.13 scripts/list_installed_mcps.py --json
+    {{ BIN }}/{{ PYTHON }} scripts/list_installed_mcps.py --json
 
 # ─────────────────────────────────────────────────────────────────────────────
 # 🔧 Utilidades
@@ -84,12 +84,12 @@ help:
 
 # Test rápido (si aplica)
 test:
-    {{ BIN }}/python3.13 -m pytest
+    {{ BIN }}/{{ PYTHON }} -m pytest
 
 # Validar contrato vivo de todos los MCP por dominio
 test-mcps:
-    {{ BIN }}/python3.13 -m pytest tests/test_mcp_servers.py tests/test_mcp_metadata.py
+    {{ BIN }}/{{ PYTHON }} -m pytest tests/test_mcp_servers.py tests/test_mcp_metadata.py
 
 # Verificar formato (si aplica)
 lint:
-    {{ BIN }}/python3.13 -m ruff check forgetools/
+    {{ BIN }}/{{ PYTHON }} -m ruff check forgetools/

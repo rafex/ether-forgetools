@@ -197,6 +197,82 @@ def specnative_close_initiative(initiative: str) -> str:
     """
     return f'# SpecNative Close Initiative: `{initiative}`\n\n## Verify\n```\nspecnative_initiative(action="review", initiative="{initiative}")\nspecnative_context(action="read", document="traceability")\n```\n\n## Close\n```\nspecnative_initiative(action="close", initiative="{initiative}")\n# If preview is correct:\nspecnative_initiative(action="close", initiative="{initiative}", write=True)\nspecnative_session(action="clear", write=True)\n```\n'
 
+def init_project_guided(name: str, problem: str, users: str, goals: str, stack: str = "") -> str:
+    """Official SpecNative v0.8 alias for guided project initialization."""
+    return specnative_init_project(name=name, problem=problem, users=users, goals=goals, stack=stack)
+
+
+def start_initiative(initiative: str, problem: str) -> str:
+    """Official SpecNative v0.8 prompt to start an initiative."""
+    return start_feature(initiative=initiative, problem=problem)
+
+
+def plan_tasks(initiative: str) -> str:
+    """Official SpecNative v0.8 prompt to derive tasks from a spec."""
+    return specnative_plan_tasks(initiative=initiative)
+
+
+def implement_task(initiative: str, task_id: str) -> str:
+    """Official SpecNative v0.8 prompt to implement a single task."""
+    return specnative_implement_task(initiative=initiative, task_id=task_id)
+
+
+def review_against_spec(initiative: str) -> str:
+    """Review implementation state against a SpecNative spec before closing."""
+    return f'# Review Against Spec: `{initiative}`\n\n## Required context\n```\nspecnative_context(action="read-spec", initiative="{initiative}")\nspecnative_context(action="list-tasks", initiative="{initiative}")\nspecnative_board(initiative="{initiative}", format="markdown")\nspecnative_artifacts(action="list-decisions")\n```\n\n## Verification\n```\nspecnative_initiative(action="review", initiative="{initiative}")\n# Run project-specific checks from COMMANDS.md before closing.\nspecnative_context(action="read", document="commands")\n```\n\nEvery task marked `done` must include non-empty `completion_evidence`.\n'
+
+
+def handoff(summary: str, next_steps: str, decisions_made: str = "") -> str:
+    """Official SpecNative v0.8 alias for multi-agent handoff."""
+    return specnative_handoff(summary=summary, next_steps=next_steps, decisions_made=decisions_made)
+
+
+def record_decision(title: str, context: str, decision: str, consequences: str, owner: str = "team") -> str:
+    """Record a persistent SpecNative decision after applying the placement test."""
+    return f'# Record Decision: `{title}`\n\nOnly write this if the tradeoff survives the current initiative.\n\n```\nspecnative_initiative(\n  action="decision",\n  title="{title}",\n  context="""{context}""",\n  decision="""{decision}""",\n  consequences="""{consequences}""",\n  owner="{owner}",\n  decision_state="proposed",\n  write=True,\n)\n```\n\nAfter writing, inspect it:\n```\nspecnative_artifacts(action="list-decisions")\n```\n'
+
+
+def close_initiative(initiative: str) -> str:
+    """Official SpecNative v0.8 prompt to close an initiative."""
+    return specnative_close_initiative(initiative=initiative)
+
+
+def specnative(request: str) -> str:
+    """Universal SpecNative entry point that routes one user request."""
+    return f"""Use the SpecNative MCP for this request: {request}
+
+Read `spec://agents`, call `specnative_session(action="resume")` and
+`specnative_status(action="status")`, then choose the smallest correct workflow:
+start_initiative, capture_backlog, implement_task, record_decision,
+review_against_spec, handoff, or close_initiative.
+
+Do not edit generated indexes or boards. Update canonical artifacts only.
+"""
+
+
+def capture_backlog(title: str, description: str, initiative: str = "", priority: str = "p2") -> str:
+    """Classify and capture a requested backlog item without creating parallel state."""
+    return f"""Capture this backlog request using the SpecNative MCP.
+
+Title: {title}
+Description: {description}
+Initiative hint: {initiative or "none"}
+Priority: {priority}
+
+1. Read `spec://agents`, then call `specnative_status(action="list-specs")`
+   and `specnative_board(format="markdown")` to locate an existing initiative
+   and avoid duplicates.
+2. If an existing spec applies, obtain or confirm `close_criteria` and at least
+   one validation. Do not invent either.
+3. Call `specnative_backlog(...)` with `initiative` only after those execution
+   details are known. It will create canonical task metadata in TASKS.md.
+4. If the request has no suitable spec or is underspecified, call
+   `specnative_backlog(kind="idea", ...)` or omit `initiative`. It will record
+   triaged intake in `spec-native/intake/IDEAS.md`.
+5. Report whether the result is an executable task visible in board output or a
+   non-executable intake item, and state the next required action.
+"""
+
 def multi_repo_health(base_dir: str, pattern: str='*') -> str:
     """Health check for multiple side-by-side git repositories.
 
@@ -537,6 +613,16 @@ PROMPTS = {
     "specnative_plan_tasks": specnative_plan_tasks,
     "specnative_implement_task": specnative_implement_task,
     "specnative_close_initiative": specnative_close_initiative,
+    "init_project_guided": init_project_guided,
+    "start_initiative": start_initiative,
+    "plan_tasks": plan_tasks,
+    "implement_task": implement_task,
+    "review_against_spec": review_against_spec,
+    "handoff": handoff,
+    "record_decision": record_decision,
+    "close_initiative": close_initiative,
+    "specnative": specnative,
+    "capture_backlog": capture_backlog,
     "multi_repo_health": multi_repo_health,
     "new_tool_scaffold": new_tool_scaffold,
     "maven_dependency_research": maven_dependency_research,

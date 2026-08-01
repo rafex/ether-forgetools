@@ -176,6 +176,9 @@ REGISTRY: dict[str, str] = {
     "specnative session":    "forgetools.specnative.session",
     "specnative project":    "forgetools.specnative.project",
     "specnative templates":  "forgetools.specnative.templates",
+    "specnative board":      "forgetools.specnative.board",
+    "specnative backlog":    "forgetools.specnative.backlog",
+    "specnative artifacts":  "forgetools.specnative.artifacts",
     # diff — semantic comparisons
     "diff dirs":             "forgetools.diff.dirs",
     "diff json":             "forgetools.diff.json",

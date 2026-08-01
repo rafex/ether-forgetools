@@ -46,6 +46,16 @@ PROMPTS_BY_DOMAIN: dict[str, tuple[str, ...]] = {
         "best_practice_commits",
     ),
     "specnative": (
+        "specnative",
+        "capture_backlog",
+        "init_project_guided",
+        "start_initiative",
+        "plan_tasks",
+        "implement_task",
+        "review_against_spec",
+        "handoff",
+        "record_decision",
+        "close_initiative",
         "start_feature",
         "repo_health_check",
         "specnative_workflow",
@@ -312,7 +322,33 @@ def _register_specnative_resources(server: FastMCP) -> None:
         "ci",
         "cd",
         "spec",
+        "session",
+        "mcp",
     )
+
+    spec_resource_docs = {
+        "spec://agents": "agents",
+        "spec://session": "session",
+        "spec://context/product": "product",
+        "spec://context/architecture": "architecture",
+        "spec://context/stack": "stack",
+        "spec://context/conventions": "conventions",
+        "spec://context/commands": "commands",
+        "spec://context/decisions": "decisions",
+        "spec://context/roadmap": "roadmap",
+        "spec://context/traceability": "traceability",
+        "spec://spec-native/pipelines/ci": "ci",
+        "spec://spec-native/pipelines/cd": "cd",
+        "spec://pipelines/ci": "ci",
+        "spec://pipelines/cd": "cd",
+        "spec://schema": "schema",
+    }
+
+    def _spec_resource_reader(document: str) -> str:
+        try:
+            return json.dumps(_run_tool("specnative context", action="read", document=document), indent=2)
+        except Exception as exc:
+            return _json_error(exc)
 
     @server.resource("forge://context/repo")
     def resource_context_repo() -> str:
@@ -339,6 +375,17 @@ def _register_specnative_resources(server: FastMCP) -> None:
             return json.dumps(_run_tool("specnative context", action="read", document=document), indent=2)
         except Exception as exc:
             return _json_error(exc)
+
+    for uri, document in spec_resource_docs.items():
+        def _make_resource(doc: str):
+            def _resource() -> str:
+                return _spec_resource_reader(doc)
+
+            _resource.__name__ = f"resource_{doc.replace('-', '_')}"
+            _resource.__doc__ = f"Read SpecNative resource {doc}."
+            return _resource
+
+        server.resource(uri)(_make_resource(document))
 
     @server.resource("forge://specnative/status")
     def resource_specnative_status() -> str:
@@ -385,6 +432,14 @@ def _register_specnative_resources(server: FastMCP) -> None:
         """Available SpecNative built-in and local archetypes."""
         try:
             return json.dumps(_run_tool("specnative templates", action="list-archetypes"), indent=2)
+        except Exception as exc:
+            return _json_error(exc)
+
+    @server.resource("forge://specnative/board")
+    def resource_specnative_board() -> str:
+        """SpecNative delivery board in markdown format."""
+        try:
+            return json.dumps(_run_tool("specnative board", format="markdown"), indent=2)
         except Exception as exc:
             return _json_error(exc)
 

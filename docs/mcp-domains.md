@@ -126,12 +126,37 @@ forge-mcp-docs
 - Casos de uso:
   - estado/iniciativas SpecNative
   - contexto del repo para agentes
+  - board de delivery (`json`, `markdown`, `mermaid`) con columnas `ready`, `in_progress`, `blocked`, `waiting`, `done`
+  - captura de backlog sin modificar el board; ideas no ejecutables van a `spec-native/intake/IDEAS.md`
+  - lectura/listado de decisions, architecture records y conventions
+  - continuidad multi-agente con `SESSION.md` y update de tareas con evidencia
   - catalogo del ecosistema ether
+- Tools principales:
+  - `specnative_status`, `specnative_context`, `specnative_initiative`
+  - `specnative_session`, `specnative_project`, `specnative_templates`
+  - `specnative_board`, `specnative_backlog`, `specnative_artifacts`
+- Resources SpecNative v0.8:
+  - `spec://agents`, `spec://session`, `spec://schema`
+  - `spec://context/product`, `spec://context/architecture`, `spec://context/stack`
+  - `spec://context/conventions`, `spec://context/commands`, `spec://context/decisions`
+  - `spec://context/roadmap`, `spec://context/traceability`
+  - `spec://spec-native/pipelines/ci`, `spec://spec-native/pipelines/cd`
+  - `spec://pipelines/ci`, `spec://pipelines/cd`
+- Prompts oficiales v0.8:
+  - `specnative`, `capture_backlog`, `init_project_guided`, `start_initiative`, `plan_tasks`
+  - `implement_task`, `review_against_spec`, `handoff`
+  - `record_decision`, `close_initiative`
 
 Uso:
 
 ```bash
 forge-mcp-specnative
+forge specnative board --format markdown
+forge specnative backlog --initiative mi-iniciativa --title "Nueva tarea"
+forge specnative artifacts --action list-decisions
+forge specnative session --action update-task --initiative mi-iniciativa \
+  --task-id TASK-MI-INICI-001 --state done \
+  --completion-evidence "pytest passed, PR #123" --write
 ```
 
 ### 5) Dominio Linux
