@@ -1,9 +1,9 @@
 {
   "binary": "forge-mcp-linux",
   "counts": {
-    "prompts": 2,
-    "resources": 5,
-    "tools": 12
+    "prompts": 3,
+    "resources": 10,
+    "tools": 18
   },
   "domain": "linux",
   "prompts": [
@@ -20,6 +20,20 @@
       ],
       "description": "Structured bug hunt: logs + git blame + stacktrace + grep.",
       "name": "bug_investigation"
+    },
+    {
+      "arguments": [
+        {
+          "name": "scope",
+          "required": false
+        },
+        {
+          "name": "service",
+          "required": false
+        }
+      ],
+      "description": "Audit a Linux host across system, storage, network, logs, and services.",
+      "name": "linux_host_audit"
     },
     {
       "arguments": [
@@ -52,6 +66,31 @@
       "description": "System health: availability of required development tools.",
       "name": "resource_diag_health",
       "uri": "forge://diag/health"
+    },
+    {
+      "description": "Current Linux interfaces, routes, and DNS context.",
+      "name": "resource_linux_network",
+      "uri": "forge://linux/network"
+    },
+    {
+      "description": "Guide to safe Linux services, logs, storage, and network operations.",
+      "name": "resource_linux_operations_guide",
+      "uri": "forge://linux/operations-guide"
+    },
+    {
+      "description": "Guide to Linux command privilege preflight and non-interactive sudo.",
+      "name": "resource_linux_privilege",
+      "uri": "forge://linux/privilege"
+    },
+    {
+      "description": "Current filesystem usage and inode snapshot for the working host.",
+      "name": "resource_linux_storage",
+      "uri": "forge://linux/storage"
+    },
+    {
+      "description": "Current Linux host identity, CPU, memory, and uptime snapshot.",
+      "name": "resource_linux_system",
+      "uri": "forge://linux/system"
     },
     {
       "description": "Snapshot of all listening ports on the local machine.",
@@ -91,6 +130,74 @@
       "required": [
         "port"
       ]
+    },
+    {
+      "description": "Read Linux journal, kernel, and file logs with bounded output",
+      "name": "linux_logs",
+      "properties": [
+        "action",
+        "cwd",
+        "lines",
+        "path",
+        "pattern",
+        "priority",
+        "since",
+        "unit"
+      ],
+      "required": []
+    },
+    {
+      "description": "Inspect Linux interfaces, routes, DNS, and socket connections",
+      "name": "linux_network",
+      "properties": [
+        "action",
+        "cwd"
+      ],
+      "required": []
+    },
+    {
+      "description": "Check command availability and non-interactive sudo authorization without executing it",
+      "name": "linux_privilege",
+      "properties": [
+        "command",
+        "cwd"
+      ],
+      "required": [
+        "command"
+      ]
+    },
+    {
+      "description": "Inspect or safely operate systemd services",
+      "name": "linux_services",
+      "properties": [
+        "action",
+        "confirm",
+        "cwd",
+        "execute",
+        "unit"
+      ],
+      "required": []
+    },
+    {
+      "description": "Inspect Linux filesystem usage, mounts, inodes, and largest paths",
+      "name": "linux_storage",
+      "properties": [
+        "action",
+        "cwd",
+        "max_depth",
+        "max_entries",
+        "path"
+      ],
+      "required": []
+    },
+    {
+      "description": "Inspect Linux host identity, CPU, memory, uptime, and resource limits",
+      "name": "linux_system",
+      "properties": [
+        "action",
+        "cwd"
+      ],
+      "required": []
     },
     {
       "description": "forgetools.net.health_check \u2014 Check if a service endpoint is healthy",

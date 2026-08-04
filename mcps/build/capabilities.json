@@ -7,12 +7,30 @@
     "make"
   ],
   "counts": {
-    "prompts": 2,
-    "resources": 2,
+    "prompts": 3,
+    "resources": 6,
     "tools": 10
   },
   "domain": "build",
   "prompts": [
+    {
+      "arguments": [
+        {
+          "name": "project_dir",
+          "required": false
+        },
+        {
+          "name": "project_type",
+          "required": false
+        },
+        {
+          "name": "include_just",
+          "required": false
+        }
+      ],
+      "description": "Plan a responsibility-separated Makefile/Justfile and helpers layout.",
+      "name": "build_project_scaffold"
+    },
     {
       "arguments": [
         {
@@ -40,6 +58,26 @@
   ],
   "pyproject": "mcps/build/pyproject.toml",
   "resources": [
+    {
+      "description": "Java construction standards for Maven, Gradle, and Ant.",
+      "name": "resource_build_java",
+      "uri": "forge://build/standards/java"
+    },
+    {
+      "description": "Rules that prevent Makefile and Justfile responsibility drift.",
+      "name": "resource_make_just_boundaries",
+      "uri": "forge://build/standards/make-just-boundaries"
+    },
+    {
+      "description": "Python construction standards using uv, pip, and wheel.",
+      "name": "resource_build_python",
+      "uri": "forge://build/standards/python"
+    },
+    {
+      "description": "Repository build and task-management structure standards.",
+      "name": "resource_build_structure",
+      "uri": "forge://build/standards/structure"
+    },
     {
       "description": "Machine-readable capabilities manifest for this domain server.",
       "name": "resource_capabilities",

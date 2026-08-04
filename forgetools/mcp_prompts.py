@@ -390,6 +390,104 @@ def go_project_analysis(project_dir: str='.') -> str:
     """
     return f'# Go Project Analysis: `{project_dir}`\n\n## 1. Module and dependency graph\n```\ngo_mod(action="tidy",   cwd="{project_dir}")\ngo_mod(action="verify", cwd="{project_dir}")\ngo_mod(action="graph",  cwd="{project_dir}")\n```\n\n## 2. Build\n```\ngo_build(cwd="{project_dir}")\n```\n\n## 3. Run tests with coverage\n```\ngo_test(cwd="{project_dir}", cover=True)\ntest_coverage_report(action="summary", cwd="{project_dir}")\ntest_coverage_report(action="check",   cwd="{project_dir}", min=80)\n```\n\n## 4. Linting (golangci-lint)\n```\nlint_golangci(cwd="{project_dir}")\n```\n\n## 5. Check for secrets in source\n```\nsecrets_scan(cwd="{project_dir}")\n```\n\n## 6. Dependency security (if using govulncheck / OWASP)\n```\nsecurity_owasp(action="scan", cwd="{project_dir}")\n```\n\n## 7. File and structure overview\n```\nfs_tree(path="{project_dir}", max_depth=4)\ncontext_repo_size(cwd="{project_dir}")\ncontext_summarize(cwd="{project_dir}")\n```\n\n## 8. Find open TODOs and FIXMEs\n```\nsearch_todo(paths="{project_dir}")\n```\n\n## 9. Recent changes\n```\ngit_log(limit=10, cwd="{project_dir}")\ncontext_diff_summary(cwd="{project_dir}")\n```\n\n## Summary expectations\nAfter running the above, you should have:\n- Module dependency tree (flag any `replace` directives)\n- Build success / failure\n- Test pass rate and coverage percentage\n- Lint findings (treat `errcheck` and `govet` as blocking)\n- Known CVEs in dependencies\n- TODO/FIXME count and locations\n'
 
+def build_project_scaffold(project_dir: str='.', project_type: str='auto', include_just: bool=True) -> str:
+    """Plan a responsibility-separated Makefile/Justfile and helpers layout.
+
+    Args:
+        project_dir: Repository root to inspect and scaffold.
+        project_type: 'auto' | 'python' | 'java' | 'go' | 'node' | 'rust'.
+        include_just: Include the Justfile task-manager layer in the plan.
+    """
+    just_section = """\n## 4. Task manager layer\n\nCreate `Justfile` and `helpers/just/` for local development and composed workflows.\n`Justfile` may call Make build targets, but `Makefile` must never call `Justfile`.\n""" if include_just else ""
+    justfile_name = "Justfile" if include_just else "(Justfile omitted by request)"
+    just_dir = "just/" if include_just else "(just/ omitted)"
+    return f'''# Build Scaffold: `{project_dir}`
+
+Project type: `{project_type}`
+
+This prompt creates a plan first. Use `mcp-file` to write files only after reviewing the plan.
+
+## 1. Inspect the repository
+
+Read these resources before changing files:
+
+```text
+forge://build/standards/structure
+forge://build/standards/make-just-boundaries
+forge://build/standards/python       # when Python is present
+forge://build/standards/java         # when Java is present
+```
+
+Check for existing `Makefile`, `Justfile`, `pyproject.toml`, `pom.xml`, `settings.gradle*`, `build.xml`, and wrappers before proposing new files.
+
+## 2. Target layout
+
+```text
+{project_dir}/
+  Makefile
+  {justfile_name}
+  helpers/
+    shell/
+    python/
+    mk/
+    {just_dir}
+```
+
+## 3. Make build layer
+
+`Makefile` owns only construction targets appropriate for `{project_type}`:
+
+- Python: `build`, `wheel`, `test`, `lint`, `clean`, using `uv`.
+- Java/Maven: `validate`, `test`, `verify`, `package`, using `./mvnw`.
+- Java/Gradle: `check`, `test`, `build`, using `./gradlew`.
+- Java/Ant: named targets discovered from `build.xml`.
+- Go, Node, or Rust: use the canonical tool wrapper already present.
+
+Recipes should delegate reusable logic to `helpers/shell` or `helpers/python`, and include modules from `helpers/mk` when the build grows.
+{just_section}
+## 5. Validation before writing
+
+- Confirm no `Makefile` recipe invokes `just` or `Justfile`.
+- Confirm `Justfile` recipes do not duplicate build implementation.
+- Confirm Python helpers run through `uv`.
+- Confirm Java helpers use the repository wrapper when one exists.
+- Preview all file writes and preserve existing project conventions.
+'''
+
+
+def linux_host_audit(scope: str='full', service: str='') -> str:
+    """Audit a Linux host across system, storage, network, logs, and services.
+
+    Args:
+        scope: 'quick' | 'full' | 'incident'.
+        service: Optional systemd unit to inspect during an incident audit.
+    """
+    service_block = f'''\n## Service check\n\n```\nlinux_services(action="status", unit="{service}")\nlinux_services(action="is-active", unit="{service}")\nlinux_logs(action="journal", unit="{service}", lines=100)\nlinux_privilege(command="systemctl restart {service}")\n```\n''' if service else '''\n## Service discovery\n\n```\nlinux_services(action="list")\n```\n'''
+    incident_block = '''\n## Incident evidence\n\n```\nlinux_logs(action="journal", lines=200, priority="warning")\nlinux_logs(action="dmesg", lines=100, pattern="error")\nprocess_top(action="cpu")\nprocess_top(action="memory")\n```\n''' if scope in {"full", "incident"} else ""
+    return f'''# Linux Host Audit: `{scope}`
+
+Use typed Linux tools first and keep every result as structured evidence. Do not replace these checks with an unbounded `shell_run` call.
+
+## Host snapshot
+
+```\nlinux_system(action="info")\nlinux_system(action="memory")\nlinux_system(action="limits")\n```
+
+## Storage
+
+```\nlinux_storage(action="usage", path="/")\nlinux_storage(action="inodes", path="/")\nlinux_storage(action="mounts")\nlinux_storage(action="largest", path="/var", max_entries=20, max_depth=2)\n```
+
+## Network
+
+```\nlinux_network(action="interfaces")\nlinux_network(action="routes")\nlinux_network(action="dns")\nlinux_network(action="connections")\nprocess_ports(action="listen")\n```
+{service_block}{incident_block}
+## Decision rules
+
+- Treat missing tools or permission errors as findings, not reasons to invent raw commands.
+- Never stop, restart, mask, or disable a service without reviewing the preview and receiving explicit confirmation.
+- Capture timestamps, commands, and `ok` status from every result before proposing remediation.
+'''
+
+
 def performance_analysis(target: str) -> str:
     """Analyse performance: process top + ports + resource usage + profiling guide.
 
@@ -634,6 +732,8 @@ PROMPTS = {
     "k8s_deploy": k8s_deploy,
     "api_design": api_design,
     "go_project_analysis": go_project_analysis,
+    "build_project_scaffold": build_project_scaffold,
+    "linux_host_audit": linux_host_audit,
     "performance_analysis": performance_analysis,
     "conventional_commit": conventional_commit,
     "commit_amend": commit_amend,

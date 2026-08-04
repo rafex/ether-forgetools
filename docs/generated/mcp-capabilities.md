@@ -5,7 +5,7 @@ Documento generado por `scripts/gen_mcp_metadata.py`.
 | MCP | Categorias | Tools | Resources | Prompts | Capabilities |
 |---|---|---:|---:|---:|---|
 | `forge-mcp-ai` | `ai` | 1 | 2 | 1 | `mcps/ai/capabilities.json` |
-| `forge-mcp-build` | `go`, `npm`, `cargo`, `make` | 10 | 2 | 2 | `mcps/build/capabilities.json` |
+| `forge-mcp-build` | `go`, `npm`, `cargo`, `make` | 10 | 6 | 3 | `mcps/build/capabilities.json` |
 | `forge-mcp-cloud` | `cloud` | 1 | 2 | 1 | `mcps/cloud/capabilities.json` |
 | `forge-mcp-containers` | `docker`, `k8s`, `helm` | 14 | 5 | 2 | `mcps/containers/capabilities.json` |
 | `forge-mcp-data` | `db` | 3 | 2 | 1 | `mcps/data/capabilities.json` |
@@ -15,7 +15,7 @@ Documento generado por `scripts/gen_mcp_metadata.py`.
 | `forge-mcp-frontend` | `frontend`, `npm` | 5 | 2 | 2 | `mcps/frontend/capabilities.json` |
 | `forge-mcp-git` | `git`, `gh` | 40 | 12 | 17 | `mcps/git/capabilities.json` |
 | `forge-mcp-java` | `java` | 8 | 6 | 5 | `mcps/java/capabilities.json` |
-| `forge-mcp-linux` | `process`, `diag`, `net`, `shell` | 12 | 5 | 2 | `mcps/linux/capabilities.json` |
+| `forge-mcp-linux` | `process`, `diag`, `net`, `shell`, `linux` | 18 | 10 | 3 | `mcps/linux/capabilities.json` |
 | `forge-mcp-observability` | `observability` | 2 | 2 | 2 | `mcps/observability/capabilities.json` |
 | `forge-mcp-office` | `office` | 10 | 4 | 3 | `mcps/office/capabilities.json` |
 | `forge-mcp-podman` | `podman` | 5 | 4 | 1 | `mcps/podman/capabilities.json` |
@@ -53,8 +53,8 @@ Prompts:
 - Server: `forgetools-build`
 - Categorias: `go`, `npm`, `cargo`, `make`
 - Tools: 10
-- Resources: 2
-- Prompts: 2
+- Resources: 6
+- Prompts: 3
 
 Tools:
 
@@ -71,11 +71,16 @@ Tools:
 
 Resources:
 
+- `forge://build/standards/java`: Java construction standards for Maven, Gradle, and Ant.
+- `forge://build/standards/make-just-boundaries`: Rules that prevent Makefile and Justfile responsibility drift.
+- `forge://build/standards/python`: Python construction standards using uv, pip, and wheel.
+- `forge://build/standards/structure`: Repository build and task-management structure standards.
 - `forge://capabilities`: Machine-readable capabilities manifest for this domain server.
 - `forge://catalog`: List tools available in this domain server.
 
 Prompts:
 
+- `build_project_scaffold`: Plan a responsibility-separated Makefile/Justfile and helpers layout.
 - `dependency_upgrade`: Safely upgrade dependencies: audit → upgrade → test → verify.
 - `go_project_analysis`: Comprehensive analysis of a Go project: build, test, lint, mod, and security.
 
@@ -415,16 +420,22 @@ Prompts:
 ### `forge-mcp-linux`
 
 - Server: `forgetools-linux`
-- Categorias: `process`, `diag`, `net`, `shell`
-- Tools: 12
-- Resources: 5
-- Prompts: 2
+- Categorias: `process`, `diag`, `net`, `shell`, `linux`
+- Tools: 18
+- Resources: 10
+- Prompts: 3
 
 Tools:
 
 - `diag_env`: forgetools.diag.env_validate — Validate required environment variables
 - `diag_health`: forgetools.diag.health — Check availability of required tools
 - `diag_port`: forgetools.diag.port_check — Check if a port is in use
+- `linux_logs`: Read Linux journal, kernel, and file logs with bounded output
+- `linux_network`: Inspect Linux interfaces, routes, DNS, and socket connections
+- `linux_privilege`: Check command availability and non-interactive sudo authorization without executing it
+- `linux_services`: Inspect or safely operate systemd services
+- `linux_storage`: Inspect Linux filesystem usage, mounts, inodes, and largest paths
+- `linux_system`: Inspect Linux host identity, CPU, memory, uptime, and resource limits
 - `net_health`: forgetools.net.health_check — Check if a service endpoint is healthy
 - `net_http`: Execute HTTP requests with structured status, headers, body, and timing data
 - `process_inspect`: Inspect a process by PID with command, resource usage, and open-file details
@@ -441,11 +452,17 @@ Resources:
 - `forge://catalog`: List tools available in this domain server.
 - `forge://diag/env`: Environment variables relevant to development tools.
 - `forge://diag/health`: System health: availability of required development tools.
+- `forge://linux/network`: Current Linux interfaces, routes, and DNS context.
+- `forge://linux/operations-guide`: Guide to safe Linux services, logs, storage, and network operations.
+- `forge://linux/privilege`: Guide to Linux command privilege preflight and non-interactive sudo.
+- `forge://linux/storage`: Current filesystem usage and inode snapshot for the working host.
+- `forge://linux/system`: Current Linux host identity, CPU, memory, and uptime snapshot.
 - `forge://process/listening`: Snapshot of all listening ports on the local machine.
 
 Prompts:
 
 - `bug_investigation`: Structured bug hunt: logs + git blame + stacktrace + grep.
+- `linux_host_audit`: Audit a Linux host across system, storage, network, logs, and services.
 - `performance_analysis`: Analyse performance: process top + ports + resource usage + profiling guide.
 
 ### `forge-mcp-observability`

@@ -201,10 +201,31 @@ Para `bisect`, indica `--bisect-action start|good|bad|skip|reset`; `good`, `bad`
 - Catalogo del ecosistema ether.
 
 ### linux
-- Procesos, puertos, inspeccion y kill.
+- Procesos, puertos, inspeccion, consumo y kill.
+- Sistema: host, CPU, memoria, uptime y limites.
+- Storage: uso, inodos, montajes y rutas de mayor tamaño.
+- Logs: journal, dmesg y archivos con salida acotada.
+- Servicios systemd con preview y confirmacion para mutaciones.
+- Red: interfaces, rutas, DNS y conexiones.
+- Preflight de privilegios con `linux_privilege` antes de intentar comandos que puedan requerir `sudo`.
 - Diagnostico de entorno (`diag health/env/port`).
 - HTTP checks y shell controlado.
 - Escaneo de secretos.
+
+Ejemplos:
+
+```bash
+forge linux system --action info
+forge linux system --action memory
+forge linux storage --action usage --path /
+forge linux logs --action journal --unit nginx.service --lines 100
+forge linux services --action status --unit nginx.service
+forge linux services --action restart --unit nginx.service
+forge linux network --action routes
+forge linux privilege --command "systemctl restart nginx.service"
+```
+
+Las mutaciones de servicios requieren `--execute --confirm`; `linux_privilege` no ejecuta el comando inspeccionado y rechaza pipelines/redirecciones. `linux_logs` limita la salida para evitar consumir contexto innecesariamente.
 
 ### java
 - Maven/Gradle, modulos, stacktraces, reports.
@@ -234,6 +255,21 @@ Para `bisect`, indica `--bisect-action start|good|bad|skip|reset`; `good`, `bad`
 - npm: run, install, audit.
 - Cargo: build, test, check.
 - Make: run targets.
+- Python: `uv`, `uv pip`, `uv build` y validacion de wheels.
+- Java: Maven (`mvnw`), Gradle (`gradlew`) y Ant (`build.xml`).
+- Estructura: `Makefile` para build; `Justfile` para task management; helpers separados.
+
+Resources y prompt del dominio:
+
+```text
+forge://build/standards/structure
+forge://build/standards/make-just-boundaries
+forge://build/standards/python
+forge://build/standards/java
+build_project_scaffold(project_dir=".", project_type="auto", include_just=true)
+```
+
+Regla critica: `Justfile` puede invocar targets de `Makefile`, pero `Makefile` nunca puede invocar `Justfile`.
 
 ### data
 - DB query.

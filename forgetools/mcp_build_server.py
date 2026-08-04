@@ -1,4 +1,4 @@
-"""Domain MCP server for non-Java build toolchains."""
+"""Domain MCP server for build toolchains and construction standards."""
 from __future__ import annotations
 
 from forgetools.mcp_domain_server import build_domain_server

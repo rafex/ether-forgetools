@@ -77,6 +77,13 @@ REGISTRY: dict[str, str] = {
     "docs changelog":      "forgetools.docs.changelog",
     # shell
     "shell run":           "forgetools.shell.run",
+    # linux host operations
+    "linux system":        "forgetools.linux.system",
+    "linux storage":       "forgetools.linux.storage",
+    "linux logs":          "forgetools.linux.logs",
+    "linux services":      "forgetools.linux.services",
+    "linux network":       "forgetools.linux.network",
+    "linux privilege":     "forgetools.linux.privilege",
     # test
     "test junit-report":   "forgetools.test.junit_report",
     "test coverage":         "forgetools.test.coverage",

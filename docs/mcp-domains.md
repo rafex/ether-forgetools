@@ -170,12 +170,24 @@ forge specnative session --action update-task --initiative mi-iniciativa \
 
 - Binario: `forge-mcp-linux`
 - Server name: `forgetools-linux`
-- Categorias: `process`, `diag`, `net`, `shell`
+- Categorias: `process`, `diag`, `net`, `shell`, `linux`
 - Casos de uso:
-  - procesos/puertos
-  - salud de entorno
-  - requests HTTP de verificacion
-  - comandos shell controlados
+  - procesos/puertos y consumo de CPU, memoria, hilos e I/O
+  - identidad del host, memoria, uptime, limites y carga
+  - almacenamiento, inodos, montajes y rutas de mayor uso
+  - journal, dmesg y lectura acotada de logs
+  - systemd: listar, inspeccionar y operar servicios con preview/confirmacion
+  - interfaces, rutas, DNS y conexiones de red
+  - preflight de comandos: disponibilidad, root, sudo no interactivo y sudoers sin ejecutar el comando
+  - salud de entorno y requests HTTP de verificacion
+  - comandos shell controlados como ultimo recurso
+- Resources:
+  - `forge://linux/system`
+  - `forge://linux/storage`
+  - `forge://linux/network`
+  - `forge://linux/operations-guide`
+  - `forge://linux/privilege`
+- Prompt: `linux_host_audit(scope, service)`
 
 Uso:
 
@@ -240,6 +252,16 @@ forge-mcp-containers
   - npm run/install/audit
   - cargo build/test/check
   - ejecucion de targets Make
+  - estandares de construccion Python con `uv`, `uv pip` y wheel
+  - estandares Java con Maven, Gradle y Ant
+  - separacion estricta entre `Makefile` (build) y `Justfile` (task manager)
+  - scaffolding planificado de `helpers/{shell,python,mk,just}`
+- Resources de estandares:
+  - `forge://build/standards/structure`
+  - `forge://build/standards/make-just-boundaries`
+  - `forge://build/standards/python`
+  - `forge://build/standards/java`
+- Prompt: `build_project_scaffold(project_dir, project_type, include_just)`
 
 Uso:
 

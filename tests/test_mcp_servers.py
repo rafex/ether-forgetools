@@ -276,3 +276,19 @@ def test_mcp_domain_contract(domain: str) -> None:
             messages = result.get("messages", [])
             assert messages, f"{domain}/{prompt['name']}: prompt rendered no messages"
             assert all(message.get("role") in {"user", "assistant"} for message in messages)
+
+
+def test_build_standards_resources_contain_boundary_rules() -> None:
+    binary = VENV_BIN / "forge-mcp-build"
+    with MCPClient(binary) as client:
+        client.initialize()
+        expected = {
+            "forge://build/standards/structure": ("helpers/", "Makefile", "Justfile"),
+            "forge://build/standards/make-just-boundaries": ("Makefile", "Justfile", "Forbidden dependency"),
+            "forge://build/standards/python": ("uv", "uv pip", "wheel"),
+            "forge://build/standards/java": ("Maven", "Gradle", "Ant"),
+        }
+        for uri, markers in expected.items():
+            contents = client.request("resources/read", {"uri": uri}).get("contents", [])
+            text = "\n".join(item.get("text", "") for item in contents)
+            assert all(marker in text for marker in markers), f"Missing marker in {uri}"

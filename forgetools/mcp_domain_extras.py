@@ -66,11 +66,11 @@ PROMPTS_BY_DOMAIN: dict[str, tuple[str, ...]] = {
         "specnative_close_initiative",
     ),
     "java": ("java_project_analysis", "maven_dependency_research", "security_audit"),
-    "build": ("dependency_upgrade", "go_project_analysis"),
+    "build": ("dependency_upgrade", "go_project_analysis", "build_project_scaffold"),
     "data": ("database_migration",),
     "containers": ("docker_debug", "k8s_deploy"),
     "docs": ("api_design",),
-    "linux": ("bug_investigation", "performance_analysis"),
+    "linux": ("bug_investigation", "performance_analysis", "linux_host_audit"),
     "quality": ("code_review", "security_audit", "repo_health_check"),
     "office": ("api_design",),
     "python": ("new_tool_scaffold", "dependency_upgrade"),
@@ -108,6 +108,8 @@ def register_domain_resources(server: FastMCP, domain: str) -> None:
         _register_podman_resources(server)
     elif domain == "python":
         _register_python_resources(server)
+    elif domain == "build":
+        _register_build_resources(server)
     elif domain == "quality":
         _register_quality_resources(server)
     elif domain == "office":
@@ -260,6 +262,157 @@ def _register_python_resources(server: FastMCP) -> None:
 - Prefer `uv sync` for reproducible environments.
 - Prefer `uv run pytest`, `uv run ruff check`, and `uv run mypy` when project config exists.
 - Keep per-MCP packaging in its own `mcps/<domain>/pyproject.toml`.
+"""
+
+
+def _register_build_resources(server: FastMCP) -> None:
+    @server.resource("forge://build/standards/structure")
+    def resource_build_structure() -> str:
+        """Repository build and task-management structure standards."""
+        return """# Build and Task Management Structure
+
+Use this layout for repositories that separate construction from daily task execution:
+
+```text
+Makefile
+Justfile
+helpers/
+  shell/       # Reusable POSIX shell scripts
+  python/      # Python helpers executed with uv
+  mk/          # Make include files and build modules
+  just/        # Just modules and task recipes
+```
+
+Responsibility boundaries:
+
+- `Makefile` is only for construction: compile, package, test gates, generated artifacts, and CI build entry points.
+- `Justfile` is the task manager: local development, formatting, migrations, environment setup, and composed workflows.
+- `helpers/mk` contains Make modules; those modules may call `helpers/shell` or `helpers/python`.
+- `helpers/just` contains Just modules; those modules may call `helpers/shell`, `helpers/python`, or Make build targets.
+- `helpers/python` must use the repository's `uv` environment and `pyproject.toml`.
+- `Makefile` must never call `Justfile`; dependency direction is `Justfile -> Makefile`, never the reverse.
+
+Prefer one responsibility per helper. Keep recipes thin and put reusable logic in a typed Python or shell helper with structured errors.
+"""
+
+    @server.resource("forge://build/standards/python")
+    def resource_build_python() -> str:
+        """Python construction standards using uv, pip, and wheel."""
+        return """# Python Build Standards
+
+## Source of truth
+
+- Keep project metadata and dependencies in `pyproject.toml`.
+- Use one `pyproject.toml` per independently installable MCP/domain package.
+- Commit `uv.lock` for applications and reproducible development environments when the project policy requires it.
+
+## uv workflow
+
+```bash
+uv venv --python 3.13 .venv
+uv add <package>
+uv lock
+uv sync
+uv run pytest
+uv run ruff check .
+uv build
+```
+
+Use `uv run` for project commands so the selected environment is explicit. Use `uv pip` only when interoperating with a pip-compatible environment or installing a built artifact:
+
+```bash
+uv pip install --python .venv/bin/python -e .
+uv pip install --python .venv/bin/python dist/example-*.whl
+uv pip compile pyproject.toml -o requirements.txt
+```
+
+Avoid raw `pip install` in build recipes. If pip compatibility is required, invoke it through `uv pip` and name the target interpreter.
+
+## wheel artifacts
+
+- Build distributions with `uv build`.
+- Treat `dist/*.whl` and `dist/*.tar.gz` as generated artifacts.
+- Validate the wheel in a clean environment before publishing.
+- Do not mix editable installation behavior with release artifact validation.
+"""
+
+    @server.resource("forge://build/standards/java")
+    def resource_build_java() -> str:
+        """Java construction standards for Maven, Gradle, and Ant."""
+        return """# Java Build Standards
+
+## Tool selection
+
+- Maven projects are identified by `pom.xml`; prefer the repository wrapper `./mvnw`.
+- Gradle projects are identified by `settings.gradle` or `settings.gradle.kts`; prefer `./gradlew`.
+- Ant projects are identified by `build.xml`; use Ant only when the repository is explicitly Ant-based.
+- Do not replace Maven or Gradle with Ant for a project that already has a canonical build tool.
+
+## Maven
+
+```bash
+./mvnw -B validate
+./mvnw -B test
+./mvnw -B verify
+./mvnw -B package -DskipTests
+```
+
+Keep dependency and plugin versions in the POM or governed properties. Use the Maven wrapper and preserve the project Java/toolchain configuration.
+
+## Gradle
+
+```bash
+./gradlew tasks
+./gradlew test
+./gradlew check
+./gradlew build
+```
+
+Prefer the Gradle wrapper, version catalogs, and convention plugins already present in the repository. Avoid changing global Gradle configuration from a helper.
+
+## Ant
+
+```bash
+ant -p
+ant clean test
+ant dist
+```
+
+Use named targets from `build.xml`; do not assume Maven lifecycle names in Ant projects.
+
+## Shared rules
+
+- Build helpers must be reproducible and must not hide tool output or failures.
+- Tests are part of the build gate; task-manager recipes may compose build targets but must not duplicate them.
+- Generated artifacts belong in the configured build directory and must not be committed unless the repository policy says so.
+"""
+
+    @server.resource("forge://build/standards/make-just-boundaries")
+    def resource_make_just_boundaries() -> str:
+        """Rules that prevent Makefile and Justfile responsibility drift."""
+        return """# Makefile and Justfile Boundaries
+
+| File | Owns | May call | Must not own |
+|---|---|---|---|
+| `Makefile` | Build and packaging | `helpers/mk`, shell helpers, Python helpers | `Justfile`, interactive task workflows |
+| `Justfile` | Task management and local workflows | `helpers/just`, shell helpers, Python helpers, Make build targets | Duplicated build implementation |
+| `helpers/mk/*` | Reusable Make build fragments | shell/Python helpers | Just recipes |
+| `helpers/just/*` | Reusable task recipes | shell/Python helpers, Make targets | Build logic duplicated from Make |
+
+Required dependency direction:
+
+```text
+Justfile -> helpers/just -> helpers/shell or helpers/python
+Justfile -> Makefile -> helpers/mk -> helpers/shell or helpers/python
+```
+
+Forbidden dependency direction:
+
+```text
+Makefile -X-> Justfile
+```
+
+When a command is needed by both build and task workflows, put the implementation in `helpers/shell` or `helpers/python`, then call it from the thin orchestration layer that owns the workflow.
 """
 
 
@@ -445,6 +598,67 @@ def _register_specnative_resources(server: FastMCP) -> None:
 
 
 def _register_linux_resources(server: FastMCP) -> None:
+    @server.resource("forge://linux/system")
+    def resource_linux_system() -> str:
+        """Current Linux host identity, CPU, memory, and uptime snapshot."""
+        try:
+            return json.dumps(_run_tool("linux system", action="info"), indent=2)
+        except Exception as exc:
+            return _json_error(exc)
+
+    @server.resource("forge://linux/storage")
+    def resource_linux_storage() -> str:
+        """Current filesystem usage and inode snapshot for the working host."""
+        try:
+            return json.dumps(_run_tool("linux storage", action="usage", path="."), indent=2)
+        except Exception as exc:
+            return _json_error(exc)
+
+    @server.resource("forge://linux/network")
+    def resource_linux_network() -> str:
+        """Current Linux interfaces, routes, and DNS context."""
+        try:
+            return json.dumps({
+                "interfaces": _run_tool("linux network", action="interfaces"),
+                "routes": _run_tool("linux network", action="routes"),
+                "dns": _run_tool("linux network", action="dns"),
+            }, indent=2)
+        except Exception as exc:
+            return _json_error(exc)
+
+    @server.resource("forge://linux/operations-guide")
+    def resource_linux_operations_guide() -> str:
+        """Guide to safe Linux services, logs, storage, and network operations."""
+        return """# Linux Operations Guide
+
+- Use `linux_system` for host identity, CPU, memory, uptime, and limits.
+- Use `linux_storage` for filesystem usage, inodes, mounts, and largest paths.
+- Use `linux_logs` with bounded `lines`; prefer `journal` or `dmesg` over unbounded shell output.
+- Use `linux_services` to inspect systemd and preview service mutations before confirmation.
+- Use `linux_network` for interfaces, routes, DNS, and sockets; use `process_ports` for process ownership.
+- Mutating service actions require `execute=true` and `confirm=true`.
+- Do not use `shell_run` when a typed Linux tool provides the required operation.
+"""
+
+    @server.resource("forge://linux/privilege")
+    def resource_linux_privilege() -> str:
+        """Guide to Linux command privilege preflight and non-interactive sudo."""
+        return """# Linux Privilege Preflight
+
+Before attempting a command that may require elevated privileges, call `linux_privilege` with the exact executable and arguments.
+
+The tool does not execute the requested command. It reports:
+
+- whether the executable exists;
+- whether the process is already root;
+- whether `sudo` is installed;
+- whether `sudo -n` can authenticate without a prompt;
+- whether the command is allowed by the current sudoers policy;
+- a recommendation such as `direct`, `sudo-non-interactive`, or `blocked`.
+
+Do not pass shell pipelines, redirections, or compound commands. Inspect each executable separately.
+"""
+
     @server.resource("forge://diag/health")
     def resource_diag_health() -> str:
         """System health: availability of required development tools."""
