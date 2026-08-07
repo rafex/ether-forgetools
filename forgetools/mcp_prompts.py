@@ -232,6 +232,42 @@ def record_decision(title: str, context: str, decision: str, consequences: str, 
     return f'# Record Decision: `{title}`\n\nOnly write this if the tradeoff survives the current initiative.\n\n```\nspecnative_initiative(\n  action="decision",\n  title="{title}",\n  context="""{context}""",\n  decision="""{decision}""",\n  consequences="""{consequences}""",\n  owner="{owner}",\n  decision_state="proposed",\n  write=True,\n)\n```\n\nAfter writing, inspect it:\n```\nspecnative_artifacts(action="list-decisions")\n```\n'
 
 
+def record_architecture(title: str, context: str, design: str, consequences: str, owner: str = "team") -> str:
+    """Record a durable architecture artifact after applying the placement test."""
+    return f'''# Record Architecture: `{title}`
+
+Use this for a structural change that future initiatives must discover. Preview
+the artifact before writing it.
+
+```text
+specnative_artifacts(action="log-architecture", title="{title}",
+  context="""{context}""", design="""{design}""",
+  consequences="""{consequences}""", owner="{owner}", write=False)
+```
+
+If the preview is correct, repeat with `write=True` and verify the result with
+`specnative_artifacts(action="list-architecture")`.
+'''
+
+
+def record_convention(title: str, rationale: str, rule: str, consequences: str, owner: str = "team") -> str:
+    """Record a durable coding or process convention after applying the placement test."""
+    return f'''# Record Convention: `{title}`
+
+Use this for a rule that future initiatives must follow, not a temporary
+implementation detail.
+
+```text
+specnative_artifacts(action="log-convention", title="{title}",
+  rationale="""{rationale}""", rule="""{rule}""",
+  consequences="""{consequences}""", owner="{owner}", write=False)
+```
+
+Review the preview, then use `write=True` and verify with
+`specnative_artifacts(action="list-conventions")`.
+'''
+
+
 def close_initiative(initiative: str) -> str:
     """Official SpecNative v0.8 prompt to close an initiative."""
     return specnative_close_initiative(initiative=initiative)
@@ -389,6 +425,82 @@ def go_project_analysis(project_dir: str='.') -> str:
         project_dir: Root directory of the Go project (default: cwd)
     """
     return f'# Go Project Analysis: `{project_dir}`\n\n## 1. Module and dependency graph\n```\ngo_mod(action="tidy",   cwd="{project_dir}")\ngo_mod(action="verify", cwd="{project_dir}")\ngo_mod(action="graph",  cwd="{project_dir}")\n```\n\n## 2. Build\n```\ngo_build(cwd="{project_dir}")\n```\n\n## 3. Run tests with coverage\n```\ngo_test(cwd="{project_dir}", cover=True)\ntest_coverage_report(action="summary", cwd="{project_dir}")\ntest_coverage_report(action="check",   cwd="{project_dir}", min=80)\n```\n\n## 4. Linting (golangci-lint)\n```\nlint_golangci(cwd="{project_dir}")\n```\n\n## 5. Check for secrets in source\n```\nsecrets_scan(cwd="{project_dir}")\n```\n\n## 6. Dependency security (if using govulncheck / OWASP)\n```\nsecurity_owasp(action="scan", cwd="{project_dir}")\n```\n\n## 7. File and structure overview\n```\nfs_tree(path="{project_dir}", max_depth=4)\ncontext_repo_size(cwd="{project_dir}")\ncontext_summarize(cwd="{project_dir}")\n```\n\n## 8. Find open TODOs and FIXMEs\n```\nsearch_todo(paths="{project_dir}")\n```\n\n## 9. Recent changes\n```\ngit_log(limit=10, cwd="{project_dir}")\ncontext_diff_summary(cwd="{project_dir}")\n```\n\n## Summary expectations\nAfter running the above, you should have:\n- Module dependency tree (flag any `replace` directives)\n- Build success / failure\n- Test pass rate and coverage percentage\n- Lint findings (treat `errcheck` and `govet` as blocking)\n- Known CVEs in dependencies\n- TODO/FIXME count and locations\n'
+
+def podman_remote_workflow(connection: str, image: str, category: str = 'api', cwd: str = '.') -> str:
+    """Plan a safe remote rootless Podman deployment through a named connection."""
+    return f'''# Remote Podman Workflow
+
+**Connection:** `{connection}`
+**Image:** `{image}`
+**Port category:** `{category}`
+**Working directory:** `{cwd}`
+
+## 1. Inspect the remote target
+```
+podman_connection(action="list")
+podman_ps(connection="{connection}", all=True, cwd="{cwd}")
+podman_images(connection="{connection}", all=False, cwd="{cwd}")
+```
+
+If the connection is missing, preview and then explicitly confirm its creation:
+```
+podman_connection(
+    action="add",
+    name="{connection}",
+    destination="ssh://user@bastion/run/user/1000/podman/podman.sock",
+    identity="~/.ssh/bastion",
+)
+```
+
+## 2. Validate source and image
+```
+forge://podman/containerfiles
+forge://podman/containerignore
+podman_image_reference(image="{image}")
+```
+
+Do not replace a rejected image with a short name. Use the complete
+`docker.io/...:tag` or `ghcr.io/...:tag` reference returned by the validation.
+
+## 3. Allocate a bastion port
+```
+podman_ports(connection="{connection}", cwd="{cwd}")
+podman_select_port(category="{category}", connection="{connection}", cwd="{cwd}")
+```
+
+Use the first free port from the selected range. Never use ports below 30000,
+30400 or an arbitrary/random host port.
+
+## 4. Preview the container start
+```
+podman_run(
+    image="{image}",
+    ports=["<selected-host-port>:<container-port>"],
+    connection="{connection}",
+    execute=False,
+    cwd="{cwd}",
+)
+```
+
+Review the complete command and remote target. Only after explicit user approval:
+```
+podman_run(
+    image="{image}",
+    ports=["<selected-host-port>:<container-port>"],
+    connection="{connection}",
+    execute=True,
+    confirm=True,
+    cwd="{cwd}",
+)
+```
+
+## 5. Verify
+```
+podman_ps(connection="{connection}", all=True, cwd="{cwd}")
+podman_inspect(object="<container-name-or-id>", connection="{connection}", cwd="{cwd}")
+podman_logs(container="<container-name-or-id>", connection="{connection}", lines=100, cwd="{cwd}")
+```
+'''
 
 def build_project_scaffold(project_dir: str='.', project_type: str='auto', include_just: bool=True) -> str:
     """Plan a responsibility-separated Makefile/Justfile and helpers layout.
@@ -718,6 +830,8 @@ PROMPTS = {
     "review_against_spec": review_against_spec,
     "handoff": handoff,
     "record_decision": record_decision,
+    "record_architecture": record_architecture,
+    "record_convention": record_convention,
     "close_initiative": close_initiative,
     "specnative": specnative,
     "capture_backlog": capture_backlog,
@@ -728,6 +842,7 @@ PROMPTS = {
     "bug_investigation": bug_investigation,
     "database_migration": database_migration,
     "docker_debug": docker_debug,
+    "podman_remote_workflow": podman_remote_workflow,
     "dependency_upgrade": dependency_upgrade,
     "k8s_deploy": k8s_deploy,
     "api_design": api_design,

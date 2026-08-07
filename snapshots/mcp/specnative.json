@@ -1,9 +1,9 @@
 {
   "binary": "forge-mcp-specnative",
   "counts": {
-    "prompts": 18,
-    "resources": 26,
-    "tools": 13
+    "prompts": 20,
+    "resources": 27,
+    "tools": 14
   },
   "domain": "specnative",
   "prompts": [
@@ -106,6 +106,58 @@
       ],
       "description": "Official SpecNative v0.8 prompt to derive tasks from a spec.",
       "name": "plan_tasks"
+    },
+    {
+      "arguments": [
+        {
+          "name": "title",
+          "required": true
+        },
+        {
+          "name": "context",
+          "required": true
+        },
+        {
+          "name": "design",
+          "required": true
+        },
+        {
+          "name": "consequences",
+          "required": true
+        },
+        {
+          "name": "owner",
+          "required": false
+        }
+      ],
+      "description": "Record a durable architecture artifact after applying the placement test.",
+      "name": "record_architecture"
+    },
+    {
+      "arguments": [
+        {
+          "name": "title",
+          "required": true
+        },
+        {
+          "name": "rationale",
+          "required": true
+        },
+        {
+          "name": "rule",
+          "required": true
+        },
+        {
+          "name": "consequences",
+          "required": true
+        },
+        {
+          "name": "owner",
+          "required": false
+        }
+      ],
+      "description": "Record a durable coding or process convention after applying the placement test.",
+      "name": "record_convention"
     },
     {
       "arguments": [
@@ -341,6 +393,11 @@
       "uri": "forge://specnative/templates"
     },
     {
+      "description": "List stable and prerelease versions published by SpecNative upstream.",
+      "name": "resource_specnative_upstream_releases",
+      "uri": "forge://specnative/upstream/releases"
+    },
+    {
       "description": "Read SpecNative resource agents.",
       "name": "resource_agents",
       "uri": "spec://agents"
@@ -465,10 +522,19 @@
       "name": "specnative_artifacts",
       "properties": [
         "action",
+        "consequences",
+        "context",
         "cwd",
+        "design",
         "id",
+        "owner",
+        "rationale",
         "repo",
-        "tag"
+        "rule",
+        "tag",
+        "tags",
+        "title",
+        "write"
       ],
       "required": []
     },
@@ -597,6 +663,24 @@
         "template_name",
         "template_type",
         "write"
+      ],
+      "required": []
+    },
+    {
+      "description": "Fetch current SpecNative documentation/releases or preview and execute the official installer",
+      "name": "specnative_upstream",
+      "properties": [
+        "action",
+        "branch",
+        "cwd",
+        "document",
+        "execute",
+        "force",
+        "include_examples",
+        "profile",
+        "repo",
+        "target",
+        "version"
       ],
       "required": []
     }

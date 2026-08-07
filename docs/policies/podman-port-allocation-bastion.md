@@ -172,7 +172,7 @@ Frontend:
 ```bash
 podman run -d \
   -p 30080:80 \
-  nginx
+  docker.io/library/nginx:1.27
 ```
 
 API:
@@ -180,7 +180,7 @@ API:
 ```bash
 podman run -d \
   -p 30180:8080 \
-  kiwi-api
+  ghcr.io/example/kiwi-api:1.0
 ```
 
 Postgres:
@@ -188,7 +188,7 @@ Postgres:
 ```bash
 podman run -d \
   -p 30232:5432 \
-  postgres
+  docker.io/library/postgres:16
 ```
 
 ---
@@ -219,3 +219,30 @@ Esta politica tiene prioridad sobre:
 - puertos aleatorios
 
 Siempre respetar este documento.
+
+## Referencias de imagen y Podman remoto
+
+Cuando se descarguen o ejecuten imagenes desde Docker Hub o GHCR, usar siempre
+la referencia completa con registro, ruta y tag o digest. No usar `nginx`,
+`postgres:latest`, `docker.io/nginx` ni `ghcr.io/project-api`.
+
+```text
+docker.io/library/nginx:1.27
+docker.io/library/postgres:16
+ghcr.io/owner/project-api:1.4.0
+ghcr.io/owner/project-api@sha256:<digest>
+```
+
+Para un bastion rootless, registrar una conexion SSH y ejecutar las operaciones
+contra ese destino:
+
+```bash
+podman system connection add --identity ~/.ssh/bastion bastion \
+  ssh://user@bastion/run/user/1000/podman/podman.sock
+podman --connection bastion ps
+```
+
+El MCP acepta `connection` o `url` para seleccionar el destino remoto. La
+politica de puertos se aplica al host remoto, por lo que la disponibilidad debe
+consultarse con `podman ps --format '{{.Ports}}'` en esa conexion antes de
+seleccionar el primer puerto libre.

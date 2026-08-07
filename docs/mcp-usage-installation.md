@@ -182,10 +182,21 @@ Para `bisect`, indica `--bisect-action start|good|bad|skip|reset`; `good`, `bad`
 
 ### specnative
 - Estado de iniciativas y flujo spec-first.
+- Compatible con la arquitectura SpecNative v0.9: `spec-native/`, `.specnative/`,
+  artefactos `ARCH-*`/`CONV-*`, sesión multi-agente y perfiles oficiales.
+- Sincronización remota bajo demanda desde el repositorio y sitios oficiales:
+  `specnative_upstream(action="fetch", document="readme-es|readme-en|ai-guide-es|ai-guide-en|website-es|website-ai-es|architecture|mcp|schema")`.
+- Releases publicadas: `specnative_upstream(action="releases")`.
+- Instalación oficial en un repositorio: primero ejecutar sin efectos
+  (`execute=false`); tras revisar target, versión y perfil, repetir con
+  `execute=true`. El instalador upstream valida el repositorio git y crea su
+  branch de instalación.
+- `specnative_artifacts(action="log-architecture|log-convention")` crea una
+  propuesta en preview y solo escribe con `write=true`.
 - Lectura de contexto del repositorio.
 - Board de delivery desde `TASKS.md`: `specnative_board(format="json|markdown|mermaid")`, con columnas `ready`, `in_progress`, `blocked`, `waiting`, `done`.
 - Captura segura de backlog: `specnative_backlog(...)` en preview por defecto; si no hay spec ejecutable o faltan criterios/validacion, se registra intake en `spec-native/intake/IDEAS.md`.
-- Artefactos persistentes: `specnative_artifacts(action="list-decisions|list-architecture|list-conventions|read")`.
+- Artefactos persistentes: `specnative_artifacts(action="list-decisions|list-architecture|list-conventions|read|log-architecture|log-convention")`.
 - Continuidad multi-agente: `specnative_session(action="resume|checkpoint|update-task|clear")`.
 - Al marcar tareas como `done`, `completion_evidence` es obligatorio.
 - Resources oficiales:
@@ -197,7 +208,8 @@ Para `bisect`, indica `--bisect-action start|good|bad|skip|reset`; `good`, `bad`
   - `spec://pipelines/ci`, `spec://pipelines/cd`
 - Prompts oficiales:
   - `specnative`, `capture_backlog`, `init_project_guided`, `start_initiative`, `plan_tasks`, `implement_task`
-  - `review_against_spec`, `handoff`, `record_decision`, `close_initiative`
+  - `review_against_spec`, `handoff`, `record_decision`, `record_architecture`,
+    `record_convention`, `close_initiative`
 - Catalogo del ecosistema ether.
 
 ### linux
@@ -301,11 +313,54 @@ Regla critica: `Justfile` puede invocar targets de `Makefile`, pero `Makefile` n
 - Active identity checks for AWS, GCP and Azure CLIs.
 
 ### podman
-- Podman ps/logs.
-- Bastion port range inspection, selection and manifest validation.
+- Operaciones locales y remotas sobre Podman: conexiones SSH, `ps`, logs, images e inspect.
+- `podman_pull` exige referencias completas para evitar resolucion ambigua de short names:
+  - `docker.io/library/nginx:1.27`
+  - `ghcr.io/owner/project-api:1.4.0`
+- Builds desde `Containerfile`/`Dockerfile` con contexto y `.containerignore`; las imagenes base externas tambien deben usar referencias completas.
+- `podman_run` aplica la politica de puertos del bastion y requiere preview + confirmacion explicita.
 - Resources:
+  - `forge://podman/containerfiles`
+  - `forge://podman/containerignore`
+  - `forge://podman/image-references`
+  - `forge://podman/remote`
   - `forge://podman/policy/bastion-ports`
   - `forge://podman/ports`
+
+Ejemplos:
+
+```text
+podman_connection(action="list")
+podman_ps(connection="bastion", all=True)
+podman_image_reference(image="ghcr.io/owner/project-api:1.4.0")
+podman_pull(image="ghcr.io/owner/project-api:1.4.0", connection="bastion")
+podman_select_port(category="api", connection="bastion")
+podman_run(
+  image="ghcr.io/owner/project-api:1.4.0",
+  ports=["30180:8080"],
+  connection="bastion",
+  execute=False,
+)
+```
+
+Crear una conexion SSH se hace primero en preview y luego con confirmacion:
+
+```text
+podman_connection(
+  action="add",
+  name="bastion",
+  destination="ssh://user@bastion/run/user/1000/podman/podman.sock",
+  identity="~/.ssh/bastion",
+)
+podman_connection(
+  action="add",
+  name="bastion",
+  destination="ssh://user@bastion/run/user/1000/podman/podman.sock",
+  identity="~/.ssh/bastion",
+  execute=True,
+  confirm=True,
+)
+```
 
 ### ai
 - Ollama list/pull/run.

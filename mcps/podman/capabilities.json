@@ -4,9 +4,9 @@
     "podman"
   ],
   "counts": {
-    "prompts": 1,
-    "resources": 4,
-    "tools": 5
+    "prompts": 2,
+    "resources": 8,
+    "tools": 12
   },
   "domain": "podman",
   "prompts": [
@@ -19,6 +19,28 @@
       ],
       "description": "Debug a failing Docker container: logs \u2192 inspect \u2192 exec \u2192 fix.",
       "name": "docker_debug"
+    },
+    {
+      "arguments": [
+        {
+          "name": "connection",
+          "required": true
+        },
+        {
+          "name": "image",
+          "required": true
+        },
+        {
+          "name": "category",
+          "required": false
+        },
+        {
+          "name": "cwd",
+          "required": false
+        }
+      ],
+      "description": "Plan a safe remote rootless Podman deployment through a named connection.",
+      "name": "podman_remote_workflow"
     }
   ],
   "pyproject": "mcps/podman/pyproject.toml",
@@ -34,6 +56,21 @@
       "uri": "forge://catalog"
     },
     {
+      "description": "Containerfile/Dockerfile standards plus bounded files discovered in the current repository.",
+      "name": "resource_podman_containerfiles",
+      "uri": "forge://podman/containerfiles"
+    },
+    {
+      "description": ".containerignore/.dockerignore standards plus bounded files discovered in the current repository.",
+      "name": "resource_podman_containerignore",
+      "uri": "forge://podman/containerignore"
+    },
+    {
+      "description": "Deterministic image reference rules for Docker Hub and GitHub Container Registry.",
+      "name": "resource_podman_image_references",
+      "uri": "forge://podman/image-references"
+    },
+    {
       "description": "Bastion Podman port allocation policy.",
       "name": "resource_podman_policy",
       "uri": "forge://podman/policy/bastion-ports"
@@ -42,6 +79,11 @@
       "description": "Occupied and available Podman published ports grouped by policy range.",
       "name": "resource_podman_ports",
       "uri": "forge://podman/ports"
+    },
+    {
+      "description": "Remote rootless Podman connection workflow over SSH or a Podman service URL.",
+      "name": "resource_podman_remote",
+      "uri": "forge://podman/remote"
     }
   ],
   "schema_version": "1.0",
@@ -50,12 +92,87 @@
   "server_name": "forgetools-podman",
   "tools": [
     {
+      "description": "Build an image from a Containerfile with qualified base images on a local or remote Podman service",
+      "name": "podman_build",
+      "properties": [
+        "allow_local_base_images",
+        "connection",
+        "containerfile",
+        "context",
+        "cwd",
+        "no_cache",
+        "remote",
+        "tag",
+        "url"
+      ],
+      "required": [
+        "tag"
+      ]
+    },
+    {
+      "description": "Preview or execute Podman system connection operations for local and SSH remote services",
+      "name": "podman_connection",
+      "properties": [
+        "action",
+        "confirm",
+        "cwd",
+        "destination",
+        "execute",
+        "identity",
+        "make_default",
+        "name",
+        "port",
+        "socket_path"
+      ],
+      "required": []
+    },
+    {
+      "description": "Validate a deterministic fully-qualified Podman registry image reference",
+      "name": "podman_image_reference",
+      "properties": [
+        "image"
+      ],
+      "required": [
+        "image"
+      ]
+    },
+    {
+      "description": "List images stored by a local or remote Podman service",
+      "name": "podman_images",
+      "properties": [
+        "all",
+        "connection",
+        "cwd",
+        "remote",
+        "url"
+      ],
+      "required": []
+    },
+    {
+      "description": "Inspect a Podman container, image, pod, volume, or network",
+      "name": "podman_inspect",
+      "properties": [
+        "connection",
+        "cwd",
+        "object",
+        "remote",
+        "type",
+        "url"
+      ],
+      "required": [
+        "object"
+      ]
+    },
+    {
       "description": "Read Podman container logs",
       "name": "podman_logs",
       "properties": [
+        "connection",
         "container",
         "cwd",
-        "lines"
+        "lines",
+        "remote",
+        "url"
       ],
       "required": [
         "container"
@@ -65,7 +182,10 @@
       "description": "Inspect occupied Podman published ports",
       "name": "podman_ports",
       "properties": [
-        "cwd"
+        "connection",
+        "cwd",
+        "remote",
+        "url"
       ],
       "required": []
     },
@@ -74,16 +194,58 @@
       "name": "podman_ps",
       "properties": [
         "all",
-        "cwd"
+        "connection",
+        "cwd",
+        "remote",
+        "url"
       ],
       "required": []
+    },
+    {
+      "description": "Pull a fully-qualified Docker Hub or GHCR image into a local or remote Podman store",
+      "name": "podman_pull",
+      "properties": [
+        "authfile",
+        "connection",
+        "cwd",
+        "image",
+        "remote",
+        "url"
+      ],
+      "required": [
+        "image"
+      ]
+    },
+    {
+      "description": "Preview or execute a Podman container start with bastion-safe published ports",
+      "name": "podman_run",
+      "properties": [
+        "allow_local_image",
+        "command",
+        "confirm",
+        "connection",
+        "cwd",
+        "detach",
+        "execute",
+        "image",
+        "name",
+        "ports",
+        "remote",
+        "url"
+      ],
+      "required": [
+        "image"
+      ]
     },
     {
       "description": "Select the first free port in the approved bastion range",
       "name": "podman_select_port",
       "properties": [
         "category",
-        "cwd"
+        "connection",
+        "cwd",
+        "remote",
+        "url"
       ],
       "required": [
         "category"

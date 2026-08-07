@@ -64,6 +64,8 @@ PROMPTS_BY_DOMAIN: dict[str, tuple[str, ...]] = {
         "specnative_plan_tasks",
         "specnative_implement_task",
         "specnative_close_initiative",
+        "record_architecture",
+        "record_convention",
     ),
     "java": ("java_project_analysis", "maven_dependency_research", "security_audit"),
     "build": ("dependency_upgrade", "go_project_analysis", "build_project_scaffold"),
@@ -77,7 +79,7 @@ PROMPTS_BY_DOMAIN: dict[str, tuple[str, ...]] = {
     "frontend": ("bug_investigation", "performance_analysis"),
     "observability": ("bug_investigation", "performance_analysis"),
     "cloud": ("repo_health_check",),
-    "podman": ("docker_debug",),
+    "podman": ("docker_debug", "podman_remote_workflow"),
     "ai": ("performance_analysis",),
     "release": ("release_workflow",),
     "deps": ("dependency_upgrade", "maven_dependency_research"),
@@ -250,6 +252,124 @@ def _register_podman_resources(server: FastMCP) -> None:
             return json.dumps(_run_tool("podman ports"), indent=2)
         except Exception as exc:
             return _json_error(exc)
+
+    @server.resource("forge://podman/containerfiles")
+    def resource_podman_containerfiles() -> str:
+        """Containerfile/Dockerfile standards plus bounded files discovered in the current repository."""
+        return _container_build_files("containerfile")
+
+    @server.resource("forge://podman/containerignore")
+    def resource_podman_containerignore() -> str:
+        """.containerignore/.dockerignore standards plus bounded files discovered in the current repository."""
+        return _container_build_files("containerignore")
+
+    @server.resource("forge://podman/remote")
+    def resource_podman_remote() -> str:
+        """Remote rootless Podman connection workflow over SSH or a Podman service URL."""
+        return """# Remote rootless Podman
+
+Podman remote operations target a named system connection or an explicit service URL.
+Prefer a named SSH connection so the destination and identity are auditable:
+
+```bash
+podman system connection add --identity ~/.ssh/bastion bastion \\
+  ssh://user@bastion/run/user/1000/podman/podman.sock
+podman --connection bastion ps
+```
+
+The MCP equivalent is `podman_connection(action=\"add\", ...)`, followed by
+`podman_ps(connection=\"bastion\")`, `podman_pull(...)`, `podman_build(...)`, or
+`podman_run(...)`. `connection` and `url` are mutually exclusive. The MCP never
+asks for an interactive password; use an SSH agent or an unencrypted/authorized
+identity appropriate for the environment.
+
+Remote rootless services still enforce the bastion host-port policy. Inspect
+availability remotely with `podman_ports(connection=\"bastion\")` before selecting a port.
+"""
+
+    @server.resource("forge://podman/image-references")
+    def resource_podman_image_references() -> str:
+        """Deterministic image reference rules for Docker Hub and GitHub Container Registry."""
+        return """# Deterministic image references
+
+Do not rely on Podman short-name aliases when pulling images. Always include the
+registry, repository path, and tag or digest:
+
+```text
+docker.io/library/nginx:1.27
+docker.io/library/postgres:16
+ghcr.io/owner/project-api:1.4.0
+ghcr.io/owner/project-api@sha256:<digest>
+```
+
+Avoid `nginx`, `postgres:latest`, `docker.io/nginx`, and `ghcr.io/project-api`.
+Use `podman_image_reference` before `podman_pull`. The tool returns the canonical
+suggestion but does not silently rewrite the requested image.
+"""
+
+
+def _container_build_files(kind: str) -> str:
+    """Return standards and bounded current files without traversing dependencies."""
+    cwd = Path.cwd()
+    if kind == "containerfile":
+        names = {"Containerfile", "Dockerfile"}
+        standards = """# Containerfile standards
+
+- Prefer `Containerfile`; `Dockerfile` is accepted for compatibility.
+- Pin external base images with a meaningful tag or digest; use complete
+  `docker.io/...` or `ghcr.io/...` references.
+- Keep one concern per stage and use multi-stage builds for compiled artifacts.
+- Use a non-root runtime user unless the service requires root.
+- Keep build-only files out of the context through `.containerignore`.
+- Validate ports in compose/manifests with `podman_validate_ports`; published
+  host ports must use 30000-30399 under the bastion policy.
+"""
+    else:
+        names = {".containerignore", ".dockerignore"}
+        standards = """# Container ignore standards
+
+Use `.containerignore` as the canonical file for Podman builds. Keep `.dockerignore`
+only when the same context must also support Docker. Exclude VCS data, virtual
+environments, dependency caches, build outputs, secrets, logs, and local agent
+worktrees. Add exceptions explicitly for files copied into the image.
+
+Recommended baseline:
+
+```text
+.git/
+.gitignore
+.venv/
+venv/
+node_modules/
+target/
+dist/
+build/
+coverage/
+.env
+.env.*
+*.pem
+*.key
+```
+"""
+
+    files: list[dict[str, str | int]] = []
+    ignored_dirs = {".git", ".venv", "venv", "node_modules", "target", "build", "dist", ".opencode", ".claude"}
+    candidates: list[Path] = []
+    for path in cwd.rglob("*"):
+        if len(candidates) >= 20:
+            break
+        if path.is_symlink() or not path.is_file() or path.name not in names:
+            continue
+        if any(part in ignored_dirs for part in path.relative_to(cwd).parts):
+            continue
+        candidates.append(path)
+    for path in sorted(candidates):
+        try:
+            text = path.read_text(encoding="utf-8", errors="replace")
+            files.append({"path": str(path.relative_to(cwd)), "size": path.stat().st_size, "content": text[:131072]})
+        except OSError as exc:
+            files.append({"path": str(path.relative_to(cwd)), "error": str(exc)})
+    return json.dumps({"standards": standards, "cwd": str(cwd), "files": files}, indent=2)
 
 
 def _register_python_resources(server: FastMCP) -> None:
@@ -593,6 +713,25 @@ def _register_specnative_resources(server: FastMCP) -> None:
         """SpecNative delivery board in markdown format."""
         try:
             return json.dumps(_run_tool("specnative board", format="markdown"), indent=2)
+        except Exception as exc:
+            return _json_error(exc)
+
+    @server.resource("forge://specnative/upstream/{document}")
+    def resource_specnative_upstream(document: str) -> str:
+        """Fetch a current SpecNative source document from the upstream repository."""
+        valid = {"readme", "readme-en", "readme-es", "ai-guide", "ai-guide-en", "ai-guide-es", "website-es", "website-ai-es", "architecture", "mcp", "schema"}
+        if document not in valid:
+            return json.dumps({"ok": False, "error": f"Unknown upstream document '{document}'", "valid": sorted(valid)})
+        try:
+            return json.dumps(_run_tool("specnative upstream", action="fetch", document=document), indent=2, ensure_ascii=False)
+        except Exception as exc:
+            return _json_error(exc)
+
+    @server.resource("forge://specnative/upstream/releases")
+    def resource_specnative_upstream_releases() -> str:
+        """List stable and prerelease versions published by SpecNative upstream."""
+        try:
+            return json.dumps(_run_tool("specnative upstream", action="releases"), indent=2, ensure_ascii=False)
         except Exception as exc:
             return _json_error(exc)
 

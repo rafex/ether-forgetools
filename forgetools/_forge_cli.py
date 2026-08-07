@@ -188,6 +188,7 @@ REGISTRY: dict[str, str] = {
     "specnative board":      "forgetools.specnative.board",
     "specnative backlog":    "forgetools.specnative.backlog",
     "specnative artifacts":  "forgetools.specnative.artifacts",
+    "specnative upstream":   "forgetools.specnative.upstream",
     # diff — semantic comparisons
     "diff dirs":             "forgetools.diff.dirs",
     "diff json":             "forgetools.diff.json",
@@ -225,6 +226,13 @@ REGISTRY: dict[str, str] = {
     "podman ports":          "forgetools.podman.ports",
     "podman select-port":    "forgetools.podman.select_port",
     "podman validate-ports": "forgetools.podman.validate_ports",
+    "podman connection":     "forgetools.podman.connection",
+    "podman images":         "forgetools.podman.images",
+    "podman inspect":        "forgetools.podman.inspect",
+    "podman image-reference": "forgetools.podman.image_reference",
+    "podman pull":           "forgetools.podman.pull",
+    "podman build":          "forgetools.podman.build",
+    "podman run":            "forgetools.podman.run",
     # cloud — provider identity/context
     "cloud whoami":          "forgetools.cloud.whoami",
     # ai — local/remote AI tooling

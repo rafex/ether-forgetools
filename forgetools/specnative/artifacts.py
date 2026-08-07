@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import re
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -150,11 +151,92 @@ def _read_artifact(root: Path, artifact_id: str) -> dict[str, Any] | None:
     return None
 
 
+def _next_artifact_id(root: Path, prefix: str) -> str:
+    values: list[int] = []
+    for path in root.rglob("*.md"):
+        if ".git" in path.parts:
+            continue
+        values.extend(int(value) for value in re.findall(rf"{prefix}-(\d+)", path.read_text(encoding="utf-8", errors="ignore")))
+    return f"{prefix}-{max(values, default=0) + 1:04d}"
+
+
+def _artifact_content(
+    artifact_id: str,
+    title: str,
+    fields: dict[str, str],
+    body: str,
+    owner: str,
+    tags: list[str] | None,
+) -> str:
+    today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    lines = [
+        "+++",
+        f'kind = "context_artifact"',
+        f'id = "{artifact_id}"',
+        f'title = "{title.replace(chr(34), chr(39))}"',
+        f'owner = "{owner}"',
+        f'created_at = "{today}"',
+        f'updated_at = "{today}"',
+        f"tags = [{', '.join(chr(34) + tag.replace(chr(34), chr(39)) + chr(34) for tag in (tags or []))}]",
+        "+++",
+        "",
+        f"# {artifact_id}: {title}",
+        "",
+    ]
+    for key, value in fields.items():
+        lines.extend([f"## {key.title()}", "", value.strip(), ""])
+    lines.extend([body.strip(), ""])
+    return "\n".join(lines)
+
+
+def _write_artifact(
+    root: Path,
+    *,
+    document: str,
+    prefix: str,
+    title: str,
+    fields: dict[str, str],
+    body: str,
+    owner: str,
+    tags: list[str] | None,
+    write: bool,
+) -> dict[str, Any]:
+    artifact_id = _next_artifact_id(root, prefix)
+    content = _artifact_content(artifact_id, title, fields, body, owner, tags)
+    if uses_modern_layout(root):
+        path = root / "spec-native" / document / f"{artifact_id}.md"
+    else:
+        path = root / "agents" / f"{document.upper()}.md"
+    if write:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        if uses_modern_layout(root):
+            path.write_text(content, encoding="utf-8")
+        else:
+            existing = path.read_text(encoding="utf-8") if path.exists() else f"# {document.upper()}\n"
+            path.write_text(existing.rstrip() + "\n\n" + content, encoding="utf-8")
+    return {
+        "id": artifact_id,
+        "document": document,
+        "path": str(path.relative_to(root)),
+        "written": write,
+        "content": None if write else content,
+    }
+
+
 def run(
     *,
     action: str = "list-decisions",
     id: str | None = None,
     tag: str | None = None,
+    title: str | None = None,
+    context: str = "",
+    design: str = "",
+    rationale: str = "",
+    rule: str = "",
+    consequences: str = "",
+    owner: str = "team",
+    tags: list[str] | None = None,
+    write: bool = False,
     repo: str | None = None,
     cwd: str | None = None,
 ) -> ForgeResult:
@@ -181,17 +263,46 @@ def run(
             if not artifact["found"]:
                 return ForgeResult.failure(TOOL, [f"Artifact not found: {id}"], t.elapsed_ms)
             return ForgeResult.success(TOOL, {"action": action, **artifact}, t.elapsed_ms)
+        if action == "log-architecture":
+            missing = [name for name, value in {"title": title, "context": context, "design": design, "consequences": consequences}.items() if not value]
+            if missing:
+                return ForgeResult.failure(TOOL, [f"Missing required fields: {', '.join(missing)}"], t.elapsed_ms)
+            data = _write_artifact(
+                root, document="architecture", prefix="ARCH", title=title or "",
+                fields={"Context": context, "Design": design, "Consequences": consequences},
+                body="", owner=owner, tags=tags, write=write,
+            )
+            return ForgeResult.success(TOOL, {"action": action, **data}, t.elapsed_ms)
+        if action == "log-convention":
+            missing = [name for name, value in {"title": title, "rationale": rationale, "rule": rule, "consequences": consequences}.items() if not value]
+            if missing:
+                return ForgeResult.failure(TOOL, [f"Missing required fields: {', '.join(missing)}"], t.elapsed_ms)
+            data = _write_artifact(
+                root, document="conventions", prefix="CONV", title=title or "",
+                fields={"Rationale": rationale, "Rule": rule, "Consequences": consequences},
+                body="", owner=owner, tags=tags, write=write,
+            )
+            return ForgeResult.success(TOOL, {"action": action, **data}, t.elapsed_ms)
         return ForgeResult.failure(
             TOOL,
-            ["Unknown action. Use: list-decisions | list-architecture | list-conventions | read"],
+            ["Unknown action. Use: list-decisions | list-architecture | list-conventions | read | log-architecture | log-convention"],
             t.elapsed_ms,
         )
 
 
 def _add_args(p: argparse.ArgumentParser) -> None:
-    p.add_argument("--action", default="list-decisions", choices=["list-decisions", "list-architecture", "list-conventions", "read"])
+    p.add_argument("--action", default="list-decisions", choices=["list-decisions", "list-architecture", "list-conventions", "read", "log-architecture", "log-convention"])
     p.add_argument("--id", default=None)
     p.add_argument("--tag", default=None)
+    p.add_argument("--title", default=None)
+    p.add_argument("--context", default="")
+    p.add_argument("--design", default="")
+    p.add_argument("--rationale", default="")
+    p.add_argument("--rule", default="")
+    p.add_argument("--consequences", default="")
+    p.add_argument("--owner", default="team")
+    p.add_argument("--tags", nargs="*", default=None)
+    p.add_argument("--write", action="store_true")
     p.add_argument("--repo", default=None)
 
 

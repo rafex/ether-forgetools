@@ -142,17 +142,23 @@ forge-mcp-docs
   - `specnative_status`, `specnative_context`, `specnative_initiative`
   - `specnative_session`, `specnative_project`, `specnative_templates`
   - `specnative_board`, `specnative_backlog`, `specnative_artifacts`
-- Resources SpecNative v0.8:
+  - `specnative_upstream` para documentación/releases e instalación oficial
+- Resources SpecNative v0.9 y fuentes upstream dinámicas:
   - `spec://agents`, `spec://session`, `spec://schema`
   - `spec://context/product`, `spec://context/architecture`, `spec://context/stack`
   - `spec://context/conventions`, `spec://context/commands`, `spec://context/decisions`
   - `spec://context/roadmap`, `spec://context/traceability`
   - `spec://spec-native/pipelines/ci`, `spec://spec-native/pipelines/cd`
   - `spec://pipelines/ci`, `spec://pipelines/cd`
-- Prompts oficiales v0.8:
+  - `forge://specnative/upstream/readme-es`, `forge://specnative/upstream/readme-en`
+  - `forge://specnative/upstream/ai-guide-es`, `forge://specnative/upstream/ai-guide-en`
+  - `forge://specnative/upstream/website-es`, `forge://specnative/upstream/website-ai-es`
+  - `forge://specnative/upstream/architecture`, `forge://specnative/upstream/mcp`
+  - `forge://specnative/upstream/releases`
+- Prompts oficiales v0.9:
   - `specnative`, `capture_backlog`, `init_project_guided`, `start_initiative`, `plan_tasks`
   - `implement_task`, `review_against_spec`, `handoff`
-  - `record_decision`, `close_initiative`
+  - `record_decision`, `record_architecture`, `record_convention`, `close_initiative`
 
 Uso:
 
@@ -164,6 +170,11 @@ forge specnative artifacts --action list-decisions
 forge specnative session --action update-task --initiative mi-iniciativa \
   --task-id TASK-MI-INICI-001 --state done \
   --completion-evidence "pytest passed, PR #123" --write
+# Consultar la documentación y releases upstream sin instalar nada
+forge specnative upstream --action fetch --document readme-es
+forge specnative upstream --action releases
+# Preview de instalación oficial; repetir con --execute solo tras revisar
+forge specnative upstream --action install --target . --profile team
 ```
 
 ### 5) Dominio Linux
@@ -353,6 +364,24 @@ forge-mcp-data
   - inspeccion de contenedores Podman
   - seleccion de puertos permitidos en bastion
   - validacion de manifests contra politica de puertos
+  - conexiones locales, SSH y URLs de la API remota de Podman
+  - listado e inspeccion de imagenes, pull determinista desde Docker Hub/GHCR
+  - builds desde `Containerfile` y `.containerignore`
+  - preview y ejecucion confirmada de contenedores con puertos seguros
+- Tools principales:
+  - `podman_connection`, `podman_ps`, `podman_images`, `podman_inspect`
+  - `podman_image_reference`, `podman_pull`, `podman_build`, `podman_run`
+  - `podman_ports`, `podman_select_port`, `podman_validate_ports`, `podman_logs`
+- Resources:
+  - `forge://podman/containerfiles`
+  - `forge://podman/containerignore`
+  - `forge://podman/image-references`
+  - `forge://podman/remote`
+  - `forge://podman/policy/bastion-ports`
+  - `forge://podman/ports`
+- Las operaciones remotas aceptan `connection="bastion"` o `url="ssh://..."`, nunca ambos.
+- `podman_pull` exige referencias completas como `docker.io/library/nginx:1.27` o `ghcr.io/org/app:1.0`.
+- `podman_run` requiere preview; la ejecucion solo ocurre con `execute=true` y `confirm=true`.
 
 ### 18) Dominio AI
 

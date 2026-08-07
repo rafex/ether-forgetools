@@ -3,7 +3,8 @@ from __future__ import annotations
 """
 specnative/_core.py — Shared helpers for SpecNative tools.
 
-SpecNative repos have a fixed structure:
+SpecNative repos support both the legacy ``agents/`` layout and the current
+v0.9 ``spec-native/`` layout. The helper maps either layout to one API.
   AGENTS.md                          — operating contract (read first)
   agents/PRODUCT.md                  — user problems / vision
   agents/ARCHITECTURE.md             — system structure, boundaries
@@ -68,6 +69,12 @@ MODERN_REQUIRED_FILES = [
     "spec-native/SESSION.md",
     "spec-native/specs/README.md",
     "spec-native/tasks/README.md",
+    "spec-native/tasks/TASKS.template.md",
+    "spec-native/architecture/README.md",
+    "spec-native/conventions/README.md",
+    "spec-native/decisions/README.md",
+    "spec-native/backlog/README.md",
+    "spec-native/intake/README.md",
     "spec-native/workflows/README.md",
     "spec-native/pipelines/README.md",
     ".specnative/SCHEMA.md",

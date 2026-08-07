@@ -8,12 +8,12 @@ from forgetools._result import ForgeResult, Timer
 from forgetools.podman.ports import RANGES, _used_ports
 
 
-def run(*, category: str, cwd: str | None = None) -> ForgeResult:
+def run(*, category: str, connection: str = "", url: str = "", remote: bool = False, cwd: str | None = None) -> ForgeResult:
     with Timer() as t:
         if category not in RANGES:
             return ForgeResult.failure("podman.select-port", [f"Unknown category: {category}"], t.elapsed_ms, f"Use one of: {', '.join(RANGES)}")
         try:
-            used, _ = _used_ports(cwd)
+            used, _ = _used_ports(cwd, connection=connection, url=url, remote=remote)
         except Exception as exc:
             return ForgeResult.failure("podman.select-port", [str(exc)], t.elapsed_ms, "Run `podman ps --format '{{.Ports}}'` successfully first.")
         for port in RANGES[category]:
@@ -24,6 +24,9 @@ def run(*, category: str, cwd: str | None = None) -> ForgeResult:
 
 def _args(p: argparse.ArgumentParser) -> None:
     p.add_argument("--category", required=True, choices=sorted(RANGES), help="web/api/database/temporal")
+    p.add_argument("--connection", default="", help="Named Podman system connection")
+    p.add_argument("--url", default="", help="Podman service URL (ssh://, unix://, or tcp://)")
+    p.add_argument("--remote", action="store_true", help="Use the remote Podman client")
 
 
 if __name__ == "__main__":

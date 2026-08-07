@@ -365,12 +365,15 @@
       ]
     },
     {
-      "description": "forgetools.search.todo \u2014 Find TODOs, FIXMEs, HACKs in code",
+      "description": "Find TODO markers without traversing dependency, cache, or worktree trees.",
       "name": "search_todo",
       "properties": [
         "cwd",
         "ext",
-        "path"
+        "include_hidden",
+        "max_results",
+        "path",
+        "respect_ignore"
       ],
       "required": []
     },

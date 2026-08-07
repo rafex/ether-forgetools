@@ -18,11 +18,11 @@ Documento generado por `scripts/gen_mcp_metadata.py`.
 | `forge-mcp-linux` | `process`, `diag`, `net`, `shell`, `linux` | 18 | 10 | 3 | `mcps/linux/capabilities.json` |
 | `forge-mcp-observability` | `observability` | 2 | 2 | 2 | `mcps/observability/capabilities.json` |
 | `forge-mcp-office` | `office` | 10 | 4 | 3 | `mcps/office/capabilities.json` |
-| `forge-mcp-podman` | `podman` | 5 | 4 | 1 | `mcps/podman/capabilities.json` |
+| `forge-mcp-podman` | `podman` | 12 | 8 | 2 | `mcps/podman/capabilities.json` |
 | `forge-mcp-python` | `python` | 4 | 3 | 2 | `mcps/python/capabilities.json` |
 | `forge-mcp-quality` | `lint`, `test`, `security`, `secrets` | 11 | 3 | 3 | `mcps/quality/capabilities.json` |
 | `forge-mcp-release` | `release`, `gh`, `docs` | 20 | 2 | 1 | `mcps/release/capabilities.json` |
-| `forge-mcp-specnative` | `specnative`, `context`, `ether` | 13 | 26 | 18 | `mcps/specnative/capabilities.json` |
+| `forge-mcp-specnative` | `specnative`, `context`, `ether` | 14 | 27 | 20 | `mcps/specnative/capabilities.json` |
 | `forge-mcp-websearch` | `websearch`, `web` | 3 | 2 | 0 | `mcps/websearch/capabilities.json` |
 
 ## Detalle por Dominio
@@ -254,7 +254,7 @@ Tools:
 - `search_find_files`: forgetools.search.find_files — Find files by name/extension
 - `search_grep`: Search source files with structured match/context events and backend metadata.
 - `search_replace`: forgetools.search.search_replace — Bulk find and replace in files
-- `search_todo`: forgetools.search.todo — Find TODOs, FIXMEs, HACKs in code
+- `search_todo`: Find TODO markers without traversing dependency, cache, or worktree trees.
 - `template_scaffold`: Generate files from a named template and variable map
 - `text_audit_chars`: Audit and optionally fix invisible/problematic characters in text files
 
@@ -526,15 +526,22 @@ Prompts:
 
 - Server: `forgetools-podman`
 - Categorias: `podman`
-- Tools: 5
-- Resources: 4
-- Prompts: 1
+- Tools: 12
+- Resources: 8
+- Prompts: 2
 
 Tools:
 
+- `podman_build`: Build an image from a Containerfile with qualified base images on a local or remote Podman service
+- `podman_connection`: Preview or execute Podman system connection operations for local and SSH remote services
+- `podman_image_reference`: Validate a deterministic fully-qualified Podman registry image reference
+- `podman_images`: List images stored by a local or remote Podman service
+- `podman_inspect`: Inspect a Podman container, image, pod, volume, or network
 - `podman_logs`: Read Podman container logs
 - `podman_ports`: Inspect occupied Podman published ports
 - `podman_ps`: List Podman containers
+- `podman_pull`: Pull a fully-qualified Docker Hub or GHCR image into a local or remote Podman store
+- `podman_run`: Preview or execute a Podman container start with bastion-safe published ports
 - `podman_select_port`: Select the first free port in the approved bastion range
 - `podman_validate_ports`: Validate Podman port publications against bastion policy
 
@@ -542,12 +549,17 @@ Resources:
 
 - `forge://capabilities`: Machine-readable capabilities manifest for this domain server.
 - `forge://catalog`: List tools available in this domain server.
+- `forge://podman/containerfiles`: Containerfile/Dockerfile standards plus bounded files discovered in the current repository.
+- `forge://podman/containerignore`: .containerignore/.dockerignore standards plus bounded files discovered in the current repository.
+- `forge://podman/image-references`: Deterministic image reference rules for Docker Hub and GitHub Container Registry.
 - `forge://podman/policy/bastion-ports`: Bastion Podman port allocation policy.
 - `forge://podman/ports`: Occupied and available Podman published ports grouped by policy range.
+- `forge://podman/remote`: Remote rootless Podman connection workflow over SSH or a Podman service URL.
 
 Prompts:
 
 - `docker_debug`: Debug a failing Docker container: logs → inspect → exec → fix.
+- `podman_remote_workflow`: Plan a safe remote rootless Podman deployment through a named connection.
 
 ### `forge-mcp-python`
 
@@ -653,9 +665,9 @@ Prompts:
 
 - Server: `forgetools-specnative`
 - Categorias: `specnative`, `context`, `ether`
-- Tools: 13
-- Resources: 26
-- Prompts: 18
+- Tools: 14
+- Resources: 27
+- Prompts: 20
 
 Tools:
 
@@ -672,6 +684,7 @@ Tools:
 - `specnative_session`: Resume, checkpoint, update tasks, or clear SpecNative multi-agent session state
 - `specnative_status`: Report SpecNative specs, initiatives, states, and task progress
 - `specnative_templates`: List or apply SpecNative archetypes, spec templates, and decision snippets
+- `specnative_upstream`: Fetch current SpecNative documentation/releases or preview and execute the official installer
 
 Resources:
 
@@ -686,6 +699,7 @@ Resources:
 - `forge://specnative/status`: All SpecNative specs with their states and task counts for the current repo.
 - `forge://specnative/suggest-next`: Top recommended next actions from SpecNative project state.
 - `forge://specnative/templates`: Available SpecNative spec templates and decision snippets.
+- `forge://specnative/upstream/releases`: List stable and prerelease versions published by SpecNative upstream.
 - `spec://agents`: Read SpecNative resource agents.
 - `spec://context/architecture`: Read SpecNative resource architecture.
 - `spec://context/commands`: Read SpecNative resource commands.
@@ -710,6 +724,8 @@ Prompts:
 - `implement_task`: Official SpecNative v0.8 prompt to implement a single task.
 - `init_project_guided`: Official SpecNative v0.8 alias for guided project initialization.
 - `plan_tasks`: Official SpecNative v0.8 prompt to derive tasks from a spec.
+- `record_architecture`: Record a durable architecture artifact after applying the placement test.
+- `record_convention`: Record a durable coding or process convention after applying the placement test.
 - `record_decision`: Record a persistent SpecNative decision after applying the placement test.
 - `repo_health_check`: Full health dashboard for a repository.
 - `review_against_spec`: Review implementation state against a SpecNative spec before closing.
