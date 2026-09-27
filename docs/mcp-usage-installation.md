@@ -125,6 +125,13 @@ make install-mcp-all
 - Busqueda rapida con `fd`/`rg` (`grep`, `find-files`, `todo`) y reemplazo por candidatos.
 - `search_grep` usa `rg --json`; para repositorios Git puede usar `git grep` con `tracked_only=true`.
 - Lectura de contenido con `bat` en modo plano, con fallback Python.
+- Inspección de imágenes locales con `fs_image_view`: miniatura ASCII acotada,
+  dimensiones, orientación EXIF, colores dominantes y OCR opcional con Tesseract.
+- El OCR usa por defecto los idiomas `spa+eng`; requiere que Tesseract y ambos
+  datos de idioma estén instalados. Si no están disponibles, se informa y se
+  devuelven de todos modos la miniatura y los metadatos.
+- `fs_image_view` limita la entrada a 20 MiB, 40 megapíxeles y una miniatura
+  máxima de 120x60 caracteres. La salida textual no identifica objetos ni escenas.
 - Uso de disco con `fs_disk_usage`, preferentemente mediante export JSON de `ncdu`.
 - Operaciones de ciclo de vida con `fs_operations`: `info`, `mkdir`, `touch`, `copy`, `move`, `delete`, `archive` y `extract`.
 - Las operaciones que modifican archivos generan preview; requieren `--execute --confirm`. El borrado de directorios requiere además `--recursive`.
@@ -139,12 +146,17 @@ forge search grep --pattern "TODO|FIXME" --path src --context 2
 forge search grep --pattern "Controller" --file-type java --pcre2
 forge search grep --pattern "TODO" --tracked-only
 forge fs read --file src/main.py --lines 1-80
+forge fs image-view --path docs/architecture.png --preview-width 80 --preview-height 40
 forge fs disk-usage --path . --max-entries 20
 forge fs operations info --path src/main.py
 forge fs operations copy --source src/config.example --destination /tmp/config.example
 forge fs operations archive --sources src,tests --destination /tmp/project.tar.gz --execute --confirm
 forge fs operations extract --source /tmp/project.tar.gz --destination /tmp/project-preview --execute --confirm
 ```
+
+Para OCR instala Tesseract y los paquetes de datos `spa` y `eng` desde el gestor
+de paquetes del sistema. Comprueba la instalación con `tesseract --list-langs`.
+Pillow se instala automáticamente con `make install-mcp-file`.
 
 `copy`, `move`, `delete`, `archive` y `extract` no se ejecutan por accidente: primero muestran el plan. Usa `--overwrite` solo cuando reemplazar el destino sea intencional y `--allow-dangerous` únicamente para una ruta explícitamente autorizada.
 

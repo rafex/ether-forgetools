@@ -11,7 +11,7 @@ Documento generado por `scripts/gen_mcp_metadata.py`.
 | `forge-mcp-data` | `db` | 3 | 2 | 1 | `mcps/data/capabilities.json` |
 | `forge-mcp-deps` | `deps`, `java`, `npm` | 13 | 2 | 2 | `mcps/deps/capabilities.json` |
 | `forge-mcp-docs` | `docs`, `openapi`, `web` | 3 | 2 | 1 | `mcps/docs/capabilities.json` |
-| `forge-mcp-file` | `fs`, `search`, `edit`, `diff`, `text`, `template`, `json`, `config` | 24 | 3 | 2 | `mcps/file/capabilities.json` |
+| `forge-mcp-file` | `fs`, `search`, `edit`, `diff`, `text`, `template`, `json`, `config` | 25 | 4 | 2 | `mcps/file/capabilities.json` |
 | `forge-mcp-frontend` | `frontend`, `npm` | 5 | 2 | 2 | `mcps/frontend/capabilities.json` |
 | `forge-mcp-git` | `git`, `gh` | 40 | 12 | 17 | `mcps/git/capabilities.json` |
 | `forge-mcp-java` | `java` | 8 | 6 | 5 | `mcps/java/capabilities.json` |
@@ -227,8 +227,8 @@ Prompts:
 
 - Server: `forgetools-file`
 - Categorias: `fs`, `search`, `edit`, `diff`, `text`, `template`, `json`, `config`
-- Tools: 24
-- Resources: 3
+- Tools: 25
+- Resources: 4
 - Prompts: 2
 
 Tools:
@@ -246,6 +246,7 @@ Tools:
 - `fs_disk_usage`: Measure directory usage with ncdu JSON export or a portable Python fallback
 - `fs_find_by_type`: Find files by semantic type such as code, docs, config, images, or archives
 - `fs_head`: Read the first lines of a file or matching files with structured metadata
+- `fs_image_view`: Inspect a local raster image as a bounded ASCII preview, dominant colors, and optional Tesseract OCR
 - `fs_operations`: Inspect, create, copy, move, delete, archive, or extract filesystem paths safely
 - `fs_read`: Read a text file with metadata; accepts file, filePath, or path as the file location
 - `fs_tail`: Read the last lines of a file or matching files with structured metadata
@@ -263,6 +264,7 @@ Resources:
 - `forge://capabilities`: Machine-readable capabilities manifest for this domain server.
 - `forge://catalog`: List tools available in this domain server.
 - `forge://config/gitignore`: Current .gitignore content and missing preset analysis.
+- `forge://file/image-view`: Instructions for inspecting local raster images with text-only models.
 
 Prompts:
 

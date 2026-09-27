@@ -2,8 +2,8 @@
   "binary": "forge-mcp-file",
   "counts": {
     "prompts": 2,
-    "resources": 3,
-    "tools": 24
+    "resources": 4,
+    "tools": 25
   },
   "domain": "file",
   "prompts": [
@@ -55,6 +55,11 @@
       "description": "Current .gitignore content and missing preset analysis.",
       "name": "resource_config_gitignore",
       "uri": "forge://config/gitignore"
+    },
+    {
+      "description": "Instructions for inspecting local raster images with text-only models.",
+      "name": "resource_file_image_view",
+      "uri": "forge://file/image-view"
     }
   ],
   "schema_version": "1.0",
@@ -234,6 +239,21 @@
         "pattern"
       ],
       "required": []
+    },
+    {
+      "description": "Inspect a local raster image as a bounded ASCII preview, dominant colors, and optional Tesseract OCR",
+      "name": "fs_image_view",
+      "properties": [
+        "cwd",
+        "ocr",
+        "ocr_languages",
+        "path",
+        "preview_height",
+        "preview_width"
+      ],
+      "required": [
+        "path"
+      ]
     },
     {
       "description": "Inspect, create, copy, move, delete, archive, or extract filesystem paths safely",

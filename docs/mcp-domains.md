@@ -76,6 +76,8 @@ make install-mcp-all
 - Categorias: `fs`, `search`, `edit`, `diff`, `text`, `template`, `json`, `config`
 - Casos de uso:
   - lectura/escritura estructurada
+  - visor textual de imágenes raster: `fs_image_view` genera miniatura ASCII,
+    metadatos y OCR opcional con Tesseract (`spa+eng`)
   - busqueda/refactor usando `fd`/`rg --json` cuando estan disponibles, con fallback portable
   - `git grep` para buscar unicamente archivos versionados
   - lectura de archivos usando `bat` y analisis de uso de disco con `ncdu` cuando estan disponibles

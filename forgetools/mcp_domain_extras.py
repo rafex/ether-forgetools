@@ -824,6 +824,21 @@ Do not pass shell pipelines, redirections, or compound commands. Inspect each ex
 
 
 def _register_file_resources(server: FastMCP) -> None:
+    @server.resource("forge://file/image-view")
+    def resource_file_image_view() -> str:
+        """Instructions for inspecting local raster images with text-only models."""
+        return """# Text-only image inspection
+
+Use `fs_image_view(path=...)` to return image dimensions, EXIF orientation,
+dominant colors, a bounded ASCII luminance preview, and optional OCR text.
+OCR uses Tesseract languages `spa+eng` when both language packs are installed.
+The tool reads the first frame/page of animated or multi-frame images.
+
+The text preview can help identify layout and contrast, while OCR can expose
+visible text. Neither can identify objects or scenes; that requires an image
+capable model. Input is limited to 20 MiB and 40 megapixels.
+"""
+
     @server.resource("forge://config/gitignore")
     def resource_config_gitignore() -> str:
         """Current .gitignore content and missing preset analysis."""

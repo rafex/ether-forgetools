@@ -6,10 +6,9 @@ build-backend = "hatchling.build"
 name = "forgetools-mcp-file"
 version = "0.1.0"
 description = "Domain MCP server for file/content operations"
-readme = "../../README.md"
 requires-python = ">=3.11"
 license = { text = "MIT" }
-dependencies = []
+dependencies = ["Pillow>=10.0"]
 
 [project.scripts]
 forge-mcp-file = "forgetools.mcp_file_server:main"

@@ -18,6 +18,7 @@ DESCRIPTION_OVERRIDES = {
     "fs find-by-type": "Find files by semantic type such as code, docs, config, images, or archives",
     "fs head": "Read the first lines of a file or matching files with structured metadata",
     "fs read": "Read a text file with metadata; accepts file, filePath, or path as the file location",
+    "fs image-view": "Inspect a local raster image as a bounded ASCII preview, dominant colors, and optional Tesseract OCR",
     "fs tail": "Read the last lines of a file or matching files with structured metadata",
     "fs disk-usage": "Measure directory usage with ncdu JSON export or a portable Python fallback",
     "fs operations": "Inspect, create, copy, move, delete, archive, or extract filesystem paths safely",
