@@ -142,7 +142,6 @@ make install-mcp
 make install-mcp-file
 make install-mcp-git
 make install-mcp-docs
-make install-mcp-specnative
 make install-mcp-linux
 make install-mcp-java
 make install-mcp-websearch
@@ -171,7 +170,6 @@ Add to `~/.config/opencode/config.json`:
     "forgetools-file": { "type": "local", "command": ["forge-mcp-file"] },
     "forgetools-git": { "type": "local", "command": ["forge-mcp-git"] },
     "forgetools-docs": { "type": "local", "command": ["forge-mcp-docs"] },
-    "forgetools-specnative": { "type": "local", "command": ["forge-mcp-specnative"] },
     "forgetools-linux": { "type": "local", "command": ["forge-mcp-linux"] },
     "forgetools-java": { "type": "local", "command": ["forge-mcp-java"] },
     "forgetools-websearch": { "type": "local", "command": ["forge-mcp-websearch"] },
@@ -199,7 +197,6 @@ Add to `~/.config/opencode/config.json`:
 | `forge-mcp-file` | File/content ops |
 | `forge-mcp-git` | Git + GitHub |
 | `forge-mcp-docs` | Docs/OpenAPI/Web extraction |
-| `forge-mcp-specnative` | SpecNative + context |
 | `forge-mcp-linux` | Process/diag/net/shell/secrets |
 | `forge-mcp-java` | Java build/JDT/Maven Central + resources/prompts |
 | `forge-mcp-websearch` | DDGS search + web navigation |
@@ -221,7 +218,6 @@ Add to `~/.config/opencode/config.json`:
 
 ```bash
 # Buscar en web con DDGS
-forge websearch ddg-search --query "specnative mcp" --max-results 5
 
 # Navegar/extraccion de contenido
 forge websearch visit --url https://example.com --include-links

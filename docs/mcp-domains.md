@@ -17,7 +17,6 @@ Cada MCP de dominio se instala desde su propio `pyproject.toml` en `mcps/<domini
 make install-mcp-file
 make install-mcp-git
 make install-mcp-docs
-make install-mcp-specnative
 make install-mcp-linux
 make install-mcp-java
 make install-mcp-websearch
@@ -49,7 +48,6 @@ make install-mcp-all
 | `forge-mcp-file` | `./mcps/file/pyproject.toml` |
 | `forge-mcp-git` | `./mcps/git/pyproject.toml` |
 | `forge-mcp-docs` | `./mcps/docs/pyproject.toml` |
-| `forge-mcp-specnative` | `./mcps/specnative/pyproject.toml` |
 | `forge-mcp-linux` | `./mcps/linux/pyproject.toml` |
 | `forge-mcp-java` | `./mcps/java/pyproject.toml` |
 | `forge-mcp-websearch` | `./mcps/websearch/pyproject.toml` |
@@ -125,58 +123,6 @@ Uso:
 
 ```bash
 forge-mcp-docs
-```
-
-### 4) Dominio SpecNative
-
-- Binario: `forge-mcp-specnative`
-- Server name: `forgetools-specnative`
-- Categorias: `specnative`, `context`, `ether`
-- Casos de uso:
-  - estado/iniciativas SpecNative
-  - contexto del repo para agentes
-  - board de delivery (`json`, `markdown`, `mermaid`) con columnas `ready`, `in_progress`, `blocked`, `waiting`, `done`
-  - captura de backlog sin modificar el board; ideas no ejecutables van a `spec-native/intake/IDEAS.md`
-  - lectura/listado de decisions, architecture records y conventions
-  - continuidad multi-agente con `SESSION.md` y update de tareas con evidencia
-  - catalogo del ecosistema ether
-- Tools principales:
-  - `specnative_status`, `specnative_context`, `specnative_initiative`
-  - `specnative_session`, `specnative_project`, `specnative_templates`
-  - `specnative_board`, `specnative_backlog`, `specnative_artifacts`
-  - `specnative_upstream` para documentación/releases e instalación oficial
-- Resources SpecNative v0.9 y fuentes upstream dinámicas:
-  - `spec://agents`, `spec://session`, `spec://schema`
-  - `spec://context/product`, `spec://context/architecture`, `spec://context/stack`
-  - `spec://context/conventions`, `spec://context/commands`, `spec://context/decisions`
-  - `spec://context/roadmap`, `spec://context/traceability`
-  - `spec://spec-native/pipelines/ci`, `spec://spec-native/pipelines/cd`
-  - `spec://pipelines/ci`, `spec://pipelines/cd`
-  - `forge://specnative/upstream/readme-es`, `forge://specnative/upstream/readme-en`
-  - `forge://specnative/upstream/ai-guide-es`, `forge://specnative/upstream/ai-guide-en`
-  - `forge://specnative/upstream/website-es`, `forge://specnative/upstream/website-ai-es`
-  - `forge://specnative/upstream/architecture`, `forge://specnative/upstream/mcp`
-  - `forge://specnative/upstream/releases`
-- Prompts oficiales v0.9:
-  - `specnative`, `capture_backlog`, `init_project_guided`, `start_initiative`, `plan_tasks`
-  - `implement_task`, `review_against_spec`, `handoff`
-  - `record_decision`, `record_architecture`, `record_convention`, `close_initiative`
-
-Uso:
-
-```bash
-forge-mcp-specnative
-forge specnative board --format markdown
-forge specnative backlog --initiative mi-iniciativa --title "Nueva tarea"
-forge specnative artifacts --action list-decisions
-forge specnative session --action update-task --initiative mi-iniciativa \
-  --task-id TASK-MI-INICI-001 --state done \
-  --completion-evidence "pytest passed, PR #123" --write
-# Consultar la documentación y releases upstream sin instalar nada
-forge specnative upstream --action fetch --document readme-es
-forge specnative upstream --action releases
-# Preview de instalación oficial; repetir con --execute solo tras revisar
-forge specnative upstream --action install --target . --profile team
 ```
 
 ### 5) Dominio Linux
@@ -500,10 +446,6 @@ Ejemplo compacto para opencode:
     "forgetools-docs": {
       "type": "local",
       "command": ["forge-mcp-docs"]
-    },
-    "forgetools-specnative": {
-      "type": "local",
-      "command": ["forge-mcp-specnative"]
     },
     "forgetools-linux": {
       "type": "local",

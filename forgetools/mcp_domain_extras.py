@@ -45,28 +45,6 @@ PROMPTS_BY_DOMAIN: dict[str, tuple[str, ...]] = {
         "pr_stack",
         "best_practice_commits",
     ),
-    "specnative": (
-        "specnative",
-        "capture_backlog",
-        "init_project_guided",
-        "start_initiative",
-        "plan_tasks",
-        "implement_task",
-        "review_against_spec",
-        "handoff",
-        "record_decision",
-        "close_initiative",
-        "start_feature",
-        "repo_health_check",
-        "specnative_workflow",
-        "specnative_handoff",
-        "specnative_init_project",
-        "specnative_plan_tasks",
-        "specnative_implement_task",
-        "specnative_close_initiative",
-        "record_architecture",
-        "record_convention",
-    ),
     "java": ("java_project_analysis", "maven_dependency_research", "security_audit"),
     "build": ("dependency_upgrade", "go_project_analysis", "build_project_scaffold"),
     "data": ("database_migration",),
@@ -94,8 +72,6 @@ def register_domain_prompts(server: FastMCP, domain: str) -> None:
 def register_domain_resources(server: FastMCP, domain: str) -> None:
     if domain == "git":
         _register_git_resources(server)
-    elif domain == "specnative":
-        _register_specnative_resources(server)
     elif domain == "linux":
         _register_linux_resources(server)
     elif domain == "file":
@@ -579,162 +555,6 @@ Python dependencies are scoped to `mcps/office/pyproject.toml`:
 
 External CLIs such as `pdfunite` or `qpdf` may still be used by `office_pdf_merge` when available.
 """
-
-def _register_specnative_resources(server: FastMCP) -> None:
-    specnative_docs = (
-        "product",
-        "architecture",
-        "stack",
-        "conventions",
-        "commands",
-        "decisions",
-        "roadmap",
-        "traceability",
-        "agents",
-        "schema",
-        "ci",
-        "cd",
-        "spec",
-        "session",
-        "mcp",
-    )
-
-    spec_resource_docs = {
-        "spec://agents": "agents",
-        "spec://session": "session",
-        "spec://context/product": "product",
-        "spec://context/architecture": "architecture",
-        "spec://context/stack": "stack",
-        "spec://context/conventions": "conventions",
-        "spec://context/commands": "commands",
-        "spec://context/decisions": "decisions",
-        "spec://context/roadmap": "roadmap",
-        "spec://context/traceability": "traceability",
-        "spec://spec-native/pipelines/ci": "ci",
-        "spec://spec-native/pipelines/cd": "cd",
-        "spec://pipelines/ci": "ci",
-        "spec://pipelines/cd": "cd",
-        "spec://schema": "schema",
-    }
-
-    def _spec_resource_reader(document: str) -> str:
-        try:
-            return json.dumps(_run_tool("specnative context", action="read", document=document), indent=2)
-        except Exception as exc:
-            return _json_error(exc)
-
-    @server.resource("forge://context/repo")
-    def resource_context_repo() -> str:
-        """Repository size, language breakdown, and git metadata for cwd."""
-        try:
-            return json.dumps(_run_tool("context repo-size"), indent=2)
-        except Exception as exc:
-            return _json_error(exc)
-
-    @server.resource("forge://context/summary")
-    def resource_context_summary() -> str:
-        """AI-readable codebase summary: structure, languages, and key patterns."""
-        try:
-            return json.dumps(_run_tool("context summarize"), indent=2)
-        except Exception as exc:
-            return _json_error(exc)
-
-    @server.resource("forge://specnative/{document}")
-    def resource_specnative(document: str) -> str:
-        """Read a SpecNative context document from the current repository."""
-        if document not in specnative_docs:
-            return json.dumps({"ok": False, "error": f"Unknown document '{document}'", "valid": list(specnative_docs)})
-        try:
-            return json.dumps(_run_tool("specnative context", action="read", document=document), indent=2)
-        except Exception as exc:
-            return _json_error(exc)
-
-    for uri, document in spec_resource_docs.items():
-        def _make_resource(doc: str):
-            def _resource() -> str:
-                return _spec_resource_reader(doc)
-
-            _resource.__name__ = f"resource_{doc.replace('-', '_')}"
-            _resource.__doc__ = f"Read SpecNative resource {doc}."
-            return _resource
-
-        server.resource(uri)(_make_resource(document))
-
-    @server.resource("forge://specnative/status")
-    def resource_specnative_status() -> str:
-        """All SpecNative specs with their states and task counts for the current repo."""
-        try:
-            return json.dumps(_run_tool("specnative status", action="status"), indent=2)
-        except Exception as exc:
-            return _json_error(exc)
-
-    @server.resource("forge://specnative/session")
-    def resource_specnative_session() -> str:
-        """Current SpecNative SESSION.md handoff state for multi-agent continuity."""
-        try:
-            return json.dumps(_run_tool("specnative session", action="resume"), indent=2)
-        except Exception as exc:
-            return _json_error(exc)
-
-    @server.resource("forge://specnative/health")
-    def resource_specnative_health() -> str:
-        """SpecNative project health check with missing, empty, or stale documents."""
-        try:
-            return json.dumps(_run_tool("specnative project", action="health-check"), indent=2)
-        except Exception as exc:
-            return _json_error(exc)
-
-    @server.resource("forge://specnative/suggest-next")
-    def resource_specnative_suggest_next() -> str:
-        """Top recommended next actions from SpecNative project state."""
-        try:
-            return json.dumps(_run_tool("specnative project", action="suggest-next"), indent=2)
-        except Exception as exc:
-            return _json_error(exc)
-
-    @server.resource("forge://specnative/templates")
-    def resource_specnative_templates() -> str:
-        """Available SpecNative spec templates and decision snippets."""
-        try:
-            return json.dumps(_run_tool("specnative templates", action="list-templates"), indent=2)
-        except Exception as exc:
-            return _json_error(exc)
-
-    @server.resource("forge://specnative/archetypes")
-    def resource_specnative_archetypes() -> str:
-        """Available SpecNative built-in and local archetypes."""
-        try:
-            return json.dumps(_run_tool("specnative templates", action="list-archetypes"), indent=2)
-        except Exception as exc:
-            return _json_error(exc)
-
-    @server.resource("forge://specnative/board")
-    def resource_specnative_board() -> str:
-        """SpecNative delivery board in markdown format."""
-        try:
-            return json.dumps(_run_tool("specnative board", format="markdown"), indent=2)
-        except Exception as exc:
-            return _json_error(exc)
-
-    @server.resource("forge://specnative/upstream/{document}")
-    def resource_specnative_upstream(document: str) -> str:
-        """Fetch a current SpecNative source document from the upstream repository."""
-        valid = {"readme", "readme-en", "readme-es", "ai-guide", "ai-guide-en", "ai-guide-es", "website-es", "website-ai-es", "architecture", "mcp", "schema"}
-        if document not in valid:
-            return json.dumps({"ok": False, "error": f"Unknown upstream document '{document}'", "valid": sorted(valid)})
-        try:
-            return json.dumps(_run_tool("specnative upstream", action="fetch", document=document), indent=2, ensure_ascii=False)
-        except Exception as exc:
-            return _json_error(exc)
-
-    @server.resource("forge://specnative/upstream/releases")
-    def resource_specnative_upstream_releases() -> str:
-        """List stable and prerelease versions published by SpecNative upstream."""
-        try:
-            return json.dumps(_run_tool("specnative upstream", action="releases"), indent=2, ensure_ascii=False)
-        except Exception as exc:
-            return _json_error(exc)
-
 
 def _register_linux_resources(server: FastMCP) -> None:
     @server.resource("forge://linux/system")

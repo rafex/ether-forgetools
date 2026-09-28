@@ -20,8 +20,6 @@ Descomponer el MCP actual de `forgetools` en MCPs por dominio, manteniendo foco 
    - Todo `git.*`.
 3. `mcp-github`
    - Todo `gh.*`.
-4. `mcp-specnative`
-   - `specnative.*`, `context.*` y resources de policy/spec.
 5. `mcp-linux`
    - `process.*`, `diag.*`, `net.*`, `shell.*`, `secrets.*`.
 6. `mcp-containers`

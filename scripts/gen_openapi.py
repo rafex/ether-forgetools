@@ -9,7 +9,6 @@ DOMAIN_MCP_BINARIES = [
     "forge-mcp-file",
     "forge-mcp-git",
     "forge-mcp-docs",
-    "forge-mcp-specnative",
     "forge-mcp-linux",
     "forge-mcp-java",
     "forge-mcp-websearch",

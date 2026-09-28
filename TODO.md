@@ -24,7 +24,6 @@ MCPs existentes:
 - `mcp-python`
 - `mcp-quality`
 - `mcp-release`
-- `mcp-specnative`
 - `mcp-websearch`
 
 Cobertura actual:
@@ -37,9 +36,8 @@ Cobertura actual:
 - [x] Todos los dominios exponen `forge://catalog`.
 - [x] Todos los dominios exponen `forge://capabilities`.
 - [x] Los prompts estan distribuidos por dominio mediante `PROMPTS_BY_DOMAIN`.
-- [x] Existen resources especificos para `git`, `specnative`, `linux`, `file`, `java`, `containers`, `data`, `podman`, `python` y `quality`.
 - [x] `scripts/gen_openapi.py` incluye todos los dominios actuales.
-- [x] `openapi/forgetools.json` contiene 158 tools y no tiene summaries vacios.
+- [x] `openapi/forgetools.json` contiene 152 tools y no tiene summaries vacios.
 - [x] La documentacion incluye instalacion y ejemplos de configuracion para Codex, Claude Code, opencode y VS Code.
 
 Pendiente general:
@@ -115,26 +113,6 @@ Pendiente:
 - [ ] Agregar resources de plantillas documentales.
 - [ ] Agregar prompts para documentar arquitectura, APIs y decisiones.
 - [ ] Mantener PDF/DOCX y reportes de negocio en `mcp-office`.
-
-### `mcp-specnative`
-
-Estado actual: agrupa `specnative`, `context` y `ether`.
-
-Implementado:
-
-- [x] Status, context e initiative.
-- [x] Context summarize, diff-summary y repo-size.
-- [x] Catalogo Ether.
-- [x] Resources de contexto y documentos SpecNative.
-
-Pendiente:
-
-- [ ] Versionar schema de SpecNative como resource formal.
-- [ ] Agregar validadores de spec, roadmap, traceability y decisions.
-- [ ] Agregar generador de iniciativas desde issue/PR/contexto.
-- [ ] Agregar reporte de drift entre specs y codigo.
-- [ ] Agregar prompts para refinement, planning, review y cierre.
-- [ ] Agregar tests de compatibilidad de documentos SpecNative.
 
 ### `mcp-linux`
 

@@ -45,30 +45,61 @@ _GROUPING_FILE_SIGNALS = """\
 """
 
 
-def start_feature(initiative: str, problem: str) -> str:
-    """Start a new feature using git worktree isolation + SpecNative spec scaffold.
+def code_review(pr_number: int, depth: str = "standard") -> str:
+    """Review a pull request: diff, context, checks, and review comments."""
+    steps = f"""# Code Review: PR #{pr_number}
 
-    Follows the official SpecNative 9-step agent workflow sequence.
+## 1. Get PR overview
+```
+gh_pr_review(number={pr_number})
+```
 
-    Args:
-        initiative: Short hyphenated name for the feature (e.g. 'user-auth')
-        problem:    One-sentence description of the problem being solved
-    """
-    return f'# Start Feature: `{initiative}`\n\n**Problem:** {problem}\n\nSigue el flujo oficial SpecNative de 9 pasos. **No omitas pasos.**\n\n---\n\n## Paso 1 — Navegación (entry point)\n```\n# Lee el README.md del folder actual primero\nfs_read(path="README.md")\n```\n\n## Paso 2 — Coherencia de iniciativa\n```\nspecnative_context(action="read", document="roadmap")\n```\nVerifica que `{initiative}` sea coherente con las prioridades actuales.\n\n## Paso 3 — Contexto mínimo\n```\nspecnative_context(action="read", document="product")\nspecnative_context(action="read", document="architecture")\n```\nCarga SOLO lo necesario. No leas todo el repositorio.\n\n## Paso 4 — Respetar decisiones previas\n```\nspecnative_context(action="decisions")\n```\nLee los DEC-XXXX antes de escribir una sola línea de spec.\n\n## Paso 5 — Crear workspace aislado + spec\n```\ngit_worktree(action="add", path="../.claude/worktrees/{initiative}",\n             branch="ai/{initiative}", new_branch=True)\n\n# Preview primero:\nspecnative_initiative(action="start", initiative="{initiative}",\n                      problem="{problem}", owner="<owner>")\n# Si el preview es correcto, escribir:\nspecnative_initiative(action="start", initiative="{initiative}",\n                      problem="{problem}", owner="<owner>", write=True)\n```\n\n**Estados de spec válidos:** `draft` → `active` → `blocked` | `done` | `superseded`\n\n## Paso 6 — Derivar tareas\n```\nspecnative_context(action="read", document="conventions")\nspecnative_context(action="read", document="stack")\n\n# Preview:\nspecnative_initiative(action="plan", initiative="{initiative}")\n# Escribir:\nspecnative_initiative(action="plan", initiative="{initiative}", write=True)\n```\n\n**Estados de tarea válidos:** `todo` → `in_progress` → `blocked` | `done`\n\n## Paso 7 — Implementar (workflows/IMPLEMENTATION.md)\n```\nspecnative_initiative(action="implement", initiative="{initiative}")\n# Devuelve: target_tasks, spec_summary, conventions, agent_sequence,\n#           placement_test para decidir dónde documentar cada cosa\n```\n\nActualiza cada tarea antes de comenzar y al terminar:\n```\nspecnative_initiative(action="state", initiative="{initiative}",\n                      task_id="TASK-...", state="in_progress", write=True)\n# ... código ...\nspecnative_initiative(action="state", initiative="{initiative}",\n                      task_id="TASK-...", state="done", write=True)\n```\n\n## Paso 8 — Registrar decisiones persistentes\nSolo si el tradeoff SOBREVIVE a esta iniciativa:\n```\nspecnative_initiative(\n    action="decision",\n    title="<título de la decisión>",\n    context="<por qué fue necesaria esta decisión>",\n    decision="<qué se decidió>",\n    consequences="<trade-offs e impactos>",\n    decision_state="proposed",   # luego: accepted | deprecated | replaced\n    write=True\n)\n```\n**Usa el placement_test** (devuelto por implement) para decidir si va en\nDECISIONS.md o en otro documento.\n\n## Paso 9 — Cerrar y actualizar trazabilidad\n```\nspecnative_initiative(action="review", initiative="{initiative}")\n# Cuando ready_to_close = true:\nspecnative_initiative(action="close", initiative="{initiative}", write=True)\n# TRACEABILITY.md se actualiza automáticamente en close\n```\n'
+## 2. See files changed
+```
+gh_pr_diff(action="files", number={pr_number})
+```
 
-def code_review(pr_number: int, depth: str='standard') -> str:
-    """Review a pull request: diff, context, checks, and review comments.
+## 3. Read the diff
+```
+gh_pr_diff(action="diff", number={pr_number})
+```
+"""
+    if depth in ("standard", "deep"):
+        steps += f"""
+## 4. Check CI status
+```
+gh_pr_merge(action="check", number={pr_number})
+```
+"""
+    if depth == "deep":
+        steps += """
+## 5. Summarize context of changed files
+```
+context_diff_summary()
+```
 
-    Args:
-        pr_number: GitHub PR number to review
-        depth:     'quick' (diff only) | 'standard' (diff + checks) | 'deep' (full analysis)
-    """
-    steps = f'# Code Review: PR #{pr_number}\n\n## 1. Get PR overview\n```\ngh_pr_review(number={pr_number})\n```\n\n## 2. See files changed\n```\ngh_pr_diff(action="files", number={pr_number})\n```\n\n## 3. Read the diff\n```\ngh_pr_diff(action="diff", number={pr_number})\n```\n'
-    if depth in ('standard', 'deep'):
-        steps += f'\n## 4. Check CI status\n```\ngh_pr_merge(action="check", number={pr_number})\n```\n\n## 5. Read project conventions\n```\nspecnative_context(action="read", document="conventions")\n```\n'
-    if depth == 'deep':
-        steps += f'\n## 6. Summarize context of changed files\n```\ncontext_diff_summary()\n```\n\n## 7. Check for secrets in diff\n```\nsecrets_scan()\n```\n\n## 8. Run linting on changed files\n```\nlint_eslint()   # for JS/TS\nlint_pylint()   # for Python\nlint_checkstyle()  # for Java\n```\n\n## 9. Review decisions for conflicts\n```\nspecnative_context(action="decisions")\n```\n'
-    steps += f'\n## Final step: Add review comment or merge\n```\n# To request changes:\ngh_issue_view(action="comments", number={pr_number})\n\n# To merge when approved:\ngh_pr_merge(action="merge", number={pr_number}, method="squash")\n```\n'
+## 6. Check for secrets in diff
+```
+secrets_scan()
+```
+
+## 7. Run linting on changed files
+```
+lint_eslint()   # for JS/TS
+lint_pylint()   # for Python
+lint_checkstyle()  # for Java
+```
+"""
+    steps += f"""
+## Final step: Add review comment or merge
+```
+# To request changes:
+gh_issue_view(action="comments", number={pr_number})
+
+# To merge when approved:
+gh_pr_merge(action="merge", number={pr_number}, method="squash")
+```
+"""
     return steps
 
 def security_audit(target_dir: str='.', scope: str='full') -> str:
@@ -86,16 +117,50 @@ def security_audit(target_dir: str='.', scope: str='full') -> str:
     steps += '## Summary\nAfter running the above, check:\n- `ok: false` results indicate findings requiring action\n- CRITICAL/HIGH CVEs block releases\n- Security bug prefixes: SQL_INJECTION, XSS_, PATH_TRAVERSAL, HARD_CODE_PASSWORD\n- Built-in rules: no-eval, no-new-func, no-implied-eval\n'
     return steps
 
-def release_workflow(version: str, repo: str='', branch: str='main') -> str:
-    """Prepare and publish a new release.
+def release_workflow(version: str, repo: str = "", branch: str = "main") -> str:
+    """Prepare and publish a new release."""
+    repo_flag = f", repo='{repo}'" if repo else ""
+    return f"""# Release Workflow: `{version}`
 
-    Args:
-        version: Semantic version string, e.g. 'v2.1.0'
-        repo:    GitHub 'owner/repo' (leave empty to use current repo)
-        branch:  Branch to release from (default: main)
-    """
-    repo_flag = f", repo='{repo}'" if repo else ''
-    return f'# Release Workflow: `{version}`\n\n## 1. Verify repo is clean\n```\ngit_status()\ngit_multi_repo(action="status")\n```\n\n## 2. Check all tests pass\n```\njava_maven(goal="verify")       # Java projects\ngo_test()                       # Go projects\nnpm_run(script="test")          # JS/TS projects\n```\n\n## 3. Run security scan\n```\nsecurity_owasp(action="scan")\nsecrets_scan()\n```\n\n## 4. Generate / update changelog\n```\ndocs_changelog(action="generate", version="{version}", output="CHANGELOG.md")\n```\n\n## 5. Create release tag\n```\ngit_tag(action="create", name="{version}", message="Release {version}")\n```\n\n## 6. Create GitHub release with auto-generated notes\n```\ngh_release(tag="{version}", title="Release {version}"{repo_flag})\n```\n\n## 7. Verify release assets\n```\ngh_api_releases(action="get", slug="<owner>/<repo>", tag="{version}")\n```\n\n## 8. Update traceability (SpecNative projects)\n```\nspecnative_initiative(action="close", initiative="release-{version}", write=True)\n```\n'
+## 1. Verify repo is clean
+```
+git_status()
+git_multi_repo(action="status")
+```
+
+## 2. Check all tests pass
+```
+java_maven(goal="verify")       # Java projects
+go_test()                       # Go projects
+npm_run(script="test")          # JS/TS projects
+```
+
+## 3. Run security scan
+```
+security_owasp(action="scan")
+secrets_scan()
+```
+
+## 4. Generate / update changelog
+```
+docs_changelog(action="generate", version="{version}", output="CHANGELOG.md")
+```
+
+## 5. Create release tag
+```
+git_tag(action="create", name="{version}", message="Release {version}")
+```
+
+## 6. Create GitHub release with auto-generated notes
+```
+gh_release(tag="{version}", title="Release {version}"{repo_flag})
+```
+
+## 7. Verify release assets
+```
+gh_api_releases(action="get", slug="<owner>/<repo>", tag="{version}")
+```
+"""
 
 def debug_ci_failure(run_id: int) -> str:
     """Diagnose and fix a failing GitHub Actions workflow run.
@@ -113,200 +178,62 @@ def java_project_analysis(project_dir: str='.') -> str:
     """
     return f'# Java Project Analysis: `{project_dir}`\n\n## 1. Discover Maven module structure\n```\njava_maven_modules(action="summary", dir="{project_dir}", pattern="*")\njava_maven_modules(action="list",    dir="{project_dir}")\n```\n\n## 2. Locate Java Language Server (eclipse.jdt.ls)\n```\njava_jdt(action="locate")\n```\n\n## 3. Check code formatting\n```\njava_format(action="check", path="{project_dir}")\n```\n\n## 4. Run build\n```\njava_maven(goal="compile -DskipTests", cwd="{project_dir}")\n```\n\n## 5. Run tests and collect coverage\n```\njava_maven(goal="verify", cwd="{project_dir}")\ntest_coverage_report(action="report", cwd="{project_dir}")\ntest_coverage_report(action="check",  cwd="{project_dir}", min=80)\n```\n\n## 6. Static security analysis\n```\nsecurity_spotbugs(action="scan", cwd="{project_dir}", security_only=True)\nsecurity_owasp(action="scan",    cwd="{project_dir}")\n```\n\n## 7. Lint (Checkstyle)\n```\nlint_checkstyle(cwd="{project_dir}")\n```\n\n## 8. Parse any stacktraces in logs\n```\njava_stacktrace(cwd="{project_dir}")\n```\n'
 
-def repo_health_check(repo_dir: str='.') -> str:
-    """Full health dashboard for a repository.
+def repo_health_check(repo_dir: str = ".") -> str:
+    """Full health dashboard for a repository."""
+    return f"""# Repository Health Check: `{repo_dir}`
 
-    Args:
-        repo_dir: Repository root directory (default: cwd)
-    """
-    return f'# Repository Health Check: `{repo_dir}`\n\n## 1. Size and language breakdown\n```\ncontext_repo_size(cwd="{repo_dir}")\n```\n\n## 2. Git state\n```\ngit_status(cwd="{repo_dir}")\ngit_worktree(action="list", cwd="{repo_dir}")\n```\n\n## 3. Recent activity\n```\ngit_log(limit=10, cwd="{repo_dir}")\ncontext_diff_summary(cwd="{repo_dir}")\n```\n\n## 4. Open PRs and issues\n```\ngh_pr_list(state="open")\ngh_issue_list(state="open")\n```\n\n## 5. CI status (last 5 runs)\n```\ngh_actions(limit=5, cwd="{repo_dir}")\n```\n\n## 6. Security\n```\nsecrets_scan(cwd="{repo_dir}")\ngh_actions_validate(cwd="{repo_dir}")\n```\n\n## 7. Code quality\n```\nlint_eslint(cwd="{repo_dir}")    # JS/TS\nlint_pylint(cwd="{repo_dir}")    # Python\nlint_checkstyle(cwd="{repo_dir}") # Java\n```\n\n## 8. Test coverage\n```\ntest_coverage_report(action="find", cwd="{repo_dir}")\ntest_coverage_report(action="summary", cwd="{repo_dir}")\n```\n\n## 9. Dependencies\n```\nnpm_audit(cwd="{repo_dir}")\nsecurity_owasp(action="find", cwd="{repo_dir}")\n```\n\n## 10. SpecNative compliance (if applicable)\n```\nspecnative_status(action="validate", repo="{repo_dir}")\nspecnative_status(action="status",   repo="{repo_dir}")\n```\n'
-
-def specnative_workflow(initiative: str, action: str='status') -> str:
-    """Full SpecNative spec-first development workflow guide.
-
-    Args:
-        initiative: Initiative name (e.g. 'user-auth', 'payment-api')
-        action:     'status' | 'start' | 'implement' | 'review' | 'close'
-    """
-    _SPEC_STATES = 'draft → active → blocked | done | superseded'
-    _TASK_STATES = 'todo → in_progress → blocked | done'
-    _DEC_STATES = 'proposed → accepted | deprecated | replaced'
-    _PLACEMENT_BRIEF = '¿Desaparece al terminar la iniciativa? → SPEC.md\n¿Debe respetarse en la próxima iniciativa? → DECISIONS.md\n¿Explica el producto? → PRODUCT.md  |  ¿Guía prioridad temporal? → ROADMAP.md\n¿Describe estructura del sistema? → ARCHITECTURE.md'
-    if action == 'status':
-        return f'# SpecNative Status: `{initiative}`\n\n## Estados válidos\n- Spec:     `{_SPEC_STATES}`\n- Tarea:    `{_TASK_STATES}`\n- Decisión: `{_DEC_STATES}`\n\n## 1. Salud del repositorio (valida los 17 archivos requeridos)\n```\nspecnative_status(action="validate")\nspecnative_status(action="status")\nspecnative_status(action="list-specs")\n```\n\n## 2. Leer spec e estado de tareas\n```\nspecnative_context(action="read-spec", initiative="{initiative}")\nspecnative_context(action="list-tasks", initiative="{initiative}")\n```\n\n## 3. Decisiones relevantes (tradeoffs persistentes)\n```\nspecnative_context(action="decisions")\n```\n\n## Placement test (¿dónde va este contenido?)\n```\n{_PLACEMENT_BRIEF}\n```\n'
-    if action == 'start':
-        return f'# SpecNative Start: `{initiative}`\n\nSigue la secuencia oficial de 9 pasos.\n\n## 1. Navegación y coherencia\n```\nfs_read(path="README.md")\nspecnative_context(action="read", document="roadmap")\n```\n\n## 2. Contexto mínimo + decisiones previas\n```\nspecnative_context(action="read", document="product")\nspecnative_context(action="read", document="architecture")\nspecnative_context(action="decisions")\n```\n\n## 3. Crear spec (estado inicial: `draft`)\n```\n# Preview:\nspecnative_initiative(action="start", initiative="{initiative}",\n                      problem="<describe the problem>", owner="<owner>")\n# Escribir:\nspecnative_initiative(action="start", initiative="{initiative}",\n                      problem="<describe the problem>", owner="<owner>", write=True)\n```\n\n## 4. Derivar tareas (estado inicial de cada tarea: `todo`)\n```\nspecnative_context(action="read", document="conventions")\n# Preview:\nspecnative_initiative(action="plan", initiative="{initiative}")\n# Escribir:\nspecnative_initiative(action="plan", initiative="{initiative}", write=True)\n```\n\n## 5. Activar spec al comenzar implementación\n```\nspecnative_initiative(action="state", initiative="{initiative}",\n                      state="active", write=True)\n```\n'
-    if action == 'implement':
-        return f'# SpecNative Implement: `{initiative}`\n\n## 1. Cargar contexto de implementación (9-step sequence incluida)\n```\nspecnative_initiative(action="implement", initiative="{initiative}")\n```\nEl resultado incluye:\n- `target_tasks` — tareas en estado `todo` o `in_progress`\n- `spec_summary`, `conventions`, `architecture`, `stack`\n- `agent_sequence` — los 9 pasos oficiales\n- `placement_test` — árbol de decisiones sobre dónde documentar\n\n## 2. Por cada tarea, ciclo: todo → in_progress → done\n```\n# Al comenzar:\nspecnative_initiative(action="state", initiative="{initiative}",\n                      task_id="TASK-...", state="in_progress", write=True)\n\n# Buscar código relacionado:\nsearch_grep(pattern="<clase o función relevante>")\nfs_find_by_type(extensions=".java,.py,.ts")\n\n# Al terminar:\nspecnative_initiative(action="state", initiative="{initiative}",\n                      task_id="TASK-...", state="done", write=True)\n```\n\n## 3. Si una tarea se bloquea\n```\nspecnative_initiative(action="state", initiative="{initiative}",\n                      task_id="TASK-...", state="blocked", write=True)\n# Documentar el bloqueo en el SPEC.md con --state blocked\nspecnative_initiative(action="state", initiative="{initiative}",\n                      state="blocked", write=True)\n```\n\n## 4. Registrar decisiones persistentes (usar placement_test)\n```\n# Solo si el tradeoff SOBREVIVE a esta iniciativa:\nspecnative_initiative(\n    action="decision",\n    title="<título>",\n    context="<por qué>",\n    decision="<qué se decidió>",\n    consequences="<impactos>",\n    decision_state="proposed",\n    write=True\n)\n```\n**Placement test rápido:**\n```\n{_PLACEMENT_BRIEF}\n```\n'
-    if action == 'review':
-        return f'# SpecNative Review: `{initiative}`\n\n## 1. Verificar que todas las tareas estén en `done`\n```\nspecnative_initiative(action="review", initiative="{initiative}")\n# ready_to_close debe ser true para continuar\n```\n\n## 2. Verificar tests\n```\njava_maven(goal="verify")\ngo_test()\nnpm_run(script="test")\n```\n\n## 3. Seguridad y calidad\n```\nsecrets_scan()\nsecurity_spotbugs(action="scan", security_only=True)\nlint_checkstyle()\nlint_eslint()\nlint_pylint()\n```\n\n## 4. Confirmar estado del spec\nEl spec debe estar en `active`. Si todo está bien, pasar a `close`.\n'
-    if action == 'close':
-        return f'# SpecNative Close: `{initiative}`\n\n## 1. Revisión final\n```\nspecnative_initiative(action="review", initiative="{initiative}")\n# ready_to_close debe ser true\n```\n\n## 2. Registrar decisiones finales que sobrevivan (si aplica)\n```\n# Usa el placement_test para confirmar que va en DECISIONS.md:\n# "¿Debe respetarse en la próxima iniciativa?" → sí → DECISIONS.md\nspecnative_initiative(\n    action="decision",\n    title="<título>",\n    context="<por qué>",\n    decision="<qué se decidió>",\n    consequences="<impactos>",\n    decision_state="proposed",\n    write=True\n)\n```\n\n## 3. Cerrar el spec (estado → `done`, actualiza TRACEABILITY.md)\n\n```\nspecnative_initiative(action="close", initiative="{initiative}")\n# Preview looks good? Write it:\nspecnative_initiative(action="close", initiative="{initiative}", write=True)\n```\n\n## 4. Commit and create PR\n```\ngit_commit(action="commit")\ngh_pr_create(title="feat({initiative}): ...", body="Closes spec SPEC-...")\n```\n'
-    return f"Unknown action '{action}'. Use: status | start | implement | review | close"
-
-def specnative_init_project(
-    name: str,
-    problem: str,
-    users: str,
-    goals: str,
-    stack: str = "",
-) -> str:
-    """Initialize SpecNative project context with guided document updates.
-
-    Args:
-        name:    Project name
-        problem: Product/problem statement
-        users:   Target users
-        goals:   Observable goals
-        stack:   Known technology stack
-    """
-    return f'# SpecNative Init Project: `{name}`\n\n## 1. Check gaps\n```\nspecnative_project(action="health-check")\nspecnative_project(action="suggest-next")\n```\n\n## 2. Fill PRODUCT.md\n```\nspecnative_project(\n  action="refine-document", document="product", write=True,\n  what_changed="Initial guided SpecNative setup",\n  content="""# PRODUCT.md\n\n## Problema\n{problem}\n\n## Usuarios\n{users}\n\n## Objetivos\n{goals}\n\n## No objetivos\n\n## Valor diferencial\n"""\n)\n```\n\n## 3. Fill STACK.md if known\n```\nspecnative_project(action="update-section", document="stack", section="Lenguajes y runtimes", content="{stack}", write=True)\n```\n\n## 4. Continue interviewing\nUse `specnative_project(action="read-template", document="<doc>")` before writing architecture, conventions and commands.\n'
-
-def specnative_handoff(summary: str, next_steps: str, decisions_made: str = "") -> str:
-    """Generate a SpecNative multi-agent handoff.
-
-    Args:
-        summary:        What was accomplished
-        next_steps:     Ordered next actions
-        decisions_made: Optional decisions not yet recorded
-    """
-    return f'# SpecNative Handoff\n\n## Summary\n{summary}\n\n## Next steps\n{next_steps}\n\n## Actions\n```\nspecnative_session(\n  action="checkpoint",\n  initiative="<current-initiative>",\n  task_id="<current-task>",\n  intent="{summary}",\n  next_steps="""{next_steps}""",\n  context_notes="""{decisions_made or "none"}""",\n  write=True,\n)\n```\n\nIf persistent decisions were made:\n```\nspecnative_initiative(action="decision", title="<title>", context="<context>", decision="<decision>", consequences="<consequences>", write=True)\n```\n\nThe next agent should begin with:\n```\nspecnative_session(action="resume")\n```\n'
-
-def specnative_plan_tasks(initiative: str) -> str:
-    """Derive tasks from an existing SpecNative spec.
-
-    Args:
-        initiative: Initiative name
-    """
-    return f'# SpecNative Plan Tasks: `{initiative}`\n\n## Steps\n```\nspecnative_context(action="read-spec", initiative="{initiative}")\nspecnative_context(action="read", document="planning")\nspecnative_context(action="read", document="architecture")\nspecnative_context(action="read", document="decisions")\n```\n\nCreate task preview:\n```\nspecnative_initiative(action="plan", initiative="{initiative}")\n```\n\nIf the plan is correct:\n```\nspecnative_initiative(action="plan", initiative="{initiative}", write=True)\n```\n'
-
-def specnative_implement_task(initiative: str, task_id: str) -> str:
-    """Implement a specific SpecNative task.
-
-    Args:
-        initiative: Initiative name
-        task_id: Task ID
-    """
-    return f'# SpecNative Implement Task: `{initiative}` / `{task_id}`\n\n## Steps\n```\nspecnative_session(action="resume")\nspecnative_initiative(action="implement", initiative="{initiative}", task_id="{task_id}")\nspecnative_initiative(action="state", initiative="{initiative}", task_id="{task_id}", state="in_progress", write=True)\n```\n\nAfter implementation and validation:\n```\nspecnative_initiative(action="state", initiative="{initiative}", task_id="{task_id}", state="done", write=True)\nspecnative_session(action="checkpoint", initiative="{initiative}", task_id="{task_id}", intent="Completed task", next_steps="Review and continue", write=True)\n```\n'
-
-def specnative_close_initiative(initiative: str) -> str:
-    """Close a SpecNative initiative and update traceability.
-
-    Args:
-        initiative: Initiative name
-    """
-    return f'# SpecNative Close Initiative: `{initiative}`\n\n## Verify\n```\nspecnative_initiative(action="review", initiative="{initiative}")\nspecnative_context(action="read", document="traceability")\n```\n\n## Close\n```\nspecnative_initiative(action="close", initiative="{initiative}")\n# If preview is correct:\nspecnative_initiative(action="close", initiative="{initiative}", write=True)\nspecnative_session(action="clear", write=True)\n```\n'
-
-def init_project_guided(name: str, problem: str, users: str, goals: str, stack: str = "") -> str:
-    """Official SpecNative v0.8 alias for guided project initialization."""
-    return specnative_init_project(name=name, problem=problem, users=users, goals=goals, stack=stack)
-
-
-def start_initiative(initiative: str, problem: str) -> str:
-    """Official SpecNative v0.8 prompt to start an initiative."""
-    return start_feature(initiative=initiative, problem=problem)
-
-
-def plan_tasks(initiative: str) -> str:
-    """Official SpecNative v0.8 prompt to derive tasks from a spec."""
-    return specnative_plan_tasks(initiative=initiative)
-
-
-def implement_task(initiative: str, task_id: str) -> str:
-    """Official SpecNative v0.8 prompt to implement a single task."""
-    return specnative_implement_task(initiative=initiative, task_id=task_id)
-
-
-def review_against_spec(initiative: str) -> str:
-    """Review implementation state against a SpecNative spec before closing."""
-    return f'# Review Against Spec: `{initiative}`\n\n## Required context\n```\nspecnative_context(action="read-spec", initiative="{initiative}")\nspecnative_context(action="list-tasks", initiative="{initiative}")\nspecnative_board(initiative="{initiative}", format="markdown")\nspecnative_artifacts(action="list-decisions")\n```\n\n## Verification\n```\nspecnative_initiative(action="review", initiative="{initiative}")\n# Run project-specific checks from COMMANDS.md before closing.\nspecnative_context(action="read", document="commands")\n```\n\nEvery task marked `done` must include non-empty `completion_evidence`.\n'
-
-
-def handoff(summary: str, next_steps: str, decisions_made: str = "") -> str:
-    """Official SpecNative v0.8 alias for multi-agent handoff."""
-    return specnative_handoff(summary=summary, next_steps=next_steps, decisions_made=decisions_made)
-
-
-def record_decision(title: str, context: str, decision: str, consequences: str, owner: str = "team") -> str:
-    """Record a persistent SpecNative decision after applying the placement test."""
-    return f'# Record Decision: `{title}`\n\nOnly write this if the tradeoff survives the current initiative.\n\n```\nspecnative_initiative(\n  action="decision",\n  title="{title}",\n  context="""{context}""",\n  decision="""{decision}""",\n  consequences="""{consequences}""",\n  owner="{owner}",\n  decision_state="proposed",\n  write=True,\n)\n```\n\nAfter writing, inspect it:\n```\nspecnative_artifacts(action="list-decisions")\n```\n'
-
-
-def record_architecture(title: str, context: str, design: str, consequences: str, owner: str = "team") -> str:
-    """Record a durable architecture artifact after applying the placement test."""
-    return f'''# Record Architecture: `{title}`
-
-Use this for a structural change that future initiatives must discover. Preview
-the artifact before writing it.
-
-```text
-specnative_artifacts(action="log-architecture", title="{title}",
-  context="""{context}""", design="""{design}""",
-  consequences="""{consequences}""", owner="{owner}", write=False)
+## 1. Size and language breakdown
+```
+context_repo_size(cwd="{repo_dir}")
 ```
 
-If the preview is correct, repeat with `write=True` and verify the result with
-`specnative_artifacts(action="list-architecture")`.
-'''
-
-
-def record_convention(title: str, rationale: str, rule: str, consequences: str, owner: str = "team") -> str:
-    """Record a durable coding or process convention after applying the placement test."""
-    return f'''# Record Convention: `{title}`
-
-Use this for a rule that future initiatives must follow, not a temporary
-implementation detail.
-
-```text
-specnative_artifacts(action="log-convention", title="{title}",
-  rationale="""{rationale}""", rule="""{rule}""",
-  consequences="""{consequences}""", owner="{owner}", write=False)
+## 2. Git state
+```
+git_status(cwd="{repo_dir}")
+git_worktree(action="list", cwd="{repo_dir}")
 ```
 
-Review the preview, then use `write=True` and verify with
-`specnative_artifacts(action="list-conventions")`.
-'''
+## 3. Recent activity
+```
+git_log(limit=10, cwd="{repo_dir}")
+context_diff_summary(cwd="{repo_dir}")
+```
 
+## 4. Open PRs and issues
+```
+gh_pr_list(state="open")
+gh_issue_list(state="open")
+```
 
-def close_initiative(initiative: str) -> str:
-    """Official SpecNative v0.8 prompt to close an initiative."""
-    return specnative_close_initiative(initiative=initiative)
+## 5. CI status (last 5 runs)
+```
+gh_actions(limit=5, cwd="{repo_dir}")
+```
 
+## 6. Security
+```
+secrets_scan(cwd="{repo_dir}")
+gh_actions_validate(cwd="{repo_dir}")
+```
 
-def specnative(request: str) -> str:
-    """Universal SpecNative entry point that routes one user request."""
-    return f"""Use the SpecNative MCP for this request: {request}
+## 7. Code quality
+```
+lint_eslint(cwd="{repo_dir}")    # JS/TS
+lint_pylint(cwd="{repo_dir}")    # Python
+lint_checkstyle(cwd="{repo_dir}") # Java
+```
 
-Read `spec://agents`, call `specnative_session(action="resume")` and
-`specnative_status(action="status")`, then choose the smallest correct workflow:
-start_initiative, capture_backlog, implement_task, record_decision,
-review_against_spec, handoff, or close_initiative.
+## 8. Test coverage
+```
+test_coverage_report(action="find", cwd="{repo_dir}")
+test_coverage_report(action="summary", cwd="{repo_dir}")
+```
 
-Do not edit generated indexes or boards. Update canonical artifacts only.
-"""
-
-
-def capture_backlog(title: str, description: str, initiative: str = "", priority: str = "p2") -> str:
-    """Classify and capture a requested backlog item without creating parallel state."""
-    return f"""Capture this backlog request using the SpecNative MCP.
-
-Title: {title}
-Description: {description}
-Initiative hint: {initiative or "none"}
-Priority: {priority}
-
-1. Read `spec://agents`, then call `specnative_status(action="list-specs")`
-   and `specnative_board(format="markdown")` to locate an existing initiative
-   and avoid duplicates.
-2. If an existing spec applies, obtain or confirm `close_criteria` and at least
-   one validation. Do not invent either.
-3. Call `specnative_backlog(...)` with `initiative` only after those execution
-   details are known. It will create canonical task metadata in TASKS.md.
-4. If the request has no suitable spec or is underspecified, call
-   `specnative_backlog(kind="idea", ...)` or omit `initiative`. It will record
-   triaged intake in `spec-native/intake/IDEAS.md`.
-5. Report whether the result is an executable task visible in board output or a
-   non-executable intake item, and state the next required action.
+## 9. Dependencies
+```
+npm_audit(cwd="{repo_dir}")
+security_owasp(action="find", cwd="{repo_dir}")
+```
 """
 
 def multi_repo_health(base_dir: str, pattern: str='*') -> str:
@@ -416,7 +343,7 @@ def api_design(api_name: str, description: str) -> str:
         api_name:    Short name for the API (e.g. 'payments-api', 'user-service')
         description: One-paragraph description of what the API does
     """
-    return f'# API Design: `{api_name}`\n\n**Description:** {description}\n\nYou are following a spec-first approach. Write the contract before the code.\n\n## Phase 1 — Parse any existing spec or generate a new one\n```\n# Check if an OpenAPI spec already exists\nsearch_find_files(name="openapi*.yaml", paths=".")\nsearch_find_files(name="openapi*.json", paths=".")\nsearch_find_files(name="swagger*.yaml", paths=".")\n\n# If one exists, parse it:\nopenapi_parse(path="<spec-file>")\n```\n\nIf no spec exists, create `openapi.yaml` following this template:\n```yaml\nopenapi: "3.1.0"\ninfo:\n  title: "{api_name}"\n  version: "0.1.0"\n  description: "{description}"\npaths:\n  /health:\n    get:\n      summary: Health check\n      responses:\n        "200":\n          description: OK\n```\n\n## Phase 2 — Review and validate the spec\n```\nopenapi_parse(path="openapi.yaml")\n```\n\nVerify:\n- All paths have `operationId`\n- Request/response schemas are defined\n- Authentication scheme is documented\n- Error responses (400, 401, 404, 500) are included\n\n## Phase 3 — Generate stub / scaffold\n```\n# Use template scaffold for the server stub\ntemplate_scaffold(\n    template="api-stub",\n    output="{api_name}",\n    vars={{"api_name": "{api_name}", "spec": "openapi.yaml"}},\n)\n```\n\n## Phase 4 — Check project conventions\n```\nspecnative_context(action="read", document="conventions")\nspecnative_context(action="read", document="architecture")\nspecnative_context(action="read", document="stack")\n```\n\n## Phase 5 — Implement endpoints\nFor each path in the spec:\n```\n# Find related existing code\nsearch_grep(pattern="{api_name}", paths=".")\n\n# Check test coverage as you implement\ntest_coverage_report(action="summary")\n```\n\n## Phase 6 — Write and run tests\n```\n# Run tests\nnpm_run(script="test")              # Node.js\njava_maven(goal="test")             # Java\ngo_test(cwd=".")                    # Go\n\n# Review coverage\ntest_coverage_report(action="summary")\ntest_coverage_report(action="check", min=80)\n```\n\n## Phase 7 — Security review\n```\nsecurity_eslint(action="scan")      # JS/TS\nsecurity_spotbugs(action="scan", security_only=True)  # Java\nsecrets_scan()\n```\n\n## Phase 8 — Validate final spec matches implementation\n```\nopenapi_parse(path="openapi.yaml")\nnet_health(url="http://localhost:<port>/health")\nnet_http(url="http://localhost:<port>/openapi.json", method="GET")\n```\n\n## Checklist\n- [ ] OpenAPI spec committed to repo\n- [ ] All endpoints have request/response schema validation\n- [ ] Auth/AuthZ documented and implemented\n- [ ] Error responses standardised (RFC 7807 Problem Details recommended)\n- [ ] Test coverage ≥ 80%\n- [ ] No secrets or CVEs found\n'
+    return f'# API Design: `{api_name}`\n\n**Description:** {description}\n\nYou are following a spec-first approach. Write the contract before the code.\n\n## Phase 1 — Parse any existing spec or generate a new one\n```\n# Check if an OpenAPI spec already exists\nsearch_find_files(name="openapi*.yaml", paths=".")\nsearch_find_files(name="openapi*.json", paths=".")\nsearch_find_files(name="swagger*.yaml", paths=".")\n\n# If one exists, parse it:\nopenapi_parse(path="<spec-file>")\n```\n\nIf no spec exists, create `openapi.yaml` following this template:\n```yaml\nopenapi: "3.1.0"\ninfo:\n  title: "{api_name}"\n  version: "0.1.0"\n  description: "{description}"\npaths:\n  /health:\n    get:\n      summary: Health check\n      responses:\n        "200":\n          description: OK\n```\n\n## Phase 2 — Review and validate the spec\n```\nopenapi_parse(path="openapi.yaml")\n```\n\nVerify:\n- All paths have `operationId`\n- Request/response schemas are defined\n- Authentication scheme is documented\n- Error responses (400, 401, 404, 500) are included\n\n## Phase 3 — Generate stub / scaffold\n```\n# Use template scaffold for the server stub\ntemplate_scaffold(\n    template="api-stub",\n    output="{api_name}",\n    vars={{"api_name": "{api_name}", "spec": "openapi.yaml"}},\n)\n```\n\n## Phase 4 — Implement endpoints\nFor each path in the spec:\n```\n# Find related existing code\nsearch_grep(pattern="{api_name}", paths=".")\n\n# Check test coverage as you implement\ntest_coverage_report(action="summary")\n```\n\n## Phase 6 — Write and run tests\n```\n# Run tests\nnpm_run(script="test")              # Node.js\njava_maven(goal="test")             # Java\ngo_test(cwd=".")                    # Go\n\n# Review coverage\ntest_coverage_report(action="summary")\ntest_coverage_report(action="check", min=80)\n```\n\n## Phase 7 — Security review\n```\nsecurity_eslint(action="scan")      # JS/TS\nsecurity_spotbugs(action="scan", security_only=True)  # Java\nsecrets_scan()\n```\n\n## Phase 8 — Validate final spec matches implementation\n```\nopenapi_parse(path="openapi.yaml")\nnet_health(url="http://localhost:<port>/health")\nnet_http(url="http://localhost:<port>/openapi.json", method="GET")\n```\n\n## Checklist\n- [ ] OpenAPI spec committed to repo\n- [ ] All endpoints have request/response schema validation\n- [ ] Auth/AuthZ documented and implemented\n- [ ] Error responses standardised (RFC 7807 Problem Details recommended)\n- [ ] Test coverage ≥ 80%\n- [ ] No secrets or CVEs found\n'
 
 def go_project_analysis(project_dir: str='.') -> str:
     """Comprehensive analysis of a Go project: build, test, lint, mod, and security.
@@ -424,7 +351,7 @@ def go_project_analysis(project_dir: str='.') -> str:
     Args:
         project_dir: Root directory of the Go project (default: cwd)
     """
-    return f'# Go Project Analysis: `{project_dir}`\n\n## 1. Module and dependency graph\n```\ngo_mod(action="tidy",   cwd="{project_dir}")\ngo_mod(action="verify", cwd="{project_dir}")\ngo_mod(action="graph",  cwd="{project_dir}")\n```\n\n## 2. Build\n```\ngo_build(cwd="{project_dir}")\n```\n\n## 3. Run tests with coverage\n```\ngo_test(cwd="{project_dir}", cover=True)\ntest_coverage_report(action="summary", cwd="{project_dir}")\ntest_coverage_report(action="check",   cwd="{project_dir}", min=80)\n```\n\n## 4. Linting (golangci-lint)\n```\nlint_golangci(cwd="{project_dir}")\n```\n\n## 5. Check for secrets in source\n```\nsecrets_scan(cwd="{project_dir}")\n```\n\n## 6. Dependency security (if using govulncheck / OWASP)\n```\nsecurity_owasp(action="scan", cwd="{project_dir}")\n```\n\n## 7. File and structure overview\n```\nfs_tree(path="{project_dir}", max_depth=4)\ncontext_repo_size(cwd="{project_dir}")\ncontext_summarize(cwd="{project_dir}")\n```\n\n## 8. Find open TODOs and FIXMEs\n```\nsearch_todo(paths="{project_dir}")\n```\n\n## 9. Recent changes\n```\ngit_log(limit=10, cwd="{project_dir}")\ncontext_diff_summary(cwd="{project_dir}")\n```\n\n## Summary expectations\nAfter running the above, you should have:\n- Module dependency tree (flag any `replace` directives)\n- Build success / failure\n- Test pass rate and coverage percentage\n- Lint findings (treat `errcheck` and `govet` as blocking)\n- Known CVEs in dependencies\n- TODO/FIXME count and locations\n'
+    return f'# Go Project Analysis: `{project_dir}`\n\n## 1. Module and dependency graph\n```\ngo_mod(action="tidy",   cwd="{project_dir}")\ngo_mod(action="verify", cwd="{project_dir}")\ngo_mod(action="graph",  cwd="{project_dir}")\n```\n\n## 2. Build\n```\ngo_build(cwd="{project_dir}")\n```\n\n## 3. Run tests with coverage\n```\ngo_test(cwd="{project_dir}", cover=True)\ntest_coverage_report(action="summary", cwd="{project_dir}")\ntest_coverage_report(action="check",   cwd="{project_dir}", min=80)\n```\n\n## 4. Linting (golangci-lint)\n```\nlint_golangci(cwd="{project_dir}")\n```\n\n## 5. Check for secrets in source\n```\nsecrets_scan(cwd="{project_dir}")\n```\n\n## 6. Dependency security (if using govulncheck / OWASP)\n```\nsecurity_owasp(action="scan", cwd="{project_dir}")\n```\n\n## 7. File and structure overview\n```\nfs_tree(path="{project_dir}", max_depth=4)\ncontext_repo_size(cwd="{project_dir}")\n```\n\n## 8. Find open TODOs and FIXMEs\n```\nsearch_todo(paths="{project_dir}")\n```\n\n## 9. Recent changes\n```\ngit_log(limit=10, cwd="{project_dir}")\ncontext_diff_summary(cwd="{project_dir}")\n```\n\n## Summary expectations\nAfter running the above, you should have:\n- Module dependency tree (flag any `replace` directives)\n- Build success / failure\n- Test pass rate and coverage percentage\n- Lint findings (treat `errcheck` and `govet` as blocking)\n- Known CVEs in dependencies\n- TODO/FIXME count and locations\n'
 
 def podman_remote_workflow(connection: str, image: str, category: str = 'api', cwd: str = '.') -> str:
     """Plan a safe remote rootless Podman deployment through a named connection."""
@@ -685,23 +612,127 @@ def commit_history_cleanup(base_branch: str='main', strategy: str='interactive',
     """
     return f'''# Commit History Cleanup (before PR)\n\n**Base branch:** `{base_branch}`\n**Strategy:** `{strategy}`\n\n## Step 1 — See commits ahead of `{base_branch}`\n\n```\ngit_log(limit=30, cwd="{cwd}")\ncontext_diff_summary(since="{base_branch}", until="HEAD", cwd="{cwd}")\n```\n\nCount how many commits need cleaning. If the count is 1, nothing to do.\n\n## Step 2 — Verify there are no uncommitted changes\n\n```\ngit_status(cwd="{cwd}")\n```\n\nStage or stash anything uncommitted before rebasing.\n\n{('## Strategy: interactive rebase' + chr(10) + chr(10) + 'This lets you squash, reword, drop, or reorder commits one-by-one.' + chr(10) + chr(10) + '```' + chr(10) + f'# Rebase interactively against {base_branch}' + chr(10) + f'shell_run(cmd="git rebase -i {base_branch}", cwd="{cwd}")' + chr(10) + '```' + chr(10) + chr(10) + 'In the editor, change `pick` to:' + chr(10) + '- `r` / `reword` — keep commit but edit the message' + chr(10) + '- `s` / `squash` — merge into previous commit, edit combined message' + chr(10) + '- `f` / `fixup`  — merge into previous commit, discard this message' + chr(10) + '- `d` / `drop`   — remove the commit entirely' + chr(10) + chr(10) + 'After rebase completes:' + chr(10) + '```' + chr(10) + f'git_log(limit=10, cwd="{cwd}")' + chr(10) + '```' if strategy == 'interactive' else '')}\n{('## Strategy: squash-all' + chr(10) + chr(10) + f'Collapses all commits ahead of `{base_branch}` into one Conventional Commit.' + chr(10) + chr(10) + '```' + chr(10) + f'# Soft-reset to base (keeps all changes staged)' + chr(10) + f'shell_run(cmd="git reset --soft $(git merge-base HEAD {base_branch})", cwd="{cwd}")' + chr(10) + f'git_status(cwd="{cwd}")      # all changes now staged' + chr(10) + f'git_diff(staged=True, cwd="{cwd}")' + chr(10) + '```' + chr(10) + chr(10) + 'Then craft a single Conventional Commit covering all changes:' + chr(10) + '```' + chr(10) + '# Use the conventional_commit prompt for the merged change' + chr(10) + 'git_commit(' + chr(10) + '    action="commit",' + chr(10) + '    message="feat(scope): summarise all changes",' + chr(10) + f'    cwd="{cwd}",' + chr(10) + ')' + chr(10) + '```' if strategy == 'squash-all' else '')}\n{('## Strategy: fixup' + chr(10) + chr(10) + 'Automatically applies all `fixup!` commits to their targets.' + chr(10) + chr(10) + '```' + chr(10) + f'shell_run(cmd="git rebase --autosquash {base_branch}", cwd="{cwd}")' + chr(10) + f'git_log(limit=10, cwd="{cwd}")' + chr(10) + '```' if strategy == 'fixup' else '')}\n\n## Step 3 — Final validation\n\n```\ngit_log(limit=10, cwd="{cwd}")\ncontext_diff_summary(since="{base_branch}", until="HEAD", cwd="{cwd}")\n```\n\nAll commit messages should follow Conventional Commits:\n```\n{_CC_FORMAT}\n```\n\n### Rules\n{_CC_RULES}\n'''
 
-def worktree_feature(feature: str, base_branch: str='main', worktree_base: str='../.claude/worktrees', cwd: str='.') -> str:
-    """Isolate a single feature in its own git worktree (simpler than parallel workflow).
+def worktree_feature(feature: str, base_branch: str = "main", worktree_base: str = "../.claude/worktrees", cwd: str = ".") -> str:
+    """Plan and implement a feature in an isolated Git worktree."""
+    branch = f"feat/{feature}"
+    wt_path = f"{worktree_base}/{feature}"
+    commit_scope = feature.replace("-", "")
+    return f"""# Feature Worktree: `{feature}`
 
-    Creates one worktree for focused work, then integrates via a PR.
-    Use this for a single self-contained feature. For N parallel tasks use
-    the `parallel_worktree_workflow` prompt instead.
+**Branch:** `{branch}`
+**Worktree path:** `{wt_path}`
+**Base:** `{base_branch}`
 
-    Args:
-        feature:       Short slug for the feature (e.g. 'add-oauth', 'refactor-auth')
-        base_branch:   Branch to branch from and PR into (default: main)
-        worktree_base: Parent directory for worktrees (default: ../.claude/worktrees)
-        cwd:           Main repository directory (default: cwd)
-    """
-    branch = f'feat/{feature}'
-    wt_path = f'{worktree_base}/{feature}'
-    commit_scope = feature.replace('-', '')
-    return f'# Feature Worktree: `{feature}`\n\n**Branch:** `{branch}`\n**Worktree path:** `{wt_path}`\n**Base:** `{base_branch}`\n\n---\n\n## Phase 1 — Prepare\n\n```\n# Verify the repo is clean\ngit_status(cwd="{cwd}")\ngit_log(limit=5, cwd="{cwd}")\n\n# Check no existing worktree for this feature\ngit_worktree(action="list", cwd="{cwd}")\n```\n\nIf the worktree already exists, skip Phase 2 and go straight to Phase 3.\n\n---\n\n## Phase 2 — Create worktree\n\n```\ngit_worktree(\n    action="add",\n    path="{wt_path}",\n    branch="{branch}",\n    new_branch=True,\n    base="{base_branch}",\n    cwd="{cwd}",\n)\n```\n\nVerify it was created:\n```\ngit_worktree(action="list", cwd="{cwd}")\n```\n\n---\n\n## Phase 3 — Work in the worktree\n\nAll implementation happens inside `{wt_path}` — never in the main repo.\n\n```\n# Check context from the worktree\ngit_status(cwd="{wt_path}")\nfs_tree(path="{wt_path}", max_depth=3)\n\n# Read project conventions (SpecNative-aware repos)\nspecnative_context(action="read", document="conventions", cwd="{cwd}")\nspecnative_context(action="read", document="architecture", cwd="{cwd}")\n```\n\n### Development loop\n\n```\n# Inspect / search code\nsearch_grep(pattern="<keyword>", paths="{wt_path}")\n\n# After each logical unit — conventional commit\ngit_commit(\n    action="commit",\n    message="feat({commit_scope}): <describe what changed>",\n    cwd="{wt_path}",\n)\n```\n\nCommit often. Each commit should be a single logical change and follow\nConventional Commits (`feat`, `fix`, `test`, `refactor`, `docs`…).\n\n---\n\n## Phase 4 — Sync with `{base_branch}` (if it advanced)\n\n```\ngit_status(cwd="{wt_path}")\n\n# Rebase onto latest base\nshell_run(cmd="git fetch origin {base_branch} && git rebase origin/{base_branch}", cwd="{wt_path}")\n```\n\nResolve conflicts if any, then:\n```\nshell_run(cmd="git rebase --continue", cwd="{wt_path}")\n```\n\n---\n\n## Phase 5 — Pre-PR cleanup\n\n```\n# Review all commits ahead of base\ncontext_diff_summary(since="{base_branch}", until="HEAD", cwd="{wt_path}")\ngit_log(limit=20, cwd="{wt_path}")\n```\n\nSquash WIP commits using `commit_history_cleanup` prompt if needed.\n\n```\n# Run tests\njava_maven(goal="verify", cwd="{wt_path}")   # Java\ngo_test(cwd="{wt_path}")                      # Go\nnpm_run(script="test", cwd="{wt_path}")       # JS/TS\n\n# Check for secrets\nsecrets_scan(cwd="{wt_path}")\n```\n\n---\n\n## Phase 6 — Open PR\n\n```\n# Push the branch\nshell_run(cmd="git push -u origin {branch}", cwd="{wt_path}")\n\n# Create the PR\ngh_pr_create(\n    title="feat({commit_scope}): <one-line summary>",\n    body="## Summary\\n\\n- <bullet 1>\\n- <bullet 2>\\n\\n## Test plan\\n\\n- [ ] <test item>",\n    base="{base_branch}",\n    draft=False,\n)\n```\n\n---\n\n## Phase 7 — Cleanup after merge\n\n```\n# Remove worktree\ngit_worktree(action="remove", path="{wt_path}", cwd="{cwd}")\n\n# Delete local branch\nshell_run(cmd="git branch -d {branch}", cwd="{cwd}")\n\n# Verify\ngit_worktree(action="list", cwd="{cwd}")\ngit_branch(action="list", cwd="{cwd}")\n```\n'
+---
+
+## Phase 1 — Prepare
+
+```
+# Verify the repo is clean
+git_status(cwd="{cwd}")
+git_log(limit=5, cwd="{cwd}")
+
+# Check no existing worktree for this feature
+git_worktree(action="list", cwd="{cwd}")
+```
+
+If the worktree already exists, skip Phase 2 and go straight to Phase 3.
+
+---
+
+## Phase 2 — Create worktree
+
+```
+git_worktree(
+    action="add",
+    path="{wt_path}",
+    branch="{branch}",
+    new_branch=True,
+    base="{base_branch}",
+    cwd="{cwd}",
+)
+```
+
+Verify it was created:
+```
+git_worktree(action="list", cwd="{cwd}")
+```
+
+---
+
+## Phase 3 — Work in the worktree
+
+All implementation happens inside `{wt_path}` — never in the main repo.
+
+```
+# Check context from the worktree
+git_status(cwd="{wt_path}")
+fs_tree(path="{wt_path}", max_depth=3)
+```
+
+### Development loop
+
+```
+# Inspect / search code
+search_grep(pattern="<keyword>", paths="{wt_path}")
+
+# After each logical unit — conventional commit
+git_commit(
+    action="commit",
+    message="feat({commit_scope}): <describe what changed>",
+    cwd="{wt_path}",
+)
+```
+
+Commit often. Each commit should be a single logical change and follow Conventional Commits.
+
+---
+
+## Phase 4 — Sync with `{base_branch}` (if it advanced)
+
+```
+git_status(cwd="{wt_path}")
+shell_run(cmd="git fetch origin {base_branch} && git rebase origin/{base_branch}", cwd="{wt_path}")
+```
+
+---
+
+## Phase 5 — Pre-PR cleanup
+
+```
+context_diff_summary(since="{base_branch}", until="HEAD", cwd="{wt_path}")
+git_log(limit=20, cwd="{wt_path}")
+java_maven(goal="verify", cwd="{wt_path}")   # Java
+go_test(cwd="{wt_path}")                      # Go
+npm_run(script="test", cwd="{wt_path}")       # JS/TS
+secrets_scan(cwd="{wt_path}")
+```
+
+---
+
+## Phase 6 — Open PR
+
+```
+shell_run(cmd="git push -u origin {branch}", cwd="{wt_path}")
+gh_pr_create(
+    title="feat({commit_scope}): <one-line summary>",
+    body="## Summary\n\n- <bullet 1>\n- <bullet 2>\n\n## Test plan\n\n- [ ] <test item>",
+    base="{base_branch}",
+    draft=False,
+)
+```
+
+---
+
+## Phase 7 — Cleanup after merge
+
+```
+git_worktree(action="remove", path="{wt_path}", cwd="{cwd}")
+shell_run(cmd="git branch -d {branch}", cwd="{cwd}")
+git_worktree(action="list", cwd="{cwd}")
+git_branch(action="list", cwd="{cwd}")
+```
+"""
 
 def worktree_hotfix(hotfix: str, affected_version: str='', base_branch: str='main', worktree_base: str='../.claude/worktrees', cwd: str='.') -> str:
     """Emergency hotfix in an isolated worktree — minimal blast radius, fast turnaround.
@@ -810,31 +841,12 @@ def gitignore_setup(preset: str='all', cwd: str='.') -> str:
     return f'# Configurar .gitignore — preset: `{preset}`\n\n**Objetivo:** Agregar patrones para {desc} al `.gitignore` del repositorio en `{cwd}`.\n\n---\n\n## Paso 1 — Auditar el estado actual\n\nLee el resource para ver el contenido actual y los patrones faltantes:\n```\nforge://config/gitignore\n```\n\nO con la tool directamente en modo dry-run:\n```\nconfig_gitignore(preset="{preset}", dry_run=True, cwd="{cwd}")\n```\n\nRevisa la sección `missing_patterns` del resultado.\n\n---\n\n## Paso 2 — Aplicar los patrones faltantes\n\nSi hay patrones faltantes, aplícalos:\n```\nconfig_gitignore(preset="{preset}", dry_run=False, cwd="{cwd}")\n```\n\nEl tool es **idempotente** — no duplica líneas ya existentes.\n\n---\n\n## Paso 3 — Verificar el resultado\n\nConfirma que los patrones quedaron registrados:\n```\nforge://config/gitignore\n```\n\nVerifica que `fully_covered` sea `true` y `missing_patterns` esté vacío.\n\n---\n\n## Paso 4 — Commitear el cambio\n\n```\ngit_status(cwd="{cwd}")\ngit_commit(message="chore: add macOS + Claude Code gitignore patterns", cwd="{cwd}")\n```\n\n---\n\n## Referencia de patrones\n\n### macOS\n| Patrón | Qué ignora |\n|--------|-----------|\n| `._*` | Apple Double (metadatos de archivos) |\n| `.DS_Store` | Configuración de carpetas del Finder |\n| `.AppleDouble/` | Carpetas de metadatos legacy |\n| `.LSOverride` | Overrides de Launch Services |\n| `.Spotlight-V100` | Índice de Spotlight |\n| `.Trashes` | Archivos en papelera del volumen |\n\n### Claude Code\n| Patrón | Qué ignora |\n|--------|-----------|\n| `.claude/` | Todo el directorio (sesiones, memoria, worktrees) |\n| `!.claude/launch.json` | **Excepción**: config de servidores dev |\n| `!.claude/settings.json` | **Excepción**: config del proyecto |\n| `!.claude/CLAUDE.md` | **Excepción**: documentación para agentes |\n'
 
 PROMPTS = {
-    "start_feature": start_feature,
     "code_review": code_review,
     "security_audit": security_audit,
     "release_workflow": release_workflow,
     "debug_ci_failure": debug_ci_failure,
     "java_project_analysis": java_project_analysis,
     "repo_health_check": repo_health_check,
-    "specnative_workflow": specnative_workflow,
-    "specnative_init_project": specnative_init_project,
-    "specnative_handoff": specnative_handoff,
-    "specnative_plan_tasks": specnative_plan_tasks,
-    "specnative_implement_task": specnative_implement_task,
-    "specnative_close_initiative": specnative_close_initiative,
-    "init_project_guided": init_project_guided,
-    "start_initiative": start_initiative,
-    "plan_tasks": plan_tasks,
-    "implement_task": implement_task,
-    "review_against_spec": review_against_spec,
-    "handoff": handoff,
-    "record_decision": record_decision,
-    "record_architecture": record_architecture,
-    "record_convention": record_convention,
-    "close_initiative": close_initiative,
-    "specnative": specnative,
-    "capture_backlog": capture_backlog,
     "multi_repo_health": multi_repo_health,
     "new_tool_scaffold": new_tool_scaffold,
     "maven_dependency_research": maven_dependency_research,

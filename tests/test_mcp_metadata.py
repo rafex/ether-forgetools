@@ -78,3 +78,26 @@ def test_mcp_tool_descriptions_are_not_generic() -> None:
             if tool["description"].startswith("Run the ") or tool["description"] in weak_literals
         ]
         assert not weak, f"{path}: weak tool descriptions: {weak}"
+
+
+def test_retired_interfaces_are_not_published() -> None:
+    from forgetools._forge_cli import REGISTRY
+
+    retired_domain = "spec" + "native"
+    retired_keys = {
+        "context summarize",
+        "ether catalog",
+        *(f"{retired_domain} {action}" for action in (
+            "artifacts", "backlog", "board", "context", "initiative", "project",
+            "session", "status", "templates", "upstream",
+        )),
+    }
+    assert not (retired_keys & REGISTRY.keys())
+
+    openapi = _load_json(ROOT / "openapi" / "forgetools.json")
+    assert not any(
+        retired_domain in path
+        or ("context" + "_summarize") in path
+        or ("ether" + "_catalog") in path
+        for path in openapi["paths"]
+    )

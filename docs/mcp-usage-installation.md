@@ -14,7 +14,6 @@ Dominios actuales con `pyproject.toml` propio:
 - `mcps/file/pyproject.toml`
 - `mcps/git/pyproject.toml`
 - `mcps/docs/pyproject.toml`
-- `mcps/specnative/pyproject.toml`
 - `mcps/linux/pyproject.toml`
 - `mcps/java/pyproject.toml`
 - `mcps/websearch/pyproject.toml`
@@ -52,7 +51,7 @@ make install-mcp
 uv venv --python 3.13 .venv
 uv pip install --python .venv/bin/python -e .
 uv pip install --python .venv/bin/python -e ".[mcp]"
-for domain in file git docs specnative linux java websearch containers build data quality office python frontend observability cloud podman ai release deps; do
+for domain in file git docs linux java websearch containers build data quality office python frontend observability cloud podman ai release deps; do
   uv pip install --python .venv/bin/python --no-deps -e "./mcps/${domain}"
 done
 ```
@@ -63,7 +62,6 @@ done
 make install-mcp-file
 make install-mcp-git
 make install-mcp-docs
-make install-mcp-specnative
 make install-mcp-linux
 make install-mcp-java
 make install-mcp-websearch
@@ -100,7 +98,6 @@ make install-mcp-all
 | `forge-mcp-file` | `forgetools-file` | Files, search, edit, diff, text, template, json, config |
 | `forge-mcp-git` | `forgetools-git` | Git + GitHub |
 | `forge-mcp-docs` | `forgetools-docs` | Docs + OpenAPI + web extraction |
-| `forge-mcp-specnative` | `forgetools-specnative` | SpecNative + context + ether |
 | `forge-mcp-linux` | `forgetools-linux` | process + diag + net + shell + secrets |
 | `forge-mcp-java` | `forgetools-java` | Java build, JDT, Maven Central and standards |
 | `forge-mcp-websearch` | `forgetools-websearch` | websearch + web |
@@ -191,38 +188,6 @@ Para `bisect`, indica `--bisect-action start|good|bad|skip|reset`; `good`, `bad`
 - Generacion de changelog.
 - Parseo de especificaciones OpenAPI.
 - Extraccion de contenido web (`web_fetch`).
-
-### specnative
-- Estado de iniciativas y flujo spec-first.
-- Compatible con la arquitectura SpecNative v0.9: `spec-native/`, `.specnative/`,
-  artefactos `ARCH-*`/`CONV-*`, sesión multi-agente y perfiles oficiales.
-- Sincronización remota bajo demanda desde el repositorio y sitios oficiales:
-  `specnative_upstream(action="fetch", document="readme-es|readme-en|ai-guide-es|ai-guide-en|website-es|website-ai-es|architecture|mcp|schema")`.
-- Releases publicadas: `specnative_upstream(action="releases")`.
-- Instalación oficial en un repositorio: primero ejecutar sin efectos
-  (`execute=false`); tras revisar target, versión y perfil, repetir con
-  `execute=true`. El instalador upstream valida el repositorio git y crea su
-  branch de instalación.
-- `specnative_artifacts(action="log-architecture|log-convention")` crea una
-  propuesta en preview y solo escribe con `write=true`.
-- Lectura de contexto del repositorio.
-- Board de delivery desde `TASKS.md`: `specnative_board(format="json|markdown|mermaid")`, con columnas `ready`, `in_progress`, `blocked`, `waiting`, `done`.
-- Captura segura de backlog: `specnative_backlog(...)` en preview por defecto; si no hay spec ejecutable o faltan criterios/validacion, se registra intake en `spec-native/intake/IDEAS.md`.
-- Artefactos persistentes: `specnative_artifacts(action="list-decisions|list-architecture|list-conventions|read|log-architecture|log-convention")`.
-- Continuidad multi-agente: `specnative_session(action="resume|checkpoint|update-task|clear")`.
-- Al marcar tareas como `done`, `completion_evidence` es obligatorio.
-- Resources oficiales:
-  - `spec://agents`, `spec://session`, `spec://schema`
-  - `spec://context/product`, `spec://context/architecture`, `spec://context/stack`
-  - `spec://context/conventions`, `spec://context/commands`, `spec://context/decisions`
-  - `spec://context/roadmap`, `spec://context/traceability`
-  - `spec://spec-native/pipelines/ci`, `spec://spec-native/pipelines/cd`
-  - `spec://pipelines/ci`, `spec://pipelines/cd`
-- Prompts oficiales:
-  - `specnative`, `capture_backlog`, `init_project_guided`, `start_initiative`, `plan_tasks`, `implement_task`
-  - `review_against_spec`, `handoff`, `record_decision`, `record_architecture`,
-    `record_convention`, `close_initiative`
-- Catalogo del ecosistema ether.
 
 ### linux
 - Procesos, puertos, inspeccion, consumo y kill.
@@ -392,7 +357,6 @@ podman_connection(
 forge-mcp-file
 forge-mcp-git
 forge-mcp-docs
-forge-mcp-specnative
 forge-mcp-linux
 forge-mcp-java
 forge-mcp-websearch
@@ -444,10 +408,6 @@ args = []
 
 [mcp_servers.forgetools_docs]
 command = "/Users/rafex/repository/github/rafex/ether/ether-forgetools/.venv/bin/forge-mcp-docs"
-args = []
-
-[mcp_servers.forgetools_specnative]
-command = "/Users/rafex/repository/github/rafex/ether/ether-forgetools/.venv/bin/forge-mcp-specnative"
 args = []
 
 [mcp_servers.forgetools_linux]
@@ -523,7 +483,6 @@ Usa `claude mcp add` para registrar cada servidor por dominio:
 claude mcp add forgetools-file -- /Users/rafex/repository/github/rafex/ether/ether-forgetools/.venv/bin/forge-mcp-file
 claude mcp add forgetools-git -- /Users/rafex/repository/github/rafex/ether/ether-forgetools/.venv/bin/forge-mcp-git
 claude mcp add forgetools-docs -- /Users/rafex/repository/github/rafex/ether/ether-forgetools/.venv/bin/forge-mcp-docs
-claude mcp add forgetools-specnative -- /Users/rafex/repository/github/rafex/ether/ether-forgetools/.venv/bin/forge-mcp-specnative
 claude mcp add forgetools-linux -- /Users/rafex/repository/github/rafex/ether/ether-forgetools/.venv/bin/forge-mcp-linux
 claude mcp add forgetools-java -- /Users/rafex/repository/github/rafex/ether/ether-forgetools/.venv/bin/forge-mcp-java
 claude mcp add forgetools-websearch -- /Users/rafex/repository/github/rafex/ether/ether-forgetools/.venv/bin/forge-mcp-websearch
@@ -550,39 +509,6 @@ claude mcp add forgetools-deps -- /Users/rafex/repository/github/rafex/ether/eth
     "forgetools-file": { "type": "local", "command": ["forge-mcp-file"] },
     "forgetools-git": { "type": "local", "command": ["forge-mcp-git"] },
     "forgetools-docs": { "type": "local", "command": ["forge-mcp-docs"] },
-    "forgetools-specnative": { "type": "local", "command": ["forge-mcp-specnative"] },
-    "forgetools-linux": { "type": "local", "command": ["forge-mcp-linux"] },
-    "forgetools-java": { "type": "local", "command": ["forge-mcp-java"] },
-    "forgetools-websearch": { "type": "local", "command": ["forge-mcp-websearch"] },
-    "forgetools-containers": { "type": "local", "command": ["forge-mcp-containers"] },
-    "forgetools-build": { "type": "local", "command": ["forge-mcp-build"] },
-    "forgetools-data": { "type": "local", "command": ["forge-mcp-data"] },
-    "forgetools-quality": { "type": "local", "command": ["forge-mcp-quality"] },
-    "forgetools-office": { "type": "local", "command": ["forge-mcp-office"] },
-    "forgetools-python": { "type": "local", "command": ["forge-mcp-python"] },
-    "forgetools-frontend": { "type": "local", "command": ["forge-mcp-frontend"] },
-    "forgetools-observability": { "type": "local", "command": ["forge-mcp-observability"] },
-    "forgetools-cloud": { "type": "local", "command": ["forge-mcp-cloud"] },
-    "forgetools-podman": { "type": "local", "command": ["forge-mcp-podman"] },
-    "forgetools-ai": { "type": "local", "command": ["forge-mcp-ai"] },
-    "forgetools-release": { "type": "local", "command": ["forge-mcp-release"] },
-    "forgetools-deps": { "type": "local", "command": ["forge-mcp-deps"] }
-  }
-}
-```
-
-### VS Code
-
-En un workspace, agrega `.vscode/mcp.json`:
-
-```json
-{
-  "servers": {
-    "forgetools-file": {
-      "type": "stdio",
-      "command": "/Users/rafex/repository/github/rafex/ether/ether-forgetools/.venv/bin/forge-mcp-file",
-      "args": []
-    },
     "forgetools-git": {
       "type": "stdio",
       "command": "/Users/rafex/repository/github/rafex/ether/ether-forgetools/.venv/bin/forge-mcp-git",
@@ -591,11 +517,6 @@ En un workspace, agrega `.vscode/mcp.json`:
     "forgetools-docs": {
       "type": "stdio",
       "command": "/Users/rafex/repository/github/rafex/ether/ether-forgetools/.venv/bin/forge-mcp-docs",
-      "args": []
-    },
-    "forgetools-specnative": {
-      "type": "stdio",
-      "command": "/Users/rafex/repository/github/rafex/ether/ether-forgetools/.venv/bin/forge-mcp-specnative",
       "args": []
     },
     "forgetools-linux": {

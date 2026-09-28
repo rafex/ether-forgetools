@@ -6,7 +6,7 @@ Este documento define que MCP conviene habilitar en cada tipo de agente. El obje
 
 No es necesario desinstalar los MCP que no se usan. La instalacion y la habilitacion son decisiones distintas:
 
-- `make install-mcp-all` instala los 20 paquetes de dominio en `.venv`.
+- `make install-mcp-all` instala los 19 paquetes de dominio en `.venv`.
 - El cliente solo envia al agente los MCP registrados en su configuracion.
 - Para reducir contexto, registra pocos servidores y habilita los demas solo para tareas que los necesiten.
 
@@ -31,28 +31,6 @@ make install-mcp-git
 ```
 
 Este es el perfil adecuado para un agente general de mantenimiento, bug fixing o exploracion de un repositorio.
-
-### Nucleo para proyectos gestionados con SpecNative
-
-Agregar `specnative` cuando el repositorio contiene `spec-native/`, usa iniciativas, tareas, decisiones o contexto gobernado por SpecNative.
-
-| MCP | Por que agregarlo | Superficie aproximada |
-|---|---|---:|
-| `specnative` | Provee contexto del producto y arquitectura, estado de iniciativas, board, backlog, artifacts, continuidad de sesion y prompts de workflow. | 13 tools, 26 resources, 18 prompts |
-
-Instalacion:
-
-```bash
-make install-mcp-specnative
-```
-
-Para este repositorio, el perfil recomendado es:
-
-```text
-file + git + specnative
-```
-
-No debe habilitarse `specnative` en agentes que solo hagan tareas puntuales sobre repositorios que no usan su estructura, porque sus resources y prompts agregan una superficie considerable.
 
 ## Perfiles por caso de uso
 
@@ -128,11 +106,10 @@ Usa esta secuencia antes de registrar un MCP en el cliente:
 
 1. ¿El agente necesita leer o modificar archivos? Habilita `file`.
 2. ¿El trabajo ocurre en un repositorio Git? Habilita `git`.
-3. ¿El repo usa `spec-native/` o requiere contexto gobernado? Agrega `specnative`.
-4. ¿Hay un lenguaje o runtime dominante? Agrega un solo perfil de lenguaje: `python`, `java`, `frontend` o `build`.
-5. ¿La tarea requiere validacion automatizada? Agrega `quality`.
-6. ¿La tarea toca sistemas externos? Agrega el MCP operativo especifico y retiralo al terminar.
-7. ¿La tarea requiere informacion actual de internet? Agrega `websearch` durante esa sesion.
+3. ¿Hay un lenguaje o runtime dominante? Agrega un solo perfil de lenguaje: `python`, `java`, `frontend` o `build`.
+4. ¿La tarea requiere validacion automatizada? Agrega `quality`.
+5. ¿La tarea toca sistemas externos? Agrega el MCP operativo especifico y retiralo al terminar.
+6. ¿La tarea requiere informacion actual de internet? Agrega `websearch` durante esa sesion.
 
 Evita activar dos MCP que cubren la misma fase si no existe una necesidad concreta. Por ejemplo, para una tarea Java normal basta `java` y `quality`; `deps` se agrega solo para investigacion de dependencias y `release` solo para entrega.
 
@@ -149,20 +126,6 @@ Evita activar dos MCP que cubren la misma fase si no existe una necesidad concre
 }
 ```
 
-### Agente de este repositorio
-
-```json
-{
-  "mcp": {
-    "forgetools-file": { "type": "local", "command": ["forge-mcp-file"] },
-    "forgetools-git": { "type": "local", "command": ["forge-mcp-git"] },
-    "forgetools-specnative": { "type": "local", "command": ["forge-mcp-specnative"] }
-  }
-}
-```
-
-La sintaxis exacta cambia entre Codex, Claude Code, opencode y VS Code. Los ejemplos completos estan en [mcp-usage-installation.md](./mcp-usage-installation.md). Registra solamente los bloques del perfil elegido.
-
 ## Instalacion versus habilitacion
 
 Para preparar todos los binarios una sola vez:
@@ -177,7 +140,6 @@ Despues configura solo los servidores necesarios en cada agente. Si prefieres ma
 ```bash
 make install-mcp-file
 make install-mcp-git
-make install-mcp-specnative
 ```
 
 `make install-mcp` es un alias del instalador monolitico de todos los dominios; no debe confundirse con el perfil minimo. Para trabajo diario es preferible instalar o habilitar por dominio.
@@ -187,14 +149,12 @@ make install-mcp-specnative
 | Preset | MCP habilitados | Objetivo |
 |---|---|---|
 | `minimal` | `file`, `git` | Cambios locales y mantenimiento general. |
-| `specnative` | `file`, `git`, `specnative` | Desarrollo guiado por especificaciones en este ecosistema. |
 | `python` | `file`, `git`, `python`, `quality` | Desarrollo y validacion Python. |
 | `java` | `file`, `git`, `java`, `quality` | Desarrollo y validacion Java. |
 | `web` | `file`, `git`, `frontend`, `quality`, opcional `websearch` | Frontend y consulta de documentacion externa. |
 | `operations` | `file`, `git`, `linux`, `observability`, `containers`, opcional `cloud` | Diagnostico y despliegue; usar con permisos controlados. |
 | `documents` | `file`, `git`, `docs`, `office` | Documentacion tecnica y archivos PDF/DOCX. |
 
-Como regla practica, empieza con `minimal` y cambia temporalmente al preset de la tarea. El preset `specnative` es el default recomendado para los agentes que trabajen dentro de este repositorio.
 
 ## Fuente de verdad
 

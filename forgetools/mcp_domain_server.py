@@ -14,7 +14,6 @@ from forgetools._forge_cli import REGISTRY
 
 DESCRIPTION_OVERRIDES = {
     "context repo-size": "Measure repository size, language distribution, and git metadata for context planning",
-    "ether catalog": "List Ether ecosystem repositories and their local/remote availability",
     "fs find-by-type": "Find files by semantic type such as code, docs, config, images, or archives",
     "fs head": "Read the first lines of a file or matching files with structured metadata",
     "fs read": "Read a text file with metadata; accepts file, filePath, or path as the file location",
@@ -63,16 +62,6 @@ DESCRIPTION_OVERRIDES = {
     "security eslint": "Run ESLint-oriented security checks and return structured findings",
     "security owasp": "Run OWASP dependency checks and parse security findings",
     "security spotbugs": "Run SpotBugs security analysis and parse structured findings",
-    "specnative context": "Read, write, or list SpecNative context documents for the current repository",
-    "specnative artifacts": "List or read SpecNative persistent context artifacts such as decisions, architecture records, and conventions",
-    "specnative backlog": "Capture SpecNative backlog items as task previews or backlog notes without changing delivery boards",
-    "specnative board": "Build a SpecNative delivery board from task files in json, markdown, or mermaid format",
-    "specnative initiative": "Create or update SpecNative initiatives from repository context",
-    "specnative project": "Health-check, suggest, snapshot, and safely refine SpecNative project documents",
-    "specnative session": "Resume, checkpoint, update tasks, or clear SpecNative multi-agent session state",
-    "specnative status": "Report SpecNative specs, initiatives, states, and task progress",
-    "specnative templates": "List or apply SpecNative archetypes, spec templates, and decision snippets",
-    "specnative upstream": "Fetch current SpecNative documentation/releases or preview and execute the official installer",
     "template scaffold": "Generate files from a named template and variable map",
     "test coverage-report": "Parse coverage reports and return summary metrics and uncovered files",
 }

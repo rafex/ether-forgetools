@@ -133,8 +133,6 @@ REGISTRY: dict[str, str] = {
     "template scaffold":   "forgetools.template.scaffold",
     # openapi parsing
     "openapi parse":       "forgetools.openapi.parse",
-    # context
-    "context summarize":   "forgetools.context.summarize",
     # git additions
     "git multi-repo":        "forgetools.git.multi_repo",
     "git submodule-status":  "forgetools.git.submodule_status",
@@ -177,19 +175,6 @@ REGISTRY: dict[str, str] = {
     "git preflight":          "forgetools.git.preflight",
     # text
     "text audit-chars":      "forgetools.text.audit_chars",
-    # ether ecosystem
-    "ether catalog":         "forgetools.ether.catalog",
-    # specnative — spec-first development workflow
-    "specnative status":     "forgetools.specnative.status",
-    "specnative context":    "forgetools.specnative.context",
-    "specnative initiative": "forgetools.specnative.initiative",
-    "specnative session":    "forgetools.specnative.session",
-    "specnative project":    "forgetools.specnative.project",
-    "specnative templates":  "forgetools.specnative.templates",
-    "specnative board":      "forgetools.specnative.board",
-    "specnative backlog":    "forgetools.specnative.backlog",
-    "specnative artifacts":  "forgetools.specnative.artifacts",
-    "specnative upstream":   "forgetools.specnative.upstream",
     # diff — semantic comparisons
     "diff dirs":             "forgetools.diff.dirs",
     "diff json":             "forgetools.diff.json",
