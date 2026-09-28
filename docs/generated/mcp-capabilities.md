@@ -379,7 +379,7 @@ Prompts:
 - `pr_create_flow`: Complete flow to create a well-structured GitHub Pull Request.
 - `pr_stack`: Manage a stack of dependent Pull Requests (stacked PRs / PR chains).
 - `release_workflow`: Prepare and publish a new release.
-- `worktree_feature`: Isolate a single feature in its own git worktree (simpler than parallel workflow).
+- `worktree_feature`: Plan and implement a feature in an isolated Git worktree.
 - `worktree_hotfix`: Emergency hotfix in an isolated worktree — minimal blast radius, fast turnaround.
 
 ### `forge-mcp-java`

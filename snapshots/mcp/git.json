@@ -308,7 +308,7 @@
           "required": false
         }
       ],
-      "description": "Isolate a single feature in its own git worktree (simpler than parallel workflow).\n\nCreates one worktree for focused work, then integrates via a PR.\nUse this for a single self-contained feature. For N parallel tasks use\nthe `parallel_worktree_workflow` prompt instead.",
+      "description": "Plan and implement a feature in an isolated Git worktree.",
       "name": "worktree_feature"
     },
     {

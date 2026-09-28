@@ -6,7 +6,6 @@ build-backend = "hatchling.build"
 name = "forgetools-mcp-java"
 version = "0.1.0"
 description = "Domain MCP server for java quality and standards"
-readme = "../../README.md"
 requires-python = ">=3.11"
 license = { text = "MIT" }
 dependencies = []

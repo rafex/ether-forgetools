@@ -6,7 +6,6 @@ build-backend = "hatchling.build"
 name = "forgetools-mcp-data"
 version = "0.1.0"
 description = "Domain MCP server for database inspection and migrations"
-readme = "../../README.md"
 requires-python = ">=3.11"
 license = { text = "MIT" }
 dependencies = []
